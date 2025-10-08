@@ -11,5 +11,18 @@
   "female": "Female",
   "other": "Other",
   "update_info": "Update Info",
-  "updating": "Updating..."
+  "updating": "Updating...",
+
+  "step_1_title": "Ngôn ngữ bạn muốn học?",
+  "choose_up_to_3_langs": "Chọn tối đa 3",
+  "step_2_title": "Ngôn ngữ bạn đã biết",
+  "choose_langs_you_know": "Chọn ngôn ngữ bạn đã biết",
+  "step_3_title": "Bạn hứng thú với?",
+  "choose_interests": "Chọn sở thích của bạn",
+  "skip": "Bỏ qua",
+  "next": "Tiếp",
+  "back": "Quay lại",
+  "finish": "Hoàn thành",
+  "profile_setup_success": "Cập nhập thông tin thành công",
+  "profile_setup_failed": "Cập nhập thông tin thất bại"
 }

@@ -23,7 +23,7 @@ class SizeConfig {
     heightMultiplier = blockSizeVertical;
   }
 
-  static double scaleWidth(double width) => width * blockSizeHorizontal / 4; // ví dụ
+  static double scaleWidth(double width) => width * blockSizeHorizontal / 4;
   static double scaleHeight(double height) => height * blockSizeVertical / 8;
   static double scaleText(double size) => size * textMultiplier / 2;
 }

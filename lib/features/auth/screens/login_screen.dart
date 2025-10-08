@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../widgets/app_header_actions.dart';
+import '../../shared/app_header_actions.dart';
 import '../widgets/login_form.dart';
 
 class LoginScreen extends StatefulWidget {

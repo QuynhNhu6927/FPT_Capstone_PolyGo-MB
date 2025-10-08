@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../widgets/app_header_actions.dart';
+import '../../shared/app_header_actions.dart';
 import '../widgets/register_form.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -28,7 +28,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
 
-    // max width của form trên desktop/tablet
     double maxFormWidth = isDesktop
         ? 500
         : isTablet

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/localization/app_localizations.dart';
-import '../../../core/widgets/app_dropdown.dart';
-import '../../../main.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../core/widgets/app_dropdown.dart';
+import '../../main.dart';
 
 class AppHeaderActions extends StatelessWidget {
   final VoidCallback onThemeToggle;

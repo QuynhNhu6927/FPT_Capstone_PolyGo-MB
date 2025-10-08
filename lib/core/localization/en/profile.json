@@ -11,5 +11,19 @@
   "female": "Female",
   "other": "Other",
   "update_info": "Update Info",
-  "updating": "Updating..."
+  "updating": "Updating...",
+
+  "step_1_title": "Languages you want to learn?",
+  "choose_up_to_3_langs": "Choose up to 3",
+  "step_2_title": "Languages you known",
+  "choose_langs_you_know": "Choose languages you known",
+  "step_3_title": "You interested in?",
+  "choose_interests": "Choose your interests",
+  "skip": "Skip",
+  "next": "Next",
+  "back": "Back",
+  "finish": "Finish",
+  "profile_setup_success": "Profile setup success",
+  "profile_setup_failed": "Profile setup failed"
+
 }

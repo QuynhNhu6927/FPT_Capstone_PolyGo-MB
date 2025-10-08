@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../core/api/api_client.dart';
@@ -47,22 +48,31 @@ class _LoginFormState extends State<LoginForm> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
 
+      final decoded = JwtDecoder.decode(token);
+      final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
+
       if (!mounted) return;
       final loc = AppLocalizations.of(context);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            backgroundColor: Colors.green,
-            content: Text(loc.translate("login_success"))),
+          backgroundColor: Colors.green,
+          content: Text(loc.translate("login_success")),
+        ),
       );
 
-      Navigator.pushNamed(context, AppRoutes.userInfo);
+      if (isNew) {
+        Navigator.pushReplacementNamed(context, AppRoutes.profileSetup);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.userInfo);
+      }
     } catch (e) {
       final loc = AppLocalizations.of(context);
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(loc.translate("login_failed"))),
+          backgroundColor: Colors.red,
+          content: Text(loc.translate("login_failed")),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
