@@ -10,191 +10,18 @@ import '../../../data/repositories/language_repository.dart';
 import '../../../data/services/language_service.dart';
 import '../../../main.dart';
 
-// class SetupLanguageLearn extends StatefulWidget {
-//   final void Function(List<String> selected) onNext;
-//
-//   const SetupLanguageLearn({super.key, required this.onNext});
-//
-//   @override
-//   State<SetupLanguageLearn> createState() => _SetupLanguageLearnState();
-// }
-//
-// class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
-//   final List<String> _selectedLangs = [];
-//   List<LanguageModel> _languages = [];
-//   bool _isLoading = true;
-//   String? _error;
-//
-//   late final LanguageRepository _repo;
-//   Locale? _currentLocale;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _repo = LanguageRepository(LanguageService(ApiClient()));
-//   }
-//
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//
-//     final locale = InheritedLocale.of(context).locale;
-//
-//     if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
-//       _currentLocale = locale;
-//       _fetchLanguages(lang: locale.languageCode);
-//     }
-//   }
-//
-//   Future<void> _fetchLanguages({String? lang}) async {
-//     try {
-//       setState(() {
-//         _isLoading = true;
-//         _error = null;
-//       });
-//
-//       final prefs = await SharedPreferences.getInstance();
-//       final token = prefs.getString('token') ?? '';
-//
-//       final langs = await _repo.getAllLanguages(token, lang: lang ?? 'vi');
-//
-//       setState(() {
-//         _languages = langs;
-//         _isLoading = false;
-//       });
-//     } catch (e) {
-//       setState(() {
-//         _error = 'Failed to load languages: $e';
-//         _isLoading = false;
-//       });
-//     }
-//   }
-//   void _toggle(String code) {
-//     setState(() {
-//       if (_selectedLangs.contains(code)) {
-//         _selectedLangs.remove(code);
-//       } else if (_selectedLangs.length < 3) {
-//         _selectedLangs.add(code);
-//       }
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final loc = AppLocalizations.of(context);
-//     final t = Theme.of(context).textTheme;
-//     final theme = Theme.of(context);
-//
-//     return SingleChildScrollView(
-//       padding: EdgeInsets.all(sw(context, 24)),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           Text(
-//             loc.translate("step_1_title"),
-//             style: t.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-//           ),
-//           Text(
-//             loc.translate("choose_up_to_3_langs"),
-//             style: t.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-//           ),
-//           SizedBox(height: sh(context, 20)),
-//
-//           if (_isLoading)
-//             const Center(child: CircularProgressIndicator())
-//           else if (_error != null)
-//             Text(
-//               _error!,
-//               style: TextStyle(color: theme.colorScheme.error),
-//             )
-//           else
-//             Wrap(
-//               spacing: 12,
-//               runSpacing: 12,
-//               children: _languages.map((lang) {
-//                 final selected = _selectedLangs.contains(lang.id);
-//                 return GestureDetector(
-//                   onTap: () => _toggle(lang.id),
-//                   child: AnimatedContainer(
-//                     duration: const Duration(milliseconds: 200),
-//                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-//                     decoration: BoxDecoration(
-//                       borderRadius: BorderRadius.circular(10),
-//                       border: Border.all(
-//                         color: selected
-//                             ? theme.colorScheme.primary
-//                             : Colors.grey.shade300,
-//                         width: selected ? 2 : 1,
-//                       ),
-//                       color: selected
-//                           ? theme.colorScheme.primary.withOpacity(0.1)
-//                           : theme.cardColor,
-//                     ),
-//                     child: Row(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: [
-//                         if (lang.flagIconUrl.isNotEmpty)
-//                           Image.network(
-//                             // ✅ dùng trực tiếp đường dẫn từ model, backend nên trả URL đầy đủ
-//                             lang.flagIconUrl,
-//                             width: 24,
-//                             height: 24,
-//                             errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-//                           ),
-//                         if (lang.flagIconUrl.isNotEmpty)
-//                           const SizedBox(width: 8),
-//                         Text(
-//                           lang.name,
-//                           style: t.bodyMedium?.copyWith(
-//                             fontWeight: FontWeight.w500,
-//                             color: selected
-//                                 ? theme.colorScheme.primary
-//                                 : Colors.grey[800],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 );
-//               }).toList(),
-//             ),
-//
-//           SizedBox(height: sh(context, 40)),
-//
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               AppButton(
-//                 text: loc.translate("skip"),
-//                 variant: ButtonVariant.outline,
-//                 onPressed: () => widget.onNext([]),
-//               ),
-//               AppButton(
-//                 text: loc.translate("next"),
-//                 onPressed: _selectedLangs.isEmpty
-//                     ? null
-//                     : () => widget.onNext(_selectedLangs),
-//                 disabled: _selectedLangs.isEmpty,
-//               ),
-//             ],
-//           ),
-//         ],
-//       ).animate().fadeIn(duration: 400.ms),
-//     );
-//   }
-// }
-
 class SetupLanguageLearn extends StatefulWidget {
   final void Function(List<String> selected) onNext;
+  final List<String> initialSelected;
 
-  const SetupLanguageLearn({super.key, required this.onNext});
+  const SetupLanguageLearn({super.key, required this.onNext,  this.initialSelected = const [],});
 
   @override
   State<SetupLanguageLearn> createState() => _SetupLanguageLearnState();
 }
 
 class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
-  final List<String> _selectedLangs = [];
+  late List<String> _selectedLangs;
   List<LanguageModel> _languages = [];
   bool _isLoading = true;
   String? _error;
@@ -205,6 +32,7 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
   @override
   void initState() {
     super.initState();
+    _selectedLangs = List.from(widget.initialSelected);
     _repo = LanguageRepository(LanguageService(ApiClient()));
   }
 
@@ -357,7 +185,7 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
                       children: [
                         if (lang.flagIconUrl.isNotEmpty)
                           Image.network(
-                            lang.flagIconUrl,
+                            lang.fullFlagUrl,
                             width: 24,
                             height: 24,
                             errorBuilder: (_, __, ___) => const SizedBox.shrink(),

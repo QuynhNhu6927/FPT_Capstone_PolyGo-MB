@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/localization/app_localizations.dart';
 import '../../shared/app_header_actions.dart';
 import '../widgets/setup_language_learn.dart';
 import '../widgets/setup_language_known.dart';
@@ -18,6 +17,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   List<String> _learningLangs = [];
   List<String> _speakingLangs = [];
+  List<String> _selectedInterests = [];
 
   void _toggleTheme() {
     setState(() {
@@ -39,17 +39,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final steps = [
       SetupLanguageLearn(
+        initialSelected: _learningLangs,
         onNext: (langs) {
           _learningLangs = langs;
           _nextStep();
         },
       ),
       SetupLanguageKnown(
+        initialSelected: _speakingLangs,
         onNext: (langs) {
           _speakingLangs = langs;
           _nextStep();
@@ -60,6 +61,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         onBack: _prevStep,
         learningLangs: _learningLangs,
         speakingLangs: _speakingLangs,
+        initialSelected: _selectedInterests,
+        onFinish: (selected) {
+          _selectedInterests = selected;
+        },
       ),
     ];
 

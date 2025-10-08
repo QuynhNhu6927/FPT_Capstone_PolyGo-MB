@@ -1,3 +1,5 @@
+import '../../../core/config/api_constants.dart';
+
 class LanguageModel {
   final String id;
   final String code;
@@ -28,4 +30,6 @@ class LanguageModel {
       'flagIconUrl': flagIconUrl,
     };
   }
+
+  String get fullFlagUrl => '${ApiConstants.baseUrl}/$flagIconUrl';
 }

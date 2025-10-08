@@ -1,3 +1,5 @@
+import '../../../core/config/api_constants.dart';
+
 class InterestModel {
   final String id;
   final String code;
@@ -32,4 +34,6 @@ class InterestModel {
       'iconUrl': iconUrl,
     };
   }
+
+  String get fullIconUrl => '${ApiConstants.baseUrl}/$iconUrl';
 }

@@ -18,12 +18,16 @@ class SetupInterests extends StatefulWidget {
   final VoidCallback onBack;
   final List<String> learningLangs;
   final List<String> speakingLangs;
+  final List<String> initialSelected;
+  final void Function(List<String>)? onFinish;
 
   const SetupInterests({
     super.key,
     required this.onBack,
     required this.learningLangs,
     required this.speakingLangs,
+    this.initialSelected = const [],
+    this.onFinish,
   });
 
   @override
@@ -31,7 +35,7 @@ class SetupInterests extends StatefulWidget {
 }
 
 class _SetupInterestsState extends State<SetupInterests> {
-  final List<String> _selected = [];
+  late List<String> _selected;
   List<InterestModel> _interests = [];
   bool _isLoading = true;
   String? _error;
@@ -42,6 +46,7 @@ class _SetupInterestsState extends State<SetupInterests> {
   @override
   void initState() {
     super.initState();
+    _selected = List.from(widget.initialSelected); // copy từ parent
     _repo = InterestRepository(InterestService(ApiClient()));
   }
 
@@ -86,12 +91,13 @@ class _SetupInterestsState extends State<SetupInterests> {
       } else if (_selected.length < 5) {
         _selected.add(id);
       }
+      widget.onFinish?.call(_selected);
     });
   }
 
-  Future<void> _handleProfileSetup({
-    required List<String> interestIds,
-  }) async {
+  Future<void> _handleProfileSetup({required List<String> interestIds}) async {
+    widget.onFinish?.call(_selected);
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
@@ -165,7 +171,7 @@ class _SetupInterestsState extends State<SetupInterests> {
                 ],
               ),
               child: Icon(
-                Icons.star, // icon đại diện sở thích
+                Icons.star,
                 size: sw(context, 36),
                 color: theme.colorScheme.primary,
               ),
@@ -194,7 +200,6 @@ class _SetupInterestsState extends State<SetupInterests> {
           ),
           SizedBox(height: sh(context, 20)),
 
-          // Container danh sách sở thích
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(
@@ -234,7 +239,7 @@ class _SetupInterestsState extends State<SetupInterests> {
                         color: selected
                             ? borderColorSelected
                             : borderColorDefault,
-                          width: 1,
+                        width: 1,
                       ),
                       color: selected
                           ? backgroundSelected
@@ -245,7 +250,7 @@ class _SetupInterestsState extends State<SetupInterests> {
                       children: [
                         if (i.iconUrl.isNotEmpty)
                           Image.network(
-                            i.iconUrl,
+                            i.fullIconUrl,
                             width: 24,
                             height: 24,
                             errorBuilder: (_, __, ___) =>

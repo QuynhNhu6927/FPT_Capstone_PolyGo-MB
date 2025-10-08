@@ -13,11 +13,13 @@ import '../../../main.dart';
 class SetupLanguageKnown extends StatefulWidget {
   final void Function(List<String> selected) onNext;
   final VoidCallback onBack;
+  final List<String> initialSelected;
 
   const SetupLanguageKnown({
     super.key,
     required this.onNext,
     required this.onBack,
+    this.initialSelected = const [],
   });
 
   @override
@@ -25,7 +27,7 @@ class SetupLanguageKnown extends StatefulWidget {
 }
 
 class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
-  final List<String> _selected = [];
+  late List<String> _selected;
   List<LanguageModel> _languages = [];
   bool _isLoading = true;
   String? _error;
@@ -36,6 +38,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
   @override
   void initState() {
     super.initState();
+    _selected = List.from(widget.initialSelected);
     _repo = LanguageRepository(LanguageService(ApiClient()));
   }
 
@@ -201,7 +204,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
                       children: [
                         if (lang.flagIconUrl.isNotEmpty)
                           Image.network(
-                            lang.flagIconUrl,
+                            lang.fullFlagUrl,
                             width: 24,
                             height: 24,
                             errorBuilder: (_, __, ___) =>
