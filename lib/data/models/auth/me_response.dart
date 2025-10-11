@@ -3,8 +3,8 @@ class MeResponse {
   final String name;
   final String mail;
   final String? avatarUrl;
-  final int meritLevel;
-  final int gender;
+  final String meritLevel;
+  final String gender;
   final int experiencePoints;
   final String role;
 
@@ -25,8 +25,8 @@ class MeResponse {
       name: json['name'] as String,
       mail: json['mail'] as String,
       avatarUrl: json['avatarUrl'] as String?,
-      meritLevel: json['meritLevel'] as int,
-      gender: json['gender'] as int,
+      meritLevel: json['meritLevel'] as String,
+      gender: json['gender'] as String,
       experiencePoints: json['experiencePoints'] as int,
       role: json['role'] as String,
     );

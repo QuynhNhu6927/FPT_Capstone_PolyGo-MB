@@ -6,13 +6,14 @@ import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/interests/interest_model.dart';
-import '../../../data/models/profile/profile_setup_request.dart';
+import '../../../data/models/user/profile_setup_request.dart';
 import '../../../data/repositories/interest_repository.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../data/services/interest_service.dart';
 import '../../../data/services/user_service.dart';
 import '../../../main.dart';
 import '../../../routes/app_routes.dart';
+import '../../shared/app_error_state.dart';
 
 class SetupInterests extends StatefulWidget {
   final VoidCallback onBack;
@@ -153,7 +154,7 @@ class _SetupInterestsState extends State<SetupInterests> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 🔹 Icon đầu
+          // Icon đầu
           Center(
             child: Container(
               padding: EdgeInsets.all(sw(context, 12)),
@@ -201,78 +202,82 @@ class _SetupInterestsState extends State<SetupInterests> {
           SizedBox(height: sh(context, 20)),
 
           Container(
-            padding: EdgeInsets.all(sw(context, 16)),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(sw(context, 16)),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.brightness == Brightness.dark
-                      ? Colors.grey.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
-                ? Text(
-              _error!,
-              style: TextStyle(color: theme.colorScheme.error),
-            )
-                : Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: _interests.map((i) {
-                final selected = _selected.contains(i.id);
-                return GestureDetector(
-                  onTap: () => _toggle(i.id),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: selected
-                            ? borderColorSelected
-                            : borderColorDefault,
-                        width: 1,
-                      ),
-                      color: selected
-                          ? backgroundSelected
-                          : backgroundDefault,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (i.iconUrl.isNotEmpty)
-                          Image.network(
-                            i.fullIconUrl,
-                            width: 24,
-                            height: 24,
-                            errorBuilder: (_, __, ___) =>
-                            const SizedBox.shrink(),
-                          ),
-                        if (i.iconUrl.isNotEmpty) const SizedBox(width: 8),
-                        Text(
-                          i.name,
-                          style: t.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: selected
-                                ? textColorSelected
-                                : textColorDefault,
-                          ),
-                        ),
-                      ],
-                    ),
+              padding: EdgeInsets.all(sw(context, 16)),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(sw(context, 16)),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.grey.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
-                );
-              }).toList(),
+                ],
+              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? AppErrorState(onRetry: () => _fetchInterests()
+              )
+                  : GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _interests.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: (MediaQuery.of(context).size.width ~/ 220).clamp(2, 6),
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 3.8,
+                ),
+                itemBuilder: (context, index) {
+                  final i = _interests[index];
+                  final selected = _selected.contains(i.id);
+                  return GestureDetector(
+                    onTap: () => _toggle(i.id),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected ? borderColorSelected : borderColorDefault,
+                          width: 1,
+                        ),
+                        color: selected ? backgroundSelected : backgroundDefault,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (i.iconUrl.isNotEmpty)
+                            Image.network(
+                              i.iconUrl,
+                              width: 24,
+                              height: 24,
+                              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                            ),
+                          if (i.iconUrl.isNotEmpty) const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              i.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: t.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: selected ? textColorSelected : textColorDefault,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
+
+
 
           SizedBox(height: sh(context, 32)),
 

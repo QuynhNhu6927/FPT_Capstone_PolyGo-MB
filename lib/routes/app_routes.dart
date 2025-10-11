@@ -4,6 +4,7 @@ import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/forget_password_screen.dart';
 import '../features/profile/screens/profile_setup_screen.dart';
 import '../features/profile/screens/user_info_screen.dart';
+import '../features/profile/screens/update_profile_screen.dart';
 import '../features/shared/temp.dart';
 
 class AppRoutes {
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String forgetPassword = '/forget-password';
   static const String userInfo = '/user-information';
   static const String profileSetup = '/profile-setup';
+  static const String updateProfile = '/update-profile';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -28,6 +30,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const UserInfoScreen());
       case profileSetup:
         return MaterialPageRoute(builder: (_) => const ProfileSetupScreen());
+      case updateProfile:
+        return MaterialPageRoute(builder: (_) => const UpdateProfileScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

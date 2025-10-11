@@ -5,89 +5,96 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/api/api_client.dart';
-import '../../../data/models/languages/language_model.dart';
-import '../../../data/repositories/language_repository.dart';
-import '../../../data/services/language_service.dart';
+import '../../../data/models/interests/me_interests_model.dart';
+import '../../../data/repositories/interest_repository.dart';
+import '../../../data/services/interest_service.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
 
-class SetupLanguageLearn extends StatefulWidget {
-  final void Function(List<String> selected) onNext;
-  final List<String> initialSelected;
+class UpdateInterests extends StatefulWidget {
+  final void Function(List<String> selected) onFinish;
+  final VoidCallback onBack;
+  final List<String>? initialSelected;
 
-  const SetupLanguageLearn({
+  const UpdateInterests({
     super.key,
-    required this.onNext,
-    this.initialSelected = const [],
+    required this.onFinish,
+    required this.onBack,
+    this.initialSelected,
   });
 
   @override
-  State<SetupLanguageLearn> createState() => _SetupLanguageLearnState();
+  State<UpdateInterests> createState() => _UpdateInterestsState();
 }
 
-class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
-  late List<String> _selectedLangs;
-  List<LanguageModel> _languages = [];
+class _UpdateInterestsState extends State<UpdateInterests> {
+  late List<String> _selected;
+  List<MeInterestModel> _interests = [];
   bool _isLoading = true;
   String? _error;
-
-  late final LanguageRepository _repo;
+  late final InterestRepository _repo;
   Locale? _currentLocale;
 
   @override
   void initState() {
     super.initState();
-    _selectedLangs = List.from(widget.initialSelected);
-    _repo = LanguageRepository(LanguageService(ApiClient()));
+    _repo = InterestRepository(InterestService(ApiClient()));
+    _selected = widget.initialSelected ?? [];
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = InheritedLocale.of(context).locale;
-    if (_currentLocale == null ||
-        _currentLocale!.languageCode != locale.languageCode) {
+    if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      _fetchLanguages(lang: locale.languageCode);
+      _fetchInterests(lang: locale.languageCode);
     }
   }
 
-  Future<void> _fetchLanguages({String? lang}) async {
+  Future<void> _fetchInterests({String? lang}) async {
     try {
       setState(() {
         _isLoading = true;
         _error = null;
       });
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final langs = await _repo.getAllLanguages(token, lang: lang ?? 'vi');
+
+      final interests = await _repo.getMeInterests(token, lang: lang ?? 'vi');
+
       setState(() {
-        _languages = langs;
+        _interests = interests;
+        // Nếu chưa có selection, lấy theo has=true
+        if (_selected.isEmpty) {
+          _selected = interests.where((e) => e.has).map((e) => e.id).toList();
+        }
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load languages: $e';
+        _error = 'Failed to load interests: $e';
         _isLoading = false;
       });
     }
   }
 
-  void _toggle(String code) {
+  void _toggle(String id) {
     setState(() {
-      if (_selectedLangs.contains(code)) {
-        _selectedLangs.remove(code);
-      } else if (_selectedLangs.length < 3) {
-        _selectedLangs.add(code);
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final t = theme.textTheme;
     final loc = AppLocalizations.of(context);
+    final t = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     final borderColorDefault = theme.dividerColor;
     final borderColorSelected = theme.colorScheme.primary;
@@ -97,14 +104,13 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
     final backgroundSelected = theme.colorScheme.primary.withOpacity(0.1);
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6); // responsive grid
+    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(sw(context, 24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          /// --- HEADER ICON ---
           Center(
             child: Container(
               padding: EdgeInsets.all(sw(context, 12)),
@@ -114,7 +120,7 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
                 boxShadow: [
                   BoxShadow(
                     color: theme.brightness == Brightness.dark
-                        ? Colors.black.withOpacity(0.4)
+                        ? Colors.black.withOpacity(0.5)
                         : Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
@@ -122,18 +128,15 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
                 ],
               ),
               child: Icon(
-                Icons.language,
+                Icons.favorite,
                 size: sw(context, 36),
                 color: theme.colorScheme.primary,
               ),
             ),
           ),
-
           SizedBox(height: sh(context, 20)),
-
-          /// --- TITLE ---
           Text(
-            loc.translate("step_1_title"),
+            loc.translate("step_interests_title"),
             textAlign: TextAlign.center,
             style: t.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
@@ -142,7 +145,7 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
           ),
           SizedBox(height: sh(context, 6)),
           Text(
-            loc.translate("choose_up_to_3_langs"),
+            loc.translate("choose_your_interests"),
             textAlign: TextAlign.center,
             style: t.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -150,8 +153,6 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
             ),
           ),
           SizedBox(height: sh(context, 20)),
-
-          /// --- GRID CONTAINER ---
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(
@@ -170,11 +171,12 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                ? AppErrorState(onRetry: () => _fetchLanguages())
+                ? AppErrorState(onRetry: () => _fetchInterests(lang: _currentLocale?.languageCode))
                 : GridView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _languages.length,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: _interests.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 crossAxisSpacing: 12,
@@ -182,49 +184,41 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
                 childAspectRatio: 3.8,
               ),
               itemBuilder: (context, index) {
-                final lang = _languages[index];
-                final selected = _selectedLangs.contains(lang.id);
+                final interest = _interests[index];
+                final selected = _selected.contains(interest.id);
                 return GestureDetector(
-                  onTap: () => _toggle(lang.id),
+                  onTap: () => _toggle(interest.id),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: selected
-                            ? borderColorSelected
-                            : borderColorDefault,
+                        color: selected ? borderColorSelected : borderColorDefault,
                         width: 1,
                       ),
-                      color: selected
-                          ? backgroundSelected
-                          : backgroundDefault,
+                      color: selected ? backgroundSelected : backgroundDefault,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (lang.iconUrl.isNotEmpty)
+                        if (interest.iconUrl.isNotEmpty)
                           Image.network(
-                            lang.iconUrl,
+                            interest.iconUrl,
                             width: 24,
                             height: 24,
-                            errorBuilder: (_, __, ___) =>
-                            const SizedBox.shrink(),
+                            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                           ),
-                        if (lang.iconUrl.isNotEmpty)
-                          const SizedBox(width: 8),
+                        if (interest.iconUrl.isNotEmpty) const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            lang.name,
+                            interest.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: t.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
-                              color: selected
-                                  ? textColorSelected
-                                  : textColorDefault,
+                              color: selected ? textColorSelected : textColorDefault,
                             ),
                           ),
                         ),
@@ -234,27 +228,20 @@ class _SetupLanguageLearnState extends State<SetupLanguageLearn> {
                 );
               },
             ),
-
           ),
-
           SizedBox(height: sh(context, 32)),
-
-          /// --- BUTTONS ---
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AppButton(
-                text: loc.translate("skip"),
+                text: loc.translate("back"),
                 variant: ButtonVariant.outline,
-                onPressed: () => widget.onNext([]),
+                onPressed: widget.onBack,
               ),
-              const SizedBox(width: 8),
               AppButton(
-                text: loc.translate("next"),
-                onPressed: _selectedLangs.isEmpty
-                    ? null
-                    : () => widget.onNext(_selectedLangs),
-                disabled: _selectedLangs.isEmpty,
+                text: loc.translate("finish"),
+                onPressed: _selected.isEmpty ? null : () => widget.onFinish(_selected),
+                disabled: _selected.isEmpty,
               ),
             ],
           ),

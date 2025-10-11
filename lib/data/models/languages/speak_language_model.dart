@@ -1,24 +1,25 @@
-import '../../../core/config/api_constants.dart';
-
-class LanguageModel {
+class SpeakLanguageModel {
   final String id;
   final String lang;
   final String name;
   final String iconUrl;
+  final bool isSpeaking;
 
-  LanguageModel({
+  SpeakLanguageModel({
     required this.id,
     required this.lang,
     required this.name,
     required this.iconUrl,
+    required this.isSpeaking,
   });
 
-  factory LanguageModel.fromJson(Map<String, dynamic> json) {
-    return LanguageModel(
+  factory SpeakLanguageModel.fromJson(Map<String, dynamic> json) {
+    return SpeakLanguageModel(
       id: json['id'] ?? '',
       lang: json['lang'] ?? '',
       name: json['name'] ?? '',
       iconUrl: json['iconUrl'] ?? '',
+      isSpeaking: json['isSpeaking'] ?? false,
     );
   }
 
@@ -27,9 +28,8 @@ class LanguageModel {
       'id': id,
       'code': lang,
       'name': name,
-      'flagIconUrl': iconUrl,
+      'iconUrl': iconUrl,
+      'isSpeaking': isSpeaking,
     };
   }
-
-  // String get fullFlagUrl => '${ApiConstants.baseUrl}/$iconUrl';
 }

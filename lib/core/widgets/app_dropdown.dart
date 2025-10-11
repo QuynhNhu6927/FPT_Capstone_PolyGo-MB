@@ -9,6 +9,9 @@ class AppDropdown extends StatelessWidget {
   final VoidCallback? onTap;
   final double borderRadius;
   final IconData? icon;
+  final bool showIcon;   // hiển thị icon button
+  final bool showValue;  // hiển thị text currentValue
+  final bool showArrow;  // hiển thị mũi tên
 
   const AppDropdown({
     super.key,
@@ -18,43 +21,52 @@ class AppDropdown extends StatelessWidget {
     this.onTap,
     this.borderRadius = 8.0,
     this.icon,
+    this.showIcon = true,
+    this.showValue = true,
+    this.showArrow = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = (screenWidth / 400).clamp(1.0, 1.6);
+
     return Builder(builder: (innerContext) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Material(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: theme.colorScheme.surfaceVariant,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(borderRadius),
             onTap: () async {
-              //
               if (_menuOpen) return;
               _menuOpen = true;
 
               final RenderBox button =
               innerContext.findRenderObject() as RenderBox;
-              final Offset topLeft = button.localToGlobal(Offset.zero);
+              final RenderBox overlay =
+              Overlay.of(innerContext).context.findRenderObject() as RenderBox;
 
-              //
-              final Rect rect = Rect.fromLTWH(
-                topLeft.dx,
-                topLeft.dy + button.size.height + 4,
-                button.size.width,
-                button.size.height,
+              final Offset position =
+              button.localToGlobal(Offset.zero, ancestor: overlay);
+
+              final RelativeRect positionRect = RelativeRect.fromRect(
+                Rect.fromLTWH(
+                  position.dx,
+                  position.dy + button.size.height + 4,
+                  button.size.width,
+                  button.size.height,
+                ),
+                Offset.zero & overlay.size,
               );
 
               final selected = await showMenu<String>(
                 context: innerContext,
-                position: RelativeRect.fromRect(
-                  rect,
-                  Offset.zero & MediaQuery.of(innerContext).size,
-                ),
+                position: positionRect,
                 items: items.map((item) {
                   final bool isSelected = item == currentValue;
                   return PopupMenuItem<String>(
@@ -62,29 +74,25 @@ class AppDropdown extends StatelessWidget {
                     child: Row(
                       children: [
                         if (isSelected)
-                          Icon(Icons.check,
-                              size: 18,
-                              color: Theme.of(innerContext)
-                                  .colorScheme
-                                  .primary)
+                          Icon(
+                            Icons.check,
+                            size: 18 * scale,
+                            color: theme.colorScheme.primary,
+                          )
                         else
-                          const SizedBox(width: 18),
-                        const SizedBox(width: 8),
+                          SizedBox(width: 18 * scale),
+                        SizedBox(width: 8 * scale),
                         Flexible(
                           child: Text(
                             item,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
+                              fontSize: 14 * scale,
                               color: isSelected
-                                  ? Theme.of(innerContext)
-                                  .colorScheme
-                                  .primary
-                                  : Theme.of(innerContext)
-                                  .colorScheme
-                                  .onSurface,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                              fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -95,7 +103,7 @@ class AppDropdown extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                color: Theme.of(innerContext).colorScheme.surface,
+                color: theme.colorScheme.surface,
               );
 
               _menuOpen = false;
@@ -110,29 +118,39 @@ class AppDropdown extends StatelessWidget {
                 }
               }
             },
-            child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 12 * scale,
+                vertical: 8 * scale,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    icon ?? Icons.language,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      currentValue,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface,
+                  if (showIcon)
+                    Icon(
+                      icon ?? Icons.arrow_drop_down,
+                      size: 20 * scale,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  if (showIcon && (showValue || showArrow))
+                    SizedBox(width: 6 * scale),
+                  if (showValue)
+                    Flexible(
+                      child: Text(
+                        currentValue,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14 * scale,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ),
-                  ),
-                  const Icon(Icons.arrow_drop_down),
+                  if (showArrow)
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 20 * scale,
+                      color: theme.colorScheme.onSurface,
+                    ),
                 ],
               ),
             ),

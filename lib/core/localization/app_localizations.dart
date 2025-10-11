@@ -15,12 +15,12 @@ class AppLocalizations {
   }
 
   Future<bool> load() async {
-    print('🔵 Loading localization for: ${locale.languageCode}');
+    // print('🔵 Loading localization for: ${locale.languageCode}');
 
-    // Danh sách file
     final files = [
       'auth.json',
       'profile.json',
+      'shared.json'
     ];
 
     _localizedStrings = {};

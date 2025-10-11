@@ -73,13 +73,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: AppHeaderActions(onThemeToggle: _toggleTheme),
-              ),
-            ),
+            // Align(
+            //   alignment: Alignment.topRight,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(16),
+            //     child: AppHeaderActions(onThemeToggle: _toggleTheme),
+            //   ),
+            // ),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/api/api_client.dart';
-import '../../../data/models/auth/me_response.dart';
-import '../../../data/repositories/auth_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../routes/app_routes.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/responsive.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../data/models/auth/me_response.dart';
+import '../../../../data/repositories/auth_repository.dart';
+import '../../../../data/services/auth_service.dart';
+import '../../../../routes/app_routes.dart';
+import '../../../core/widgets/app_dropdown.dart';
+import 'change_password_form.dart';
 
 class UserInfo extends StatefulWidget {
   const UserInfo({super.key});
@@ -26,7 +31,9 @@ class _UserInfoState extends State<UserInfo> {
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+
     if (token == null) {
+      if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
       return;
     }
@@ -34,6 +41,7 @@ class _UserInfoState extends State<UserInfo> {
     try {
       final repo = AuthRepository(AuthService(ApiClient()));
       final user = await repo.me(token);
+
       if (!mounted) return;
       setState(() {
         _user = user;
@@ -46,109 +54,293 @@ class _UserInfoState extends State<UserInfo> {
     }
   }
 
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final t = theme.textTheme;
+    final loc = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 60,
-                backgroundImage: _user!.avatarUrl != null
-                    ? NetworkImage(_user!.avatarUrl!)
-                    : const AssetImage('assets/default_avatar.png') as ImageProvider,
-              ),
-              const SizedBox(height: 16),
+    final containerWidth = screenWidth < 500
+        ? screenWidth * 0.9
+        : screenWidth < 900
+        ? screenWidth * 0.75
+        : screenWidth < 1400
+        ? screenWidth * 0.6
+        : 900.0;
 
-              // Name
-              Text(
-                _user!.name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
+    if (_loading) {
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          width: containerWidth,
+          padding: EdgeInsets.all(sw(context, 24)),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
 
-              // Email
-              Text(
-                _user!.mail,
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
+    final name = _user?.name ?? "Unknown User";
+    final avatarUrl =
+        _user?.avatarUrl ?? "https://randomuser.me/api/portraits/men/32.jpg";
+    const rating = "Level 13";
+    const spoken = "1402 EXP";
+    const introduction =
+        "Passionate about learning languages and sharing Vietnamese culture!";
 
-              // Info card
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        width: containerWidth,
+        padding: EdgeInsets.all(sw(context, 24)),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+          borderRadius: BorderRadius.circular(sw(context, 16)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x11000000),
+              blurRadius: 20,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Avatar & Name ---
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: sw(context, 36),
+                  backgroundImage: NetworkImage(avatarUrl),
+                ),
+                SizedBox(width: sw(context, 16)),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoRow("Role", _user!.role),
-                      _infoRow("Merit Level", _user!.meritLevel.toString()),
-                      _infoRow("Experience Points", _user!.experiencePoints.toString()),
-                      _infoRow("Gender", _user!.gender == 0 ? "Male" : "Female"),
-                      _infoRow("ID", _user!.id),
+                      Text(
+                        name,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: st(context, 20),
+                        ),
+                      ),
+                      SizedBox(height: sh(context, 4)),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 4,
+                        runSpacing: 2,
+                        children: [
+                          const Icon(Icons.star,
+                              color: Colors.blueAccent, size: 18),
+                          Text(rating, style: t.bodyMedium),
+                          const Text("•"),
+                          Text(spoken, style: t.bodyMedium),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
-
-              // Logout button
-              SizedBox(
-                width: 200,
-                child: ElevatedButton(
-                  onPressed: _logout,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                AppDropdown(
+                  icon: Icons.settings,
+                  currentValue: "",
+                  items: [
+                    "Thông tin cá nhân",
+                    "Ngôn ngữ và sở thích",
+                    "Đổi mật khẩu"
+                  ],
+                  showIcon: true,
+                  showValue: false,
+                  showArrow: false,
+                  onSelected: (value) {
+                    if (!mounted) return;
+                    switch (value) {
+                      case "Thông tin cá nhân":
+                        Navigator.pushNamed(context, AppRoutes.updateProfile);
+                        break;
+                      case "Ngôn ngữ và sở thích":
+                        Navigator.pushNamed(context, AppRoutes.updateProfile);
+                        break;
+                      case "Đổi mật khẩu":
+                        showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierColor: Colors.black54,
+                          builder: (_) => Dialog(
+                            insetPadding: EdgeInsets.symmetric(horizontal: 24),
+                            backgroundColor: Colors.transparent,
+                            child: const ChangePasswordForm(),
+                          ),
+                        );
+                        break;
+                    }
+                  },
                 ),
+              ],
+            ),
+            SizedBox(height: sh(context, 20)),
+
+            // --- Giới thiệu ---
+            Text(
+              loc.translate("introduction"),
+              style: t.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: st(context, 16),
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+            SizedBox(height: sh(context, 8)),
+            Text(
+              introduction,
+              style: t.bodyMedium?.copyWith(fontSize: st(context, 14)),
+            ),
+
+            SizedBox(height: sh(context, 20)),
+
+            // --- Ngôn ngữ ---
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+
+                int visibleNative = width < 400 ? 1 : width < 700 ? 2 : 3;
+                int visibleLearning = width < 400 ? 1 : width < 700 ? 3 : 4;
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildLangSectionLimited(
+                        context,
+                        title: loc.translate("native_language"),
+                        tags: ["Vietnamese", "English", "Thai"],
+                        color: Colors.green[100]!,
+                        visibleCount: visibleNative,
+                        partialNext: true,
+                      ),
+                    ),
+                    SizedBox(width: sw(context, 16)),
+                    Expanded(
+                      child: _buildLangSectionLimited(
+                        context,
+                        title: loc.translate("learning"),
+                        tags: [
+                          "French",
+                          "Japanese",
+                          "Korean",
+                          "Chinese",
+                          "Spanish",
+                          "Italian"
+                        ],
+                        color: Colors.blue[100]!,
+                        visibleCount: visibleLearning,
+                        partialNext: true,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            SizedBox(height: sh(context, 20)),
+
+            // --- Sở thích ---
+            Text(
+              loc.translate("interests"),
+              style: t.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: st(context, 16),
+              ),
+            ),
+            SizedBox(height: sh(context, 8)),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildTag(context, "travel"),
+                _buildTag(context, "food"),
+                _buildTag(context, "movies"),
+              ],
+            ),
+          ],
+        ),
+      ).animate().fadeIn(duration: 400.ms),
+    );
+  }
+
+  Widget _buildTag(BuildContext context, String text, {Color? color}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    Color backgroundColor = color ??
+        (isDark ? Colors.grey[800]! : const Color(0xFFF3F4F6));
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: sw(context, 12),
+        vertical: sh(context, 6),
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(sw(context, 20)),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: st(context, 13),
+          color: Colors.black, // luôn màu đen
         ),
       ),
     );
   }
 
-  Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              "$label:",
-              style: const TextStyle(fontWeight: FontWeight.bold),
+  Widget _buildLangSectionLimited(
+      BuildContext context, {
+        required String title,
+        required List<String> tags,
+        required Color color,
+        int visibleCount = 1,
+        bool partialNext = false,
+      }) {
+    final t = Theme.of(context).textTheme;
+    final tagWidth = 90.0;
+    final visibleWidth =
+        (tagWidth * visibleCount) + (partialNext ? tagWidth * 0.4 : 0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: t.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: st(context, 15),
+          ),
+        ),
+        SizedBox(height: sh(context, 8)),
+        ClipRect(
+          child: SizedBox(
+            height: sh(context, 40),
+            width: visibleWidth,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: tags
+                    .map(
+                      (e) => Padding(
+                    padding: EdgeInsets.only(right: sw(context, 8)),
+                    child: _buildTag(context, e, color: color),
+                  ),
+                )
+                    .toList(),
+              ),
             ),
           ),
-          Expanded(
-            flex: 5,
-            child: Text(value),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

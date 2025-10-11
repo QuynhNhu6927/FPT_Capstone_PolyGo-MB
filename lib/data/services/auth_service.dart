@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/api_constants.dart';
+import '../models/auth/change_password_request.dart';
 import '../models/auth/me_response.dart';
 import '../models/auth/register_request.dart';
 import '../models/auth/login_request.dart';
@@ -71,6 +72,26 @@ class AuthService {
 
       final json = response.data as Map<String, dynamic>;
       return ApiResponse.fromJson(json, (data) => MeResponse.fromJson(data));
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<void>> changePassword(
+      ChangePasswordRequest req, String token) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.changePassword,
+        data: req.toJson(),
+        headers: {
+          ApiConstants.headerContentType: ApiConstants.contentTypeJson,
+          ApiConstants.headerAuthorization: 'Bearer $token',
+        },
+      );
+      return ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+            (_) => null,
+      );
     } on DioError catch (e) {
       rethrow;
     }

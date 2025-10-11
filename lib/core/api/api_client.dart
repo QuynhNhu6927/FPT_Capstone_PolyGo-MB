@@ -13,20 +13,20 @@ class ApiClient {
       ApiConstants.headerContentType: ApiConstants.contentTypeJson,
     },
   )) {
-    // Interceptor ví dụ: logging request/response
+
     this.dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        print('--> ${options.method} ${options.uri}');
-        print('Headers: ${options.headers}');
-        print('Body: ${options.data}');
+        // print('--> ${options.method} ${options.uri}');
+        // print('Headers: ${options.headers}');
+        // print('Body: ${options.data}');
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        print('<-- ${response.statusCode} ${response.requestOptions.uri}');
+        // print('<-- ${response.statusCode} ${response.requestOptions.uri}');
         return handler.next(response);
       },
       onError: (DioError e, handler) {
-        print('*** DioError: ${e.message}');
+        // print('*** DioError: ${e.message}');
         return handler.next(e);
       },
     ));

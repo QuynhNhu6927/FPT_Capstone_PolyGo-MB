@@ -9,6 +9,7 @@ import '../../../data/models/languages/language_model.dart';
 import '../../../data/repositories/language_repository.dart';
 import '../../../data/services/language_service.dart';
 import '../../../main.dart';
+import '../../shared/app_error_state.dart';
 
 class SetupLanguageKnown extends StatefulWidget {
   final void Function(List<String> selected) onNext;
@@ -46,9 +47,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final locale = InheritedLocale
-        .of(context)
-        .locale;
+    final locale = InheritedLocale.of(context).locale;
 
     if (_currentLocale == null ||
         _currentLocale!.languageCode != locale.languageCode) {
@@ -94,9 +93,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final t = Theme
-        .of(context)
-        .textTheme;
+    final t = Theme.of(context).textTheme;
     final theme = Theme.of(context);
 
     final borderColorDefault = theme.dividerColor;
@@ -106,12 +103,15 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
     final backgroundDefault = theme.cardColor;
     final backgroundSelected = theme.colorScheme.primary.withOpacity(0.1);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6); // responsive
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(sw(context, 24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Icon đầu
+          /// --- ICON HEADER ---
           Center(
             child: Container(
               padding: EdgeInsets.all(sw(context, 12)),
@@ -120,7 +120,9 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
                 borderRadius: BorderRadius.circular(sw(context, 12)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.black.withOpacity(0.4)
+                        : Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -136,7 +138,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
 
           SizedBox(height: sh(context, 20)),
 
-          // Title + Subtitle
+          /// --- TITLE ---
           Text(
             loc.translate("step_2_title"),
             textAlign: TextAlign.center,
@@ -156,6 +158,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
           ),
           SizedBox(height: sh(context, 20)),
 
+          /// --- GRID LIST ---
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(
@@ -171,68 +174,78 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
                 ),
               ],
             ),
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
-                ? Text(
-              _error!,
-              style: TextStyle(color: theme.colorScheme.error),
-            )
-                : Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: _languages.map((lang) {
-                final selected = _selected.contains(lang.id);
-                return GestureDetector(
-                  onTap: () => _toggle(lang.id),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: selected
-                            ? borderColorSelected
-                            : borderColorDefault,
-                        width: 1,
-                      ),
-                      color: selected ? backgroundSelected : backgroundDefault,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (lang.flagIconUrl.isNotEmpty)
-                          Image.network(
-                            lang.fullFlagUrl,
-                            width: 24,
-                            height: 24,
-                            errorBuilder: (_, __, ___) =>
-                            const SizedBox.shrink(),
-                          ),
-                        if (lang.flagIconUrl.isNotEmpty)
-                          const SizedBox(width: 8),
-                        Text(
-                          lang.name,
-                          style: t.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: selected
-                                ? textColorSelected
-                                : textColorDefault,
-                          ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? AppErrorState(onRetry: () => _fetchLanguages())
+                  : GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _languages.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 3.8,
+                ),
+                itemBuilder: (context, index) {
+                  final lang = _languages[index];
+                  final selected = _selected.contains(lang.id);
+                  return GestureDetector(
+                    onTap: () => _toggle(lang.id),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected
+                              ? borderColorSelected
+                              : borderColorDefault,
+                          width: 1,
                         ),
-                      ],
+                        color: selected
+                            ? backgroundSelected
+                            : backgroundDefault,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (lang.iconUrl.isNotEmpty)
+                            Image.network(
+                              lang.iconUrl,
+                              width: 24,
+                              height: 24,
+                              errorBuilder: (_, __, ___) =>
+                              const SizedBox.shrink(),
+                            ),
+                          if (lang.iconUrl.isNotEmpty)
+                            const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              lang.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: t.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: selected
+                                    ? textColorSelected
+                                    : textColorDefault,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
+                  );
+                },
+              ),
           ),
-
 
           SizedBox(height: sh(context, 32)),
 
-          // Buttons
+          /// --- BUTTONS ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

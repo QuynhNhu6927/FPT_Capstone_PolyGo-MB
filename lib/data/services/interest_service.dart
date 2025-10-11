@@ -4,6 +4,7 @@ import '../../core/config/api_constants.dart';
 import '../models/api_response.dart';
 import '../models/interests/interest_model.dart';
 import '../models/interests/interest_list_response.dart';
+import '../models/interests/me_interests_list_response.dart';
 
 class InterestService {
   final ApiClient apiClient;
@@ -48,4 +49,28 @@ class InterestService {
       rethrow;
     }
   }
+
+  Future<ApiResponse<MeInterestListResponse>> getMeInterests({
+    required String token,
+    String lang = 'vi', // thêm lang
+    int pageNumber = -1,
+    int pageSize = -1,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiConstants.interestsMeAll}?lang=$lang&pageNumber=$pageNumber&pageSize=$pageSize',
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => MeInterestListResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
 }
+
