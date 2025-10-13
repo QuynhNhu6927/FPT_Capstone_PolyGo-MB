@@ -24,6 +24,16 @@
   "back": "Back",
   "finish": "Finish",
   "profile_setup_success": "Profile setup success",
-  "profile_setup_failed": "Profile setup failed"
+  "profile_setup_failed": "Profile setup failed",
+  "avatar_update_success": "Avatar update success",
+
+  "introduction": "Introduction",
+  "native_language": "Speaking",
+  "learning": "Learning",
+  "interests": "Interests",
+
+  "personal_info": "Persona information",
+  "languages_interests": "Languages and interests",
+  "change_password": "Change password"
 
 }

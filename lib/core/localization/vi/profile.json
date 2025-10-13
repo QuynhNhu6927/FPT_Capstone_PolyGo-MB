@@ -24,5 +24,15 @@
   "back": "Quay lại",
   "finish": "Hoàn thành",
   "profile_setup_success": "Cập nhập thông tin thành công",
-  "profile_setup_failed": "Cập nhập thông tin thất bại"
+  "profile_setup_failed": "Cập nhập thông tin thất bại",
+  "avatar_update_success": "Cập nhập ảnh đại diện thành công",
+
+  "introduction": "Giới thiệu",
+  "native_language": "Thành thạo",
+  "learning": "Đang học",
+  "interests": "Sở thích",
+
+  "personal_info": "Thông tin cá nhân",
+  "languages_interests": "Ngôn ngữ và sở thích",
+  "change_password": "Đổi mật khẩu"
 }

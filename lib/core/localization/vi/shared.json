@@ -1,5 +1,10 @@
 {
   "error_no_connection": "Mất kết nối!",
-  "retry": "Thử lại"
+  "retry": "Thử lại",
+
+  "bottom_me": "Cá nhân",
+  "bottom_shop": "Cửa hàng",
+  "bottom_friend": "Bạn bè",
+  "bottom_home": "Trang chủ"
 
 }

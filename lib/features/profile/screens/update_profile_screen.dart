@@ -69,8 +69,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         _selectedInterests.toSet() != _initialInterests.toSet();
 
     if (!hasChange) {
-      // không có gì thay đổi, chỉ pop hoặc show message
-      Navigator.of(context).pop();
+      // không có gì thay đổi, pop và trả về false
+      Navigator.of(context).pop(false);
       return;
     }
 
@@ -90,16 +90,20 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       _initialInterests = List.from(_selectedInterests);
 
       // show toast thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')),
+        );
 
-      Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // pop trả về true chỉ **sau khi thành công**
+      }
     } catch (e) {
       // show error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Update profile failed: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Update profile failed: $e')),
+        );
+      }
     }
   }
 

@@ -20,7 +20,8 @@ class AppLocalizations {
     final files = [
       'auth.json',
       'profile.json',
-      'shared.json'
+      'shared.json',
+      'badges.json'
     ];
 
     _localizedStrings = {};

@@ -49,8 +49,9 @@ class _AllBadgesState extends State<AllBadges> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
+      final loc = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Lỗi tải huy hiệu: $e")),
+        SnackBar(content: Text("${loc.translate("load_badges_error") ?? "Lỗi tải huy hiệu"}: $e")),
       );
     }
   }
@@ -202,7 +203,7 @@ class _AllBadgesState extends State<AllBadges> {
                         Text(
                           badge.description.isNotEmpty
                               ? badge.description
-                              : "Không có mô tả",
+                              : loc.translate("no_description") ?? "Không có mô tả",
                           style: t.bodySmall?.copyWith(
                             color: hasBadge
                                 ? Colors.white.withOpacity(0.85)
@@ -224,7 +225,7 @@ class _AllBadgesState extends State<AllBadges> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              "Đạt được: ${badge.createdAt.split('T').first}",
+                              "${loc.translate("received_on") ?? "Đạt được"}: ${badge.createdAt.split('T').first}",
                               style: t.bodySmall?.copyWith(
                                 color: Colors.white,
                                 fontSize: 12,
@@ -237,7 +238,7 @@ class _AllBadgesState extends State<AllBadges> {
                     ),
                   ),
 
-                  // 🔒 Overlay toàn thẻ nếu chưa có badge
+                  // Overlay toàn thẻ nếu chưa có badge
                   if (!hasBadge)
                     Positioned.fill(
                       child: Container(
@@ -257,6 +258,5 @@ class _AllBadgesState extends State<AllBadges> {
         );
       },
     );
-
   }
 }

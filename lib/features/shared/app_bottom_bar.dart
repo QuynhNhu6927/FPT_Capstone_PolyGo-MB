@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../routes/app_routes.dart'; // 👈 để gọi route của bạn
+import '../../../routes/app_routes.dart';
+import '../../../../core/localization/app_localizations.dart';
+
 
 class AppBottomBar extends StatefulWidget {
-  final int currentIndex; // 👈 thêm thuộc tính
+  final int currentIndex;
   const AppBottomBar({super.key, this.currentIndex = 0});
 
   @override
@@ -14,10 +16,10 @@ class _AppBottomBarState extends State<AppBottomBar> {
   late int _selectedIndex;
 
   final _items = const [
-    {'icon': Icons.home_rounded, 'label': 'Home'},
-    {'icon': Icons.people_alt_rounded, 'label': 'Friend'},
-    {'icon': Icons.storefront_rounded, 'label': 'Shop'},
-    {'icon': Icons.person_rounded, 'label': 'Me'},
+    {'icon': Icons.home_rounded, 'labelKey': 'bottom_home'},
+    {'icon': Icons.people_alt_rounded, 'labelKey': 'bottom_friend'},
+    {'icon': Icons.storefront_rounded, 'labelKey': 'bottom_shop'},
+    {'icon': Icons.person_rounded, 'labelKey': 'bottom_me'},
   ];
 
   @override
@@ -29,7 +31,6 @@ class _AppBottomBarState extends State<AppBottomBar> {
   void _onItemTapped(BuildContext context, int index) {
     setState(() => _selectedIndex = index);
 
-    // 🔹 Điều hướng tương ứng theo index
     switch (index) {
       case 0:
         Navigator.pushNamed(context, AppRoutes.home);
@@ -51,11 +52,11 @@ class _AppBottomBarState extends State<AppBottomBar> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorActive = const Color(0xFF2563EB);
     final colorInactive = theme.iconTheme.color?.withOpacity(0.6) ?? Colors.grey;
 
-    // 🔹 Responsive scale factor
     final screenWidth = MediaQuery.of(context).size.width;
     final scale = screenWidth < 400
         ? 1.0
@@ -104,7 +105,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
                   if (selected) ...[
                     SizedBox(width: 6 * scale),
                     Text(
-                      item['label'] as String,
+                      loc.translate(item['labelKey'] as String),
                       style: TextStyle(
                         color: colorActive,
                         fontWeight: FontWeight.w600,
