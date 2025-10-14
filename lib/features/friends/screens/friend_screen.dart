@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
-import '../widgets/header_bar.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class FriendScreen extends StatelessWidget {
+  const FriendScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +11,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: const [
-            HeaderBar(),
             Expanded(
               child: Center(
                 child: Text(
-                  'Home',
+                  'Friend',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -28,7 +26,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomBar(),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
     );
   }
 }

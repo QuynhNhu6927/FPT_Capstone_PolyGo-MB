@@ -22,7 +22,7 @@ class BadgeModel {
     required this.badgeCategory,
     required this.createdAt,
     required this.lastUpdatedAt,
-    this.has = true, // 🟢 default true nếu không có trong JSON
+    this.has = true,
   });
 
   factory BadgeModel.fromJson(Map<String, dynamic> json) {

@@ -34,6 +34,22 @@
 
   "personal_info": "Persona information",
   "languages_interests": "Languages and interests",
-  "change_password": "Change password"
+  "change_password": "Change password",
+
+  "change_password_success": "Change password success",
+  "change_password_failed": "Change password failed",
+  "change_password_title": "Change password",
+  "current_password": "Current password",
+  "new_password": "New password",
+  "confirm_new_password": "Confirm new password",
+  "not_match": "Password not match",
+  "change_password_button": "Confirm",
+
+  "name": "Name",
+  "enter_name": "Enter name",
+  "enter_introduction": "Enter introduction",
+  "update_profile_button": "Confirm",
+  "update_profile_success": "Update profile success",
+  "update_profile_failed": "Update profile failed"
 
 }

@@ -173,19 +173,16 @@ class _UserInfoState extends State<UserInfo> {
         insetPadding: EdgeInsets.zero,
         child: Stack(
           children: [
-            // Hiển thị avatar nếu có và load thành công
             if (avatarUrl != null && avatarUrl.isNotEmpty)
               Center(
                 child: Image.network(
                   avatarUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
-                    // Nếu load ảnh lỗi, không hiển thị gì
                     return const SizedBox.shrink();
                   },
                 ),
               ),
-            // Nút cập nhật luôn hiển thị
             Positioned(
               top: 40,
               right: 20,
@@ -324,12 +321,23 @@ class _UserInfoState extends State<UserInfo> {
         width: containerWidth,
         padding: EdgeInsets.all(sw(context, 24)),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+          ),
           borderRadius: BorderRadius.circular(sw(context, 16)),
-          boxShadow: const [
-            BoxShadow(color: Color(0x11000000), blurRadius: 20, offset: Offset(0, 8))
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

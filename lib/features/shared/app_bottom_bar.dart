@@ -36,10 +36,10 @@ class _AppBottomBarState extends State<AppBottomBar> {
         Navigator.pushNamed(context, AppRoutes.home);
         break;
       case 1:
-        Navigator.pushNamed(context, AppRoutes.home);
+        Navigator.pushNamed(context, AppRoutes.friends);
         break;
       case 2:
-        Navigator.pushNamed(context, AppRoutes.home);
+        Navigator.pushNamed(context, AppRoutes.shop);
         break;
       case 3:
         Navigator.pushNamed(context, AppRoutes.userInfo);

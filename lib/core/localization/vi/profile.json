@@ -1,17 +1,17 @@
 {
-  "user_info_title": "User Info",
-  "full_name": "Full Name",
-  "enter_full_name": "Enter your full name",
+  "user_info_title": "Thông tin cá nhân",
+  "full_name": "Tên",
+  "enter_full_name": "Nhập tên",
   "email": "Email",
-  "enter_email": "Enter your email",
-  "phone": "Phone",
-  "enter_phone": "Enter your phone",
-  "gender": "Gender",
-  "male": "Male",
-  "female": "Female",
+  "enter_email": "Nhập email",
+  "phone": "Số diện thoại",
+  "enter_phone": "Nhập số điện thoại",
+  "gender": "Giới tính",
+  "male": "Nam",
+  "female": "Nữ",
   "other": "Other",
-  "update_info": "Update Info",
-  "updating": "Updating...",
+  "update_info": "Cập nhập",
+  "updating": "Đang cập nhập...",
 
   "step_1_title": "Ngôn ngữ bạn muốn học?",
   "choose_up_to_3_langs": "Chọn tối đa 3",
@@ -34,5 +34,21 @@
 
   "personal_info": "Thông tin cá nhân",
   "languages_interests": "Ngôn ngữ và sở thích",
-  "change_password": "Đổi mật khẩu"
+  "change_password": "Đổi mật khẩu",
+
+  "change_password_success": "Đổi mật khẩu thành công",
+  "change_password_failed": "Đổi mật khẩu thất bại",
+  "change_password_title": "Đổi mật khẩu",
+  "current_password": "Mật khẩu hiện tại",
+  "new_password": "Mật khẩu mới",
+  "confirm_new_password": "Xác nhận mật khẩu mới",
+  "not_match": "Mật khẩu không khớp",
+  "change_password_button": "Xác nhận",
+
+  "name": "Tên",
+  "enter_name": "Nhập tên",
+  "enter_introduction": "Nhập giới thiệu",
+  "update_profile_button": "Xác nhận",
+  "update_profile_success": "Cập nhập thông tin thành công",
+  "update_profile_failed": "Cập nhập thông tin thất bại"
 }

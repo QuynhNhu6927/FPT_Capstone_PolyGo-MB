@@ -21,12 +21,12 @@ class _BadgesSectionState extends State<BadgesSection> {
   bool _loading = true;
 
   final List<String> fallbackImages = [
-    "https://img.icons8.com/color/96/trophy.png",
-    "https://img.icons8.com/color/96/medal.png",
-    "https://img.icons8.com/color/96/star-medal.png",
-    "https://img.icons8.com/color/96/award.png",
-    "https://img.icons8.com/color/96/championship-belt.png",
-    "https://img.icons8.com/color/96/prize.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
   ];
 
   @override
@@ -98,16 +98,23 @@ class _BadgesSectionState extends State<BadgesSection> {
           vertical: sh(context, 12),
         ),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+          ),
           borderRadius: BorderRadius.circular(sw(context, 16)),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x11000000),
-              blurRadius: 20,
-              offset: Offset(0, 8),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
+
         child: SizedBox(
           height: sw(context, 100) + sh(context, 20),
           child: Row(
