@@ -7,6 +7,7 @@ import '../../../../data/models/badges/badge_model.dart';
 import '../../../../data/repositories/badge_repository.dart';
 import '../../../../data/services/badge_service.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../../core/localization/app_localizations.dart'; // thêm
 
 class BadgesSection extends StatefulWidget {
   const BadgesSection({super.key});
@@ -20,12 +21,12 @@ class _BadgesSectionState extends State<BadgesSection> {
   bool _loading = true;
 
   final List<String> fallbackImages = [
-    "https://img.icons8.com/color/96/trophy.png",
-    "https://img.icons8.com/color/96/medal.png",
-    "https://img.icons8.com/color/96/star-medal.png",
-    "https://img.icons8.com/color/96/award.png",
-    "https://img.icons8.com/color/96/championship-belt.png",
-    "https://img.icons8.com/color/96/prize.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
+    "https://img.icons8.com/fluency/96/trophy.png",
+    "https://img.icons8.com/fluency/96/medal.png",
   ];
 
   @override
@@ -62,6 +63,7 @@ class _BadgesSectionState extends State<BadgesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context); // thêm
     final screenWidth = MediaQuery.of(context).size.width;
     final containerWidth = screenWidth < 500
         ? screenWidth * 0.9
@@ -96,16 +98,23 @@ class _BadgesSectionState extends State<BadgesSection> {
           vertical: sh(context, 12),
         ),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+          ),
           borderRadius: BorderRadius.circular(sw(context, 16)),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x11000000),
-              blurRadius: 20,
-              offset: Offset(0, 8),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
+
         child: SizedBox(
           height: sw(context, 100) + sh(context, 20),
           child: Row(
@@ -166,7 +175,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                 )
                     : Center(
                   child: Text(
-                    "Bạn chưa đạt thành tựu nào.",
+                    loc.translate("no_badges_yet") ?? "Bạn chưa đạt thành tựu nào.",
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -194,6 +203,7 @@ class _BadgesSectionState extends State<BadgesSection> {
   }
 
   void _showBadgeDetail(BuildContext context, BadgeModel badge, String imageUrl) {
+    final loc = AppLocalizations.of(context); // thêm
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -242,13 +252,13 @@ class _BadgesSectionState extends State<BadgesSection> {
               Text(
                 badge.description.isNotEmpty
                     ? badge.description
-                    : "No description available.",
+                    : loc.translate("no_description") ?? "No description available.",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               SizedBox(height: sh(context, 8)),
               Text(
-                "Received: ${badge.createdAt.split('T').first}",
+                "${loc.translate("received_on") ?? "Received"}: ${badge.createdAt.split('T').first}",
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall

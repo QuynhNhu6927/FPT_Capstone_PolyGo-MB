@@ -42,7 +42,6 @@ class _UserInfoState extends State<UserInfo> {
   List<String> _interests = [];
   bool _loadingInterests = true;
 
-
   @override
   void initState() {
     super.initState();
@@ -55,9 +54,12 @@ class _UserInfoState extends State<UserInfo> {
     final locale = InheritedLocale.of(context).locale;
     if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      _loadLearningLanguages(lang: locale.languageCode);
-      _loadNativeLanguages(lang: locale.languageCode);
-      _loadInterests(lang: locale.languageCode);
+      // chỉ reload nếu user đã load
+      if (_user != null) {
+        _loadLearningLanguages(lang: locale.languageCode);
+        _loadNativeLanguages(lang: locale.languageCode);
+        _loadInterests(lang: locale.languageCode);
+      }
     }
   }
 
@@ -76,16 +78,21 @@ class _UserInfoState extends State<UserInfo> {
       final user = await repo.me(token);
 
       if (!mounted) return;
+
+      final locale = InheritedLocale.of(context).locale;
+      _currentLocale = locale;
+
       setState(() {
         _user = user;
         _loading = false;
       });
-      await Future.wait([
-        _loadLearningLanguages(),
-        _loadNativeLanguages(),
-        _loadInterests(),
-      ]);
 
+      // load ngay từ lần đầu với locale
+      await Future.wait([
+        _loadLearningLanguages(lang: locale.languageCode),
+        _loadNativeLanguages(lang: locale.languageCode),
+        _loadInterests(lang: locale.languageCode),
+      ]);
     } catch (e) {
       await prefs.remove('token');
       if (!mounted) return;
@@ -101,7 +108,7 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingInterests = true);
       final repo = InterestRepository(InterestService(ApiClient()));
-      final interests = await repo.getInterestsMe(token, lang: lang ?? 'vi');
+      final interests = await repo.getInterestsMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -122,7 +129,7 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingLearning = true);
       final repo = LanguageRepository(LanguageService(ApiClient()));
-      final langs = await repo.getLearningLanguagesMe(token, lang: lang ?? 'vi');
+      final langs = await repo.getLearningLanguagesMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -142,7 +149,7 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingNative = true);
       final repo = LanguageRepository(LanguageService(ApiClient()));
-      final langs = await repo.getSpeakingLanguagesMe(token, lang: lang ?? 'vi');
+      final langs = await repo.getSpeakingLanguagesMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -166,16 +173,16 @@ class _UserInfoState extends State<UserInfo> {
         insetPadding: EdgeInsets.zero,
         child: Stack(
           children: [
-            Center(
-              child: avatarUrl != null && avatarUrl.isNotEmpty
-                  ? Image.network(avatarUrl, fit: BoxFit.contain)
-                  : Container(
-                width: 200,
-                height: 200,
-                color: Colors.grey[400],
-                child: const Icon(Icons.person, size: 100, color: Colors.white),
+            if (avatarUrl != null && avatarUrl.isNotEmpty)
+              Center(
+                child: Image.network(
+                  avatarUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-            ),
             Positioned(
               top: 40,
               right: 20,
@@ -184,11 +191,12 @@ class _UserInfoState extends State<UserInfo> {
                 backgroundColor: Colors.blue,
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _updateAvatar(); // chọn và update avatar
+                  _updateAvatar();
                 },
                 child: const Icon(Icons.edit, color: Colors.white),
               ),
             ),
+            // Nút đóng
             Positioned(
               top: 40,
               left: 20,
@@ -207,6 +215,7 @@ class _UserInfoState extends State<UserInfo> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     if (token == null) return;
+    final loc = AppLocalizations.of(context);
 
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -240,14 +249,12 @@ class _UserInfoState extends State<UserInfo> {
         _loading = false;
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Avatar đã được cập nhật thành công!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.translate("avatar_update_success")),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
       setState(() => _loading = false);
     }
@@ -266,7 +273,7 @@ class _UserInfoState extends State<UserInfo> {
         child: UpdateUserInfoForm(
           user: _user!,
           onUpdated: (updatedUser) {
-            setState(() => _user = updatedUser); // hiển thị ngay thông tin mới
+            setState(() => _user = updatedUser);
           },
         ),
       ),
@@ -314,12 +321,23 @@ class _UserInfoState extends State<UserInfo> {
         width: containerWidth,
         padding: EdgeInsets.all(sw(context, 24)),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+          ),
           borderRadius: BorderRadius.circular(sw(context, 16)),
-          boxShadow: const [
-            BoxShadow(color: Color(0x11000000), blurRadius: 20, offset: Offset(0, 8))
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -376,33 +394,37 @@ class _UserInfoState extends State<UserInfo> {
                 AppDropdown(
                   icon: Icons.settings,
                   currentValue: "",
-                  items: ["Thông tin cá nhân", "Ngôn ngữ và sở thích", "Đổi mật khẩu"],
+                  items: [
+                    loc.translate("personal_info"),
+                    loc.translate("languages_interests"),
+                    loc.translate("change_password"),
+                  ],
                   showIcon: true,
                   showValue: false,
                   showArrow: false,
                   onSelected: (value) {
-                    switch (value) {
-                      case "Thông tin cá nhân":
-                        _showUpdateInfoForm();
-                        break;
-                      case "Ngôn ngữ và sở thích":
-                        Navigator.pushNamed(context, AppRoutes.updateProfile);
-                        break;
-                      case "Đổi mật khẩu":
-                        showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          barrierColor: Colors.black54,
-                          builder: (_) => Dialog(
-                            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-                            backgroundColor: Colors.transparent,
-                            child: const ChangePasswordForm(),
-                          ),
-                        );
-                        break;
+                    if (value == loc.translate("personal_info")) {
+                      _showUpdateInfoForm();
+                    } else if (value == loc.translate("languages_interests")) {
+                      Navigator.pushNamed(context, AppRoutes.updateProfile).then((updated) {
+                        if (updated == true) {
+                          _loadUser();
+                        }
+                      });
+                    } else if (value == loc.translate("change_password")) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierColor: Colors.black54,
+                        builder: (_) => Dialog(
+                          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+                          backgroundColor: Colors.transparent,
+                          child: const ChangePasswordForm(),
+                        ),
+                      );
                     }
                   },
-                ),
+                )
               ],
             ),
             SizedBox(height: sh(context, 20)),

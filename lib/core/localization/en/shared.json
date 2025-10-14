@@ -1,5 +1,10 @@
 {
   "error_no_connection": "Lost connection!",
-  "retry": "Try again"
+  "retry": "Try again",
+
+  "bottom_me": "Me",
+  "bottom_shop": "Shop",
+  "bottom_friend": "Friend",
+  "bottom_home": "Home"
 
 }

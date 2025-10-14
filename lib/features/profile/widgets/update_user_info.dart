@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/profile/widgets/user_info.dart';
@@ -87,7 +86,8 @@ class _UpdateUserInfoFormState extends State<UpdateUserInfoForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text(AppLocalizations.of(context).translate("update_profile_failed")),
+          content: Text(AppLocalizations.of(context)
+              .translate("update_profile_failed")),
         ),
       );
     } finally {
@@ -190,23 +190,42 @@ class _UpdateUserInfoFormState extends State<UpdateUserInfoForm> {
                     SizedBox(height: 16),
                   ],
 
-                  // Gender
-                  DropdownButtonFormField<String>(
-                    value: _gender,
-                    items: ["Female", "Male"]
-                        .map((g) => DropdownMenuItem(
-                      value: g,
-                      child: Text(g),
-                    ))
-                        .toList(),
-                    onChanged: (v) => setState(() => _gender = v ?? "Female"),
-                    decoration: InputDecoration(
-                      labelText: loc.translate("gender"),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                  // Gender radio buttons
+                  Text(
+                    loc.translate("gender"),
+                    style: t.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(loc.translate("female")),
+                          value: "Female",
+                          groupValue: _gender,
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          onChanged: (value) =>
+                              setState(() => _gender = value ?? "Female"),
+                        ),
+                      ),
+                      Expanded(
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(loc.translate("male")),
+                          value: "Male",
+                          groupValue: _gender,
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          onChanged: (value) =>
+                              setState(() => _gender = value ?? "Male"),
+                        ),
+                      ),
+                    ],
+                  ),
+
                   SizedBox(height: 24),
 
                   AppButton(

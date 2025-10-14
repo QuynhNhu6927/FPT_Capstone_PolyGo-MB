@@ -1,0 +1,15 @@
+{
+  "please_login_first": "Please log in first.",
+  "retry": "Retry",
+  "no_subscription_plans": "No subscription plans available.",
+  "failed_to_load_plans": "Failed to load subscription plans",
+  "features": "Features",
+  "subscribe": "Subscribe",
+  "days": "days",
+  "subscriptions": "Subscriptions",
+  "gifts": "Gifts",
+  "wallet": "Wallet",
+  "gifts_content_coming": "Gifts Content (coming soon)",
+  "wallet_content_coming": "Wallet Content (coming soon)",
+  "search_gifts": "Search gifts"
+}
