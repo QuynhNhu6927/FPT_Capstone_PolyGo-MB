@@ -9,7 +9,7 @@ import '../models/subscription/subscription_current_response.dart';
 import '../models/subscription/subscription_plan_list_response.dart';
 import '../models/subscription/subscription_request.dart';
 import '../models/subscription/subscription_response.dart';
-import '../models/subscription/wallet_transaction_list_response.dart';
+import '../models/transaction/wallet_transaction_list_response.dart';
 
 class SubscriptionService {
   final ApiClient apiClient;
@@ -181,7 +181,7 @@ class SubscriptionService {
   }) async {
     try {
       final response = await apiClient.get(
-        ApiConstants.walletTransactions,
+        ApiConstants.transactions,
         queryParameters: {
           'pageNumber': pageNumber.toString(),
           'pageSize': pageSize.toString(),

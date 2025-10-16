@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/localization/app_localizations.dart';
-import '../../../data/models/subscription/wallet_transaction_model.dart';
+import '../../../data/models/transaction/wallet_transaction_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/subscription_repository.dart';
 import '../../../data/services/auth_service.dart';
@@ -293,8 +293,8 @@ class _WalletState extends State<Wallet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  tx.description.isNotEmpty
-                                      ? tx.description
+                                  tx.transactionType.isNotEmpty
+                                      ? tx.transactionType
                                       : tx.transactionType,
                                   style: t.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
