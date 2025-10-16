@@ -1,4 +1,4 @@
-import 'wallet_transaction_model.dart';
+import 'package:polygo_mobile/data/models/transaction/wallet_transaction_model.dart';
 
 class WalletTransactionListResponse {
   final List<WalletTransaction> items;

@@ -6,7 +6,6 @@ class WalletTransaction {
   final String transactionMethod;
   final String transactionStatus;
   final DateTime createdAt;
-  final String description;
 
   WalletTransaction({
     required this.id,
@@ -16,7 +15,6 @@ class WalletTransaction {
     required this.transactionMethod,
     required this.transactionStatus,
     required this.createdAt,
-    required this.description,
   });
 
   factory WalletTransaction.fromJson(Map<String, dynamic> json) {
@@ -28,7 +26,6 @@ class WalletTransaction {
       transactionMethod: json['transactionMethod'] ?? '',
       transactionStatus: json['transactionStatus'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      description: json['description'] ?? '',
     );
   }
 }
