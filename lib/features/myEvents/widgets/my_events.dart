@@ -43,7 +43,6 @@ class MyEvents extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔍 Search Bar with background container
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF2C2C2C) : Colors.white,

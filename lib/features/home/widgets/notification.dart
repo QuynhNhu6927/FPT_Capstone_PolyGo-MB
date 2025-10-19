@@ -21,7 +21,7 @@ class Notification extends StatelessWidget {
       },
       {
         "type": "system",
-        "avatar": null,
+        "avatar": 'lib/assets/Primary2.png',
         "content": "Hệ thống sẽ bảo trì lúc 23:00 tối nay.",
         "date": "19/10/2025, 07:00",
       },
@@ -67,13 +67,10 @@ class Notification extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor:
-                    isUser ? Colors.transparent : Colors.blue.shade600,
-                    backgroundImage:
-                    isUser ? NetworkImage(avatar!) : null,
-                    child: !isUser
-                        ? const Icon(Icons.notifications, color: Colors.white)
-                        : null,
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: isUser
+                        ? NetworkImage(avatar!)
+                        : AssetImage(avatar!) as ImageProvider,
                   ),
 
                   const SizedBox(width: 12),

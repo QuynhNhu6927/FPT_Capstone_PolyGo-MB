@@ -112,40 +112,19 @@ class _LoginFormState extends State<LoginForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Logo
               Center(
-                child: Container(
-                  padding: EdgeInsets.all(sw(context, 12)),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
-                    borderRadius: BorderRadius.circular(sw(context, 12)),
-                  ),
-                  child: Icon(Icons.layers_rounded,
-                      size: sw(context, 36), color: const Color(0xFF2563EB)),
+                child: Image.asset(
+                  'lib/assets/Primary.png',
+                  width: st(context, 150),
+                  height: st(context, 150),
+                  fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(height: sh(context, 20)),
-
-              // Title
-              Text(
-                loc.translate("login_title"),
-                textAlign: TextAlign.center,
-                style: t.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold, fontSize: st(context, 24)),
-              ),
-              SizedBox(height: sh(context, 6)),
-              Text(
-                loc.translate("login_subtitle"),
-                textAlign: TextAlign.center,
-                style: t.bodyMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                    fontSize: st(context, 14)),
-              ),
-              SizedBox(height: sh(context, 32)),
-
               // Email
-              Text(loc.translate("email"),
-                  style: t.labelLarge?.copyWith(fontSize: st(context, 14))),
+              Text(
+                loc.translate("email"),
+                style: t.labelLarge?.copyWith(fontSize: st(context, 14)),
+              ),
               SizedBox(height: sh(context, 8)),
               TextFormField(
                 controller: _emailController,
@@ -157,14 +136,17 @@ class _LoginFormState extends State<LoginForm> {
                     borderRadius: BorderRadius.circular(sw(context, 10)),
                   ),
                 ),
-                validator: (v) =>
-                (v == null || !v.contains('@')) ? loc.translate("invalid_email") : null,
+                validator: (v) => (v == null || !v.contains('@'))
+                    ? loc.translate("invalid_email")
+                    : null,
               ),
               SizedBox(height: sh(context, 16)),
 
               // Password
-              Text(loc.translate("password"),
-                  style: t.labelLarge?.copyWith(fontSize: st(context, 14))),
+              Text(
+                loc.translate("password"),
+                style: t.labelLarge?.copyWith(fontSize: st(context, 14)),
+              ),
               SizedBox(height: sh(context, 8)),
               TextFormField(
                 controller: _passwordController,
@@ -183,8 +165,9 @@ class _LoginFormState extends State<LoginForm> {
                     borderRadius: BorderRadius.circular(sw(context, 10)),
                   ),
                 ),
-                validator: (v) =>
-                (v == null || v.length < 6) ? loc.translate("min_6_char") : null,
+                validator: (v) => (v == null || v.length < 6)
+                    ? loc.translate("min_6_char")
+                    : null,
               ),
               SizedBox(height: sh(context, 12)),
 
