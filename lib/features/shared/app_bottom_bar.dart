@@ -17,7 +17,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
 
   final _items = const [
     {'icon': Icons.home_rounded, 'labelKey': 'bottom_home'},
-    {'icon': Icons.people_alt_rounded, 'labelKey': 'bottom_friend'},
+    {'icon': Icons.edit_calendar, 'labelKey': 'bottom_my_events'},
     {'icon': Icons.storefront_rounded, 'labelKey': 'bottom_shop'},
     {'icon': Icons.person_rounded, 'labelKey': 'bottom_me'},
   ];
@@ -36,7 +36,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
         Navigator.pushNamed(context, AppRoutes.home);
         break;
       case 1:
-        Navigator.pushNamed(context, AppRoutes.friends);
+        Navigator.pushNamed(context, AppRoutes.myEvents);
         break;
       case 2:
         Navigator.pushNamed(context, AppRoutes.shop);

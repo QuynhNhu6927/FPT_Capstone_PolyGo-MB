@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
-import '../widgets/header_bar.dart';
-import '../widgets/home_menu_bar.dart';
+import '../widgets/events_content.dart';
 import '../widgets/users.dart';
+import '../widgets/home_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   final List<Widget> _pages = const [
-    Center(child: Text('Events', style: TextStyle(fontSize: 24))),
+    EventsContent(),
     Center(child: Text('Favorites', style: TextStyle(fontSize: 24))),
     Users(),
     Center(child: Text('Explore', style: TextStyle(fontSize: 24))),
@@ -35,8 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const HeaderBar(),
-            HomeMenuBar(
+            HomeHeader(
               currentIndex: _menuIndex,
               onItemSelected: _onMenuSelected,
             ),

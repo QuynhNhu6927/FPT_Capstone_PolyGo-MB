@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../routes/app_routes.dart';
 import '../../shared/app_header_actions.dart';
 import '../widgets/setup_language_learn.dart';
 import '../widgets/setup_language_known.dart';
 import '../widgets/setup_interests.dart';
+import '../widgets/welcome.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -26,7 +28,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   void _nextStep() {
-    if (_currentStep < 2) {
+    if (_currentStep < 3) { // giờ có 4 bước (0–3)
       setState(() => _currentStep++);
     }
   }
@@ -42,6 +44,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final theme = Theme.of(context);
 
     final steps = [
+      WelcomeStep(
+        onNext: _nextStep,
+        onSkip: () {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        },
+      ),
+
+      // Bước chọn ngôn ngữ học
       SetupLanguageLearn(
         initialSelected: _learningLangs,
         onNext: (langs) {
@@ -49,6 +59,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           _nextStep();
         },
       ),
+
+      // Bước chọn ngôn ngữ biết
       SetupLanguageKnown(
         initialSelected: _speakingLangs,
         onNext: (langs) {
@@ -57,6 +69,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         },
         onBack: _prevStep,
       ),
+
+      // Bước chọn sở thích
       SetupInterests(
         onBack: _prevStep,
         learningLangs: _learningLangs,
@@ -73,13 +87,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Align(
-            //   alignment: Alignment.topRight,
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(16),
-            //     child: AppHeaderActions(onThemeToggle: _toggleTheme),
-            //   ),
-            // ),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),

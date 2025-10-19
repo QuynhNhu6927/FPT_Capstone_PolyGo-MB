@@ -11,7 +11,7 @@ import 'routes/app_routes.dart';
 void main() {
   runApp(
     DevicePreview(
-    enabled: false,
+    enabled: true,
     builder: (context) => const MyApp(),
   ),);
 }

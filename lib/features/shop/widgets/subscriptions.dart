@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -379,7 +380,11 @@ class _SubscriptionsState extends State<Subscriptions> {
 
       if (!mounted) return;
       setState(() {
-        _plans = res?.items ?? [];
+        _plans = (res?.items
+            ?.where((plan) => plan.price > 0)
+            .toList()
+            ?? [])
+          ..sort((a, b) => a.price.compareTo(b.price));
         _isLoading = false;
       });
     } catch (e) {
@@ -590,13 +595,11 @@ class _SubscriptionsState extends State<Subscriptions> {
           final showCurrentSection = _currentSubscription != null &&
               _currentSubscription!.planType.toLowerCase() != "free";
 
-          // Hiển thị Current Subscription ở đầu
           if (showCurrentSection && index == 0) {
             final section = _buildCurrentSubscriptionSection();
             if (section != null) return section;
           }
 
-          // Xác định plan index trong _plans
           final planIndex = index - (showCurrentSection ? 1 : 0);
           final plan = _plans[planIndex];
 
@@ -604,6 +607,10 @@ class _SubscriptionsState extends State<Subscriptions> {
           final colorPrimary = const Color(0xFF2563EB);
           final loc = AppLocalizations.of(context);
           final t = Theme.of(context).textTheme;
+
+          final formattedPrice = plan.price < 1000
+              ? NumberFormat("#,##0.##", "vi_VN").format(plan.price)
+              : NumberFormat("#,##0", "vi_VN").format(plan.price);
 
           return Container(
             padding: EdgeInsets.all(sw(context, 20)),
@@ -667,7 +674,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "\$${plan.price.toStringAsFixed(2)}",
+                      "$formattedPriceđ",
                       style: t.headlineSmall?.copyWith(
                         color: colorPrimary,
                         fontWeight: FontWeight.bold,

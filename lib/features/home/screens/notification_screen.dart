@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
 import '../../../../core/localization/app_localizations.dart';
+import '../widgets/notification.dart';
 import '../../shared/app_bottom_bar.dart';
-import '../widgets/all_badges.dart';
 
-class AllBadgesScreen extends StatelessWidget {
-  const AllBadgesScreen({super.key});
+class NotificationScreen extends StatelessWidget {
+  const NotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +16,17 @@ class AllBadgesScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         title: Text(
-          loc.translate("my_badges"),
+          loc.translate("notifications"),
           style: t.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: const AllBadges(),
-      bottomNavigationBar: SafeArea(
+      body: const Notification(), //
+      bottomNavigationBar: const SafeArea(
         top: false,
-        child: const AppBottomBar(currentIndex: 4),
+        child: AppBottomBar(currentIndex: 4),
       ),
     );
   }
