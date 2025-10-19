@@ -38,7 +38,6 @@ class _ShopMenuBarState extends State<ShopMenuBar> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final colorActive = const Color(0xFF2563EB);
@@ -53,57 +52,45 @@ class _ShopMenuBarState extends State<ShopMenuBar> {
         : 1.5;
 
     final iconSize = 26 * scale;
-    final fontSize = 15 * scale;
-    final paddingV = 12 * scale;
+    final paddingV = 10 * scale;
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: paddingV / 2),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: paddingV),
       decoration: BoxDecoration(
         color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
-        children: List.generate(_items.length, (index) {
-          final item = _items[index];
-          final selected = _selectedIndex == index;
-          final iconColor = selected ? colorActive : colorInactive;
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_items.length, (index) {
+              final item = _items[index];
+              final selected = _selectedIndex == index;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => _onItemTapped(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: EdgeInsets.symmetric(vertical: paddingV),
-                color:
-                selected ? colorActive.withOpacity(0.08) : Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(item['icon'] as IconData,
-                        color: iconColor, size: iconSize),
-                    const SizedBox(height: 6),
-                    Text(
-                      loc.translate(item['label'] as String) ??
-                          (item['label'] as String),
-                      style: TextStyle(
-                        color: selected ? colorActive : colorInactive,
-                        fontSize: fontSize,
-                        fontWeight:
-                        selected ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ).animate().fadeIn(duration: 250.ms),
-                  ],
+              return GestureDetector(
+                onTap: () => _onItemTapped(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding: EdgeInsets.symmetric(vertical: paddingV / 2),
+                  child: Icon(
+                    item['icon'] as IconData,
+                    color: selected ? colorActive : colorInactive,
+                    size: iconSize,
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ],
       ),
     ).animate().fadeIn(duration: 300.ms);
   }

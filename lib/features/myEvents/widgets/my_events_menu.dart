@@ -16,7 +16,10 @@ class MyEventsMenu extends StatefulWidget {
   State<MyEventsMenu> createState() => _MyEventsMenuState();
 }
 
-class _MyEventsMenuState extends State<MyEventsMenu> {
+class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderStateMixin {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isSearching = false;
   late int _selectedIndex;
 
   final _items = const [
@@ -28,6 +31,16 @@ class _MyEventsMenuState extends State<MyEventsMenu> {
   void initState() {
     super.initState();
     _selectedIndex = widget.currentIndex;
+    _focusNode.addListener(() {
+      setState(() => _isSearching = _focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
@@ -39,10 +52,17 @@ class _MyEventsMenuState extends State<MyEventsMenu> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    final colorActive = const Color(0xFF2563EB);
-    final colorInactive =
-        theme.iconTheme.color?.withOpacity(0.6) ?? Colors.grey;
+    const colorPrimary = Color(0xFF2563EB);
+    final colorActive = colorPrimary;
+    final colorInactive = theme.iconTheme.color?.withOpacity(0.6) ?? Colors.grey;
+
+    final bgColor = isDark ? Colors.black : Colors.white;
+    final shadowColor = isDark ? Colors.grey.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final searchBgColor = isDark ? Color(0xFF2C2C2C) : Color(0xFFF3F4F6);
+    final searchTextColor = isDark ? Colors.white : Colors.black87;
+    final searchHintColor = isDark ? Colors.grey : Colors.grey[600];
 
     final screenWidth = MediaQuery.of(context).size.width;
     final scale = screenWidth < 400
@@ -51,59 +71,54 @@ class _MyEventsMenuState extends State<MyEventsMenu> {
         ? 1.2
         : 1.5;
 
-    final iconSize = 26 * scale;
-    final fontSize = 15 * scale;
-    final paddingV = 12 * scale;
+    final iconSize = 28 * scale;
+    final fontSize = 14 * scale;
+    final paddingV = 10 * scale;
+    final paddingH = 8 * scale;
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: paddingV / 2),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: bgColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: shadowColor,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Row(
-        children: List.generate(_items.length, (index) {
-          final item = _items[index];
-          final selected = _selectedIndex == index;
-          final iconColor = selected ? colorActive : colorInactive;
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6, top: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(_items.length, (index) {
+                final item = _items[index];
+                final selected = _selectedIndex == index;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => _onItemTapped(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: EdgeInsets.symmetric(vertical: paddingV),
-                color: selected
-                    ? colorActive.withOpacity(0.08)
-                    : Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(item['icon'] as IconData,
-                        color: iconColor, size: iconSize),
-                    const SizedBox(height: 6),
-                    Text(
-                      loc.translate(item['label'] as String) ??
-                          (item['label'] as String),
-                      style: TextStyle(
-                        color: selected ? colorActive : colorInactive,
-                        fontSize: fontSize,
-                        fontWeight:
-                        selected ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ).animate().fadeIn(duration: 250.ms),
-                  ],
-                ),
-              ),
+                return GestureDetector(
+                  onTap: () => _onItemTapped(index),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: paddingH,
+                      vertical: paddingV / 2, // chiều cao ngắn hơn
+                    ),
+                    child: Icon(
+                      item['icon'] as IconData,
+                      color: selected ? colorActive : colorInactive,
+                      size: iconSize,
+                    ),
+                  ),
+                );
+              }),
             ),
-          );
-        }),
+          ),
+        ],
       ),
     ).animate().fadeIn(duration: 300.ms);
   }

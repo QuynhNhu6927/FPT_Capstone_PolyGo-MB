@@ -37,7 +37,6 @@ class _CalendarState extends State<Calendar> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔍 Search Bar
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
@@ -48,7 +47,7 @@ class _CalendarState extends State<Calendar> {
                     color: Colors.black.withOpacity(0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
-                  ),
+                  )
               ],
             ),
             child: TextField(
@@ -64,11 +63,12 @@ class _CalendarState extends State<Calendar> {
                   borderSide: BorderSide.none,
                 ),
               ),
+              onChanged: (value) {
+                // TODO: handle search logic
+              },
             ),
           ),
           const SizedBox(height: 14),
-
-          // Filter Row
           Row(
             children: [
               ElevatedButton.icon(
