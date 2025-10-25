@@ -31,10 +31,12 @@ class AuthRepository {
   /// Login
   Future<String> login(LoginRequest req) async {
     final res = await _service.login(req);
-    if (res.data == null)
-      {
-        // throw Exception(res.message ?? 'Login failed');
-      }
+
+    // Nếu không có token (data = null) thì ném message gốc
+    if (res.data == null) {
+      throw res.message ?? 'Error.System';
+    }
+
     return res.data!;
   }
 

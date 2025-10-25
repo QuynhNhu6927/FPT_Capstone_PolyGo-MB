@@ -22,10 +22,18 @@ import '../../../data/services/language_service.dart';
 import '../../../data/services/media_service.dart';
 import '../../../data/services/user_service.dart';
 import '../../../main.dart';
+import '../../shared/app_error_state.dart';
 import 'change_password_form.dart';
 
 class UserInfo extends StatefulWidget {
-  const UserInfo({super.key});
+  final VoidCallback? onError;
+  final bool isRetrying;
+
+  const UserInfo({
+    super.key,
+    this.onError,
+    this.isRetrying = false,
+  });
 
   @override
   State<UserInfo> createState() => _UserInfoState();
@@ -35,6 +43,8 @@ class _UserInfoState extends State<UserInfo> {
   Locale? _currentLocale;
   MeResponse? _user;
   bool _loading = true;
+  bool _hasError = false;
+
   List<String> _learningLangs = [];
   bool _loadingLearning = true;
   List<String> _nativeLangs = [];
@@ -49,12 +59,20 @@ class _UserInfoState extends State<UserInfo> {
   }
 
   @override
+  void didUpdateWidget(covariant UserInfo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Nếu parent đang retry, reload dữ liệu
+    if (widget.isRetrying && !oldWidget.isRetrying) {
+      _loadUser();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = InheritedLocale.of(context).locale;
     if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      // chỉ reload nếu user đã load
       if (_user != null) {
         _loadLearningLanguages(lang: locale.languageCode);
         _loadNativeLanguages(lang: locale.languageCode);
@@ -64,12 +82,18 @@ class _UserInfoState extends State<UserInfo> {
   }
 
   Future<void> _loadUser() async {
+    setState(() {
+      _loading = true;
+      _hasError = false;
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     if (token == null) {
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
+      setState(() => _hasError = true);
+      widget.onError?.call();
       return;
     }
 
@@ -93,9 +117,12 @@ class _UserInfoState extends State<UserInfo> {
         _loadInterests(lang: locale.languageCode),
       ]);
     } catch (e) {
-      await prefs.remove('token');
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
+      setState(() {
+        _loading = false;
+        _hasError = true;
+      });
+      widget.onError?.call();
     }
   }
 
@@ -304,6 +331,13 @@ class _UserInfoState extends State<UserInfo> {
           padding: EdgeInsets.all(sw(context, 24)),
           child: const Center(child: CircularProgressIndicator()),
         ),
+      );
+    }
+
+    if (_hasError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: AppErrorState(onRetry: _loadUser),
       );
     }
 

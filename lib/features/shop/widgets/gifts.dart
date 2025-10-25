@@ -12,9 +12,13 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/gift_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../main.dart';
+import '../../shared/app_error_state.dart';
 
 class Gifts extends StatefulWidget {
-  const Gifts({super.key});
+  final bool isRetrying;
+  final VoidCallback? onError;
+
+  const Gifts({super.key, this.isRetrying = false, this.onError});
 
   @override
   State<Gifts> createState() => _GiftsState();
@@ -66,9 +70,17 @@ class _GiftsState extends State<Gifts> {
     if (_currentLocale == null ||
         _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      _loadGifts(lang: locale.languageCode);
+      _loadGiftsData(lang: locale.languageCode);
       _loadMyGifts();
 
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant Gifts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRetrying && !oldWidget.isRetrying) {
+      _loadGiftsData();
     }
   }
 
@@ -92,8 +104,7 @@ class _GiftsState extends State<Gifts> {
 
     }
   }
-
-  Future<void> _loadGifts({String? lang}) async {
+  Future<void> _loadGiftsData({String? lang}) async {
     setState(() {
       _loading = true;
       _error = null;
@@ -104,13 +115,11 @@ class _GiftsState extends State<Gifts> {
 
     if (token == null || token.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).translate("token_missing")),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
+      setState(() {
+        _loading = false;
+        _error = "Token missing";
+      });
+      widget.onError?.call();
       return;
     }
 
@@ -129,8 +138,10 @@ class _GiftsState extends State<Gifts> {
         _loading = false;
         _error = e.toString();
       });
+      widget.onError?.call();
     }
   }
+
 
   Future<void> _purchaseGiftWithQuantity(GiftModel gift, int quantity) async {
     final prefs = await SharedPreferences.getInstance();
@@ -207,7 +218,7 @@ class _GiftsState extends State<Gifts> {
         ),
       );
 
-      await _loadGifts(lang: _currentLocale?.languageCode);
+      await _loadGiftsData(lang: _currentLocale?.languageCode);
       await _loadMyGifts();
 
     } catch (e) {
@@ -233,24 +244,13 @@ class _GiftsState extends State<Gifts> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(loc.translate("failed_to_load_gifts"),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _loadGifts(lang: _currentLocale?.languageCode),
-              child: Text(loc.translate("retry")),
-            ),
-          ],
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: AppErrorState(
+          onRetry: () => _loadGiftsData(lang: _currentLocale?.languageCode),
         ),
       );
     }
-
     if (_gifts.isEmpty) {
       return Center(
         child: Text(
@@ -297,7 +297,7 @@ class _GiftsState extends State<Gifts> {
         ),
         Expanded(
           child: RefreshIndicator(
-            onRefresh: () => _loadGifts(lang: _currentLocale?.languageCode),
+            onRefresh: () => _loadGiftsData(lang: _currentLocale?.languageCode),
             child: ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: sw(context, 16)),
               itemCount: _filteredGifts.length,

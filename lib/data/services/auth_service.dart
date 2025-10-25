@@ -47,9 +47,24 @@ class AuthService {
       final response = await apiClient.post(ApiConstants.login, data: req.toJson());
       final json = response.data as Map<String, dynamic>;
       return ApiResponse.fromJson(json, (data) => data.toString());
-    } on DioError catch (e) {
-      rethrow;
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        final message = data['message'] ?? 'Error.Unknown';
+        return ApiResponse<String>(data: null, message: message);
+      }
+
+      final message = switch (e.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout => 'Error.Timeout',
+        DioExceptionType.connectionError => 'Error.Network',
+        _ => 'Error.System'
+      };
+      return ApiResponse<String>(data: null, message: message);
+    } catch (e) {
+      return ApiResponse<String>(data: null, message: 'Error.System');
     }
+
   }
 
   /// Reset password bằng mail + otp + password mới

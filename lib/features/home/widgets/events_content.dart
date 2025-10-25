@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import 'event_details.dart';
+
 class EventsContent extends StatelessWidget {
   const EventsContent({super.key});
 
@@ -11,27 +13,14 @@ class EventsContent extends StatelessWidget {
       {
         'title': 'Tech Innovation Summit 2025 — The Future of AI and Robotics',
         'image': 'https://picsum.photos/400/250?random=1',
-        'tags': ['Tech', 'AI', 'Networking', 'Hehehe']
+        'tags': ['Tech', 'AI', 'Networking', 'Hehehe'],
+        'startTime': '25 Oct 2025, 09:00 AM'
       },
       {
         'title': 'Art & Design Fair for Creative Minds',
         'image': 'https://picsum.photos/400/250?random=2',
-        'tags': ['Art', 'Exhibition', 'Creative']
-      },
-      {
-        'title': 'Music Festival 2025: Live, Love, and Rock',
-        'image': 'https://picsum.photos/400/250?random=3',
-        'tags': ['Music', 'Live', 'Outdoor']
-      },
-      {
-        'title': 'Startup Meetup — Founders & Investors Gathering',
-        'image': 'https://picsum.photos/400/250?random=4',
-        'tags': ['Startup', 'Pitching']
-      },
-      {
-        'title': 'Photography Workshop by Top Creators',
-        'image': 'https://picsum.photos/400/250?random=5',
-        'tags': ['Photo', 'Workshop']
+        'tags': ['Art', 'Exhibition', 'Creative'],
+        'startTime': '26 Oct 2025, 10:00 AM'
       },
     ];
 
@@ -151,92 +140,116 @@ class EventsContent extends StatelessWidget {
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.3)
-                : Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            AspectRatio(
-              aspectRatio: 16 / 10,
-              child: Image.network(
-                event['image'],
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
-            ),
-
-            // Title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: SizedBox(
-                height: 36,
-                child: Text(
-                  event['title'],
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    height: 1.3,
-                    color: textColor,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            //Tags
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: SizedBox(
-                height: 28,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: event['tags'].length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, tagIndex) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withOpacity(isDark ? 0.25 : 0.12),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        event['tags'][tagIndex],
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => EventDetail(event: event),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-      ),
-    ).animate().fadeIn(duration: 300.ms);
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Image.network(
+                  event['image'],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+
+              // Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 36,
+                      child: Text(
+                        event['title'],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          height: 1.3,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      event['startTime'] ?? '',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Tags
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: SizedBox(
+                  height: 28,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: event['tags'].length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, tagIndex) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(isDark ? 0.25 : 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          event['tags'][tagIndex],
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ).animate().fadeIn(duration: 300.ms),
+    );
   }
 }

@@ -27,21 +27,38 @@ class _LoginFormState extends State<LoginForm> {
   bool _rememberMe = false;
   bool _showPassword = false;
   bool _isLoading = false;
+  String? _emailError;
+  String? _passwordError;
+
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   Future<void> _onSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    final loc = AppLocalizations.of(context);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    bool hasError = false;
+    if (email.isEmpty) {
+      setState(() => _emailError = loc.translate("email_required"));
+      hasError = true;
+    }
+    if (password.isEmpty) {
+      setState(() => _passwordError = loc.translate("password_required"));
+      hasError = true;
+    }
+    if (hasError) return;
 
     setState(() => _isLoading = true);
 
     try {
-      final req = LoginRequest(
-        mail: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-
+      final req = LoginRequest(mail: email, password: password);
       final repo = AuthRepository(AuthService(ApiClient()));
       final token = await repo.login(req);
 
@@ -52,13 +69,9 @@ class _LoginFormState extends State<LoginForm> {
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
 
       if (!mounted) return;
-      final loc = AppLocalizations.of(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.translate("login_success")),
-          duration: const Duration(seconds: 2),
-        ),
+        SnackBar(content: Text(loc.translate("login_success"))),
       );
 
       if (isNew) {
@@ -67,13 +80,17 @@ class _LoginFormState extends State<LoginForm> {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
-      final loc = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.translate("login_failed")),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      final msg = e.toString();
+
+      if (msg.contains('InvalidMailOrPassword')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate("invalid_email_or_password"))),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate("system_error_try_again"))),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -131,6 +148,7 @@ class _LoginFormState extends State<LoginForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "user@example.com",
+                  errorText: _emailError,
                   prefixIcon: Icon(Icons.mail_outline, size: sw(context, 20)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(sw(context, 10)),
@@ -153,21 +171,18 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: !_showPassword,
                 decoration: InputDecoration(
                   hintText: "••••••••",
+                  errorText: _passwordError,
                   prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                   suffixIcon: IconButton(
                     icon: Icon(_showPassword
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined),
-                    onPressed: () =>
-                        setState(() => _showPassword = !_showPassword),
+                    onPressed: () => setState(() => _showPassword = !_showPassword),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(sw(context, 10)),
                   ),
                 ),
-                validator: (v) => (v == null || v.length < 6)
-                    ? loc.translate("min_6_char")
-                    : null,
               ),
               SizedBox(height: sh(context, 12)),
 

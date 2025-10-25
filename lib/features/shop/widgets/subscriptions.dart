@@ -16,9 +16,12 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/subscription_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../main.dart';
+import '../../shared/app_error_state.dart';
 
 class Subscriptions extends StatefulWidget {
-  const Subscriptions({super.key});
+  final bool isRetrying;
+  final VoidCallback? onError;
+  const Subscriptions({super.key, required this.isRetrying, this.onError});
 
   @override
   State<Subscriptions> createState() => _SubscriptionsState();
@@ -49,6 +52,14 @@ class _SubscriptionsState extends State<Subscriptions> {
         _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
       _fetchPlans(lang: locale.languageCode);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant Subscriptions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRetrying && !oldWidget.isRetrying) {
+      _fetchPlans(lang: _currentLocale?.languageCode);
     }
   }
 
@@ -364,12 +375,12 @@ class _SubscriptionsState extends State<Subscriptions> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)
-                  .translate("please_log_in_first"),
+              AppLocalizations.of(context).translate("please_log_in_first"),
             ),
             backgroundColor: Colors.red,
           ),
         );
+        widget.onError?.call();
         return;
       }
 
@@ -380,10 +391,7 @@ class _SubscriptionsState extends State<Subscriptions> {
 
       if (!mounted) return;
       setState(() {
-        _plans = (res?.items
-            ?.where((plan) => plan.price > 0)
-            .toList()
-            ?? [])
+        _plans = (res?.items?.where((plan) => plan.price > 0).toList() ?? [])
           ..sort((a, b) => a.price.compareTo(b.price));
         _isLoading = false;
       });
@@ -393,6 +401,7 @@ class _SubscriptionsState extends State<Subscriptions> {
         _isLoading = false;
         _error = e.toString();
       });
+      widget.onError?.call();
     }
   }
 
@@ -536,30 +545,16 @@ class _SubscriptionsState extends State<Subscriptions> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final t = theme.textTheme;
-    final colorPrimary = const Color(0xFF2563EB);
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${loc.translate("failed_to_load_subscription_plans")}: $_error',
-              textAlign: TextAlign.center,
-              style: t.bodyMedium?.copyWith(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _fetchPlans(lang: _currentLocale?.languageCode),
-              child: Text(loc.translate("retry")),
-            ),
-          ],
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: AppErrorState(
+          onRetry: () => _fetchPlans(lang: _currentLocale?.languageCode),
         ),
       );
     }
@@ -568,7 +563,7 @@ class _SubscriptionsState extends State<Subscriptions> {
       return Center(
         child: Text(
           loc.translate("no_subscription_plans_available"),
-          style: t.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
       );
     }
@@ -605,7 +600,6 @@ class _SubscriptionsState extends State<Subscriptions> {
 
           final isDark = Theme.of(context).brightness == Brightness.dark;
           final colorPrimary = const Color(0xFF2563EB);
-          final loc = AppLocalizations.of(context);
           final t = Theme.of(context).textTheme;
 
           final formattedPrice = plan.price < 1000

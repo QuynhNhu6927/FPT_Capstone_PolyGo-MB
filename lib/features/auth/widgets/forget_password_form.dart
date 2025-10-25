@@ -37,8 +37,8 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
   bool _showPassword = false;
   bool _showConfirmPassword = false;
 
-  String? _otpMessage; // thông báo OTP
-  bool _otpSuccess = false; // để xác định màu
+  String? _otpMessage;
+  bool _otpSuccess = false;
 
   int _otpCountdown = 0;
   Timer? _otpTimer;
