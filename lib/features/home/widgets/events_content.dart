@@ -99,6 +99,7 @@ class _EventsContentState extends State<EventsContent> {
         isPublic: e.isPublic,
         numberOfParticipants: e.numberOfParticipants,
         planType: e.planType,
+        isParticipant: e.isParticipant,
         host: HostModel(
           id: e.host.id,
           name: e.host.name,

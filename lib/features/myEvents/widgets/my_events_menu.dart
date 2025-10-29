@@ -23,8 +23,8 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
   late int _selectedIndex;
 
   final _items = const [
-    {'icon': Icons.event_note_rounded, 'label': 'my_events'},
-    {'icon': Icons.calendar_month_rounded, 'label': 'calendar'},
+    {'icon': Icons.edit_calendar, 'label': 'my_events'},
+    {'icon': Icons.event_available, 'label': 'calendar'},
   ];
 
   @override
@@ -106,7 +106,7 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
                     duration: const Duration(milliseconds: 250),
                     padding: EdgeInsets.symmetric(
                       horizontal: paddingH,
-                      vertical: paddingV / 2, // chiều cao ngắn hơn
+                      vertical: paddingV / 2,
                     ),
                     child: Icon(
                       item['icon'] as IconData,

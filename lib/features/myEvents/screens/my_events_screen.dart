@@ -33,7 +33,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
         case 0:
           return const MyEvents();
         case 1:
-          return const Calendar();
+          return const JoinedEvents();
         default:
           return const SizedBox.shrink();
       }

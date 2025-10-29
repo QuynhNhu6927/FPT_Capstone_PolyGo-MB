@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/responsive.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../data/models/events/joined_event_model.dart';
+
+class JoinedEventDetails extends StatelessWidget {
+  final JoinedEventModel event;
+
+  const JoinedEventDetails({super.key, required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final t = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
+    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
+
+    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
+
+    return Dialog(
+      elevation: 12,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sw(context, 16))),
+      shadowColor: Colors.black.withOpacity(0.3),
+      child: Container(
+        padding: EdgeInsets.all(sw(context, 20)),
+        width: sw(context, 500),
+        constraints: BoxConstraints(maxHeight: sh(context, 650)),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      event.title,
+                      style: t.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: st(context, 18),
+                        color: textColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(Icons.close, size: 24, color: secondaryText ?? Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Divider(color: dividerColor, thickness: 1),
+              const SizedBox(height: 16),
+
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: event.bannerUrl.isNotEmpty
+                    ? Image.network(
+                  event.bannerUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70),
+                    ),
+                  ),
+                )
+                    : Container(
+                  color: Colors.grey[400],
+                  child: const Center(
+                    child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: sw(context, 28),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: (event.host.avatarUrl != null && event.host.avatarUrl!.isNotEmpty)
+                        ? NetworkImage(event.host.avatarUrl!)
+                        : null,
+                    child: (event.host.avatarUrl == null || event.host.avatarUrl!.isEmpty)
+                        ? const Icon(Icons.person, size: 36, color: Colors.white70)
+                        : null,
+                  ),
+                  SizedBox(width: sw(context, 12)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.host.name,
+                        style: t.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: st(context, 15),
+                          color: textColor,
+                        ),
+                      ),
+                      Text(
+                        loc.translate('host'),
+                        style: t.bodySmall?.copyWith(color: secondaryText, fontSize: st(context, 13)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              Text(
+                event.description.isNotEmpty ? event.description : loc.translate('no_description'),
+                style: t.bodyMedium?.copyWith(fontSize: st(context, 14), height: 1.4, color: textColor),
+              ),
+              const SizedBox(height: 16),
+
+              _buildInfoRow(context, Icons.language, loc.translate('language'), event.language.name, textColor, secondaryText),
+              _buildInfoRow(
+                  context,
+                  Icons.category_outlined,
+                  loc.translate('categories'),
+                  event.categories.isNotEmpty ? event.categories.map((e) => e.name).join(', ') : loc.translate('none'),
+                  textColor,
+                  secondaryText),
+              _buildInfoRow(context, Icons.people_alt_outlined, loc.translate('participants'),
+                  "${event.numberOfParticipants}/${event.capacity}", textColor, secondaryText),
+              _buildInfoRow(context, Icons.access_time, loc.translate('time'), dateFormatted, textColor, secondaryText),
+
+              const SizedBox(height: 16),
+              Divider(color: dividerColor, thickness: 1),
+              const SizedBox(height: 16),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton(
+                    text: loc.translate('share'),
+                    variant: ButtonVariant.outline,
+                    size: ButtonSize.md,
+                    icon: const Icon(Icons.share_outlined, size: 18),
+                    onPressed: () {
+                      // TODO: implement share
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  AppButton(
+                    text: loc.translate('join_room'),
+                    size: ButtonSize.md,
+                    icon: const Icon(Icons.meeting_room_outlined, size: 18),
+                    onPressed: () {
+                      // TODO: implement join room
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn(duration: 250.ms).slide(begin: const Offset(0, 0.08), duration: 300.ms, curve: Curves.easeOutCubic);
+  }
+
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value, Color textColor,
+      Color? secondaryText) {
+    final t = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: secondaryText),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                text: "$label: ",
+                style: t.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: secondaryText,
+                  fontSize: st(context, 14),
+                ),
+                children: [
+                  TextSpan(
+                    text: value,
+                    style: t.bodyMedium?.copyWith(color: textColor, fontSize: st(context, 14)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

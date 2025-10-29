@@ -13,6 +13,7 @@ class ComingEventModel {
   final bool isPublic;
   final int numberOfParticipants;
   final String planType;
+  final bool isParticipant;
   final Host host;
   final Language language;
   final List<Category> categories;
@@ -32,6 +33,7 @@ class ComingEventModel {
     required this.isPublic,
     required this.numberOfParticipants,
     required this.planType,
+    required this.isParticipant,
     required this.host,
     required this.language,
     required this.categories,
@@ -52,6 +54,7 @@ class ComingEventModel {
     isPublic: json['isPublic'],
     numberOfParticipants: json['numberOfParticipants'],
     planType: json['planType'],
+    isParticipant: json['isParticipant'],
     host: Host.fromJson(json['host']),
     language: Language.fromJson(json['language']),
     categories: (json['categories'] as List)

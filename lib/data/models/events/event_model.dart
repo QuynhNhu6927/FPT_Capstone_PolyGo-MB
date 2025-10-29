@@ -13,6 +13,7 @@ class EventModel {
   final bool isPublic;
   final int numberOfParticipants;
   final String planType;
+  final bool isParticipant;
   final HostModel host;
   final LanguageModel language;
   final List<CategoryModel> categories;
@@ -32,6 +33,7 @@ class EventModel {
     required this.isPublic,
     required this.numberOfParticipants,
     required this.planType,
+    required this.isParticipant,
     required this.host,
     required this.language,
     required this.categories,
@@ -53,6 +55,7 @@ class EventModel {
       isPublic: json['isPublic'] ?? false,
       numberOfParticipants: json['numberOfParticipants'] ?? 0,
       planType: json['planType'] ?? '',
+      isParticipant: json['isParticipant'] ?? false,
       host: HostModel.fromJson(json['host'] ?? {}),
       language: LanguageModel.fromJson(json['language'] ?? {}),
       categories: (json['categories'] as List<dynamic>? ?? [])
