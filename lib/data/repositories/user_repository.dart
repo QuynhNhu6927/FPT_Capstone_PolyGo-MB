@@ -1,7 +1,9 @@
 import '../models/user/profile_setup_request.dart';
 import '../models/user/update_profile_request.dart';
 import '../models/user/update_userinfo_request.dart';
-import '../models/user/user_list_response.dart';
+import '../models/user/user_all_response.dart';
+import '../models/user/user_by_id_response.dart';
+import '../models/user/user_matching_response.dart';
 import '../services/user_service.dart';
 
 class UserRepository {
@@ -34,15 +36,34 @@ class UserRepository {
     }
   }
 
-  Future<UserListResponse> getUsers(String token, {int page = 1, int size = 10}) async {
-    try {
-      return await _service.getUsers(
-        token: token,
-        pageNumber: page,
-        pageSize: size,
-      );
-    } catch (e) {
-      rethrow;
-    }
+  Future<List<UserMatchingItem>> getMatchingUsers(String token, {String lang = 'vi'}) async {
+    final response = await _service.getMatchingUsers(token, lang: lang);
+    return response.data?.items ?? [];
   }
+
+  Future<List<UserItem>> getAllUsers(
+      String token, {
+        String lang = 'en',
+        int pageNumber = 1,
+        int pageSize = 20,
+        String? name,
+      }) async {
+    final response = await _service.getAllUsers(
+      token,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      name: name,
+    );
+
+    return response.data?.items ?? [];
+  }
+
+  Future<UserByIdResponse?> getUserById(String token, String id, {String lang = 'en'}) async {
+    final response = await _service.getUserById(token, id, lang: lang);
+    return response.data;
+  }
+
 }
+
+

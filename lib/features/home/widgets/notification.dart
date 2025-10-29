@@ -75,12 +75,10 @@ class Notification extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  // 🔹 Nội dung thông báo
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Nội dung chính
                         RichText(
                           text: TextSpan(
                             style: t.bodyMedium?.copyWith(
@@ -102,7 +100,6 @@ class Notification extends StatelessWidget {
 
                         const SizedBox(height: 6),
 
-                        // Ngày giờ
                         Text(
                           date,
                           style: t.bodySmall?.copyWith(

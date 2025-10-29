@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
@@ -61,7 +62,6 @@ class _UserInfoState extends State<UserInfo> {
   @override
   void didUpdateWidget(covariant UserInfo oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Nếu parent đang retry, reload dữ liệu
     if (widget.isRetrying && !oldWidget.isRetrying) {
       _loadUser();
     }
@@ -236,6 +236,13 @@ class _UserInfoState extends State<UserInfo> {
     );
   }
 
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    if (!mounted) return;
+    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
+  }
+
   Future<void> _updateAvatar() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -279,8 +286,31 @@ class _UserInfoState extends State<UserInfo> {
           duration: const Duration(seconds: 2),
         ),
       );
+    } on DioError catch (e) {
+      setState(() => _loading = false);
+
+      if (e.response?.statusCode == 413) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(loc.translate("file_too_large_error")),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(loc.translate("upload_failed")),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     } catch (e) {
       setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.translate("unexpected_error")),
+        ),
+      );
     }
   }
 
@@ -431,6 +461,7 @@ class _UserInfoState extends State<UserInfo> {
                     loc.translate("personal_info"),
                     loc.translate("languages_interests"),
                     loc.translate("change_password"),
+                    loc.translate("logout"),
                   ],
                   showIcon: true,
                   showValue: false,
@@ -455,6 +486,8 @@ class _UserInfoState extends State<UserInfo> {
                           child: const ChangePasswordForm(),
                         ),
                       );
+                    } else if (value == loc.translate("logout")) {
+                      _logout(context);
                     }
                   },
                 )

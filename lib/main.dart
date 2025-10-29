@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_preview/device_preview.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/size_config.dart';
+import 'core/utils/jwt_helper.dart';
 import 'routes/app_routes.dart';
 
 void main() {
@@ -62,6 +63,11 @@ class _MyAppState extends State<MyApp> {
 
     // token
     _token = prefs.getString('token');
+
+    if (_token != null && JwtHelper.isExpired(_token!)) {
+      await prefs.remove('token');
+      _token = null;
+    }
 
     if (mounted) setState(() {});
   }

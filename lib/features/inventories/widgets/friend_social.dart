@@ -4,8 +4,8 @@ import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../routes/app_routes.dart';
 
-class AchievementsAndGiftsSection extends StatelessWidget {
-  const AchievementsAndGiftsSection({super.key});
+class FriendSocialSection extends StatelessWidget {
+  const FriendSocialSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +44,14 @@ class AchievementsAndGiftsSection extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: Container(
         width: containerWidth,
-        padding: EdgeInsets.only(top: sh(context, 12)),
+        padding: EdgeInsets.symmetric(vertical: sh(context, 12)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Thành tựu (Badges)
+            // Bạn bè (Friends)
             Expanded(
               child: GestureDetector(
-                onTap: () => Navigator.pushNamed(context, AppRoutes.allBadges),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.home),
                 child: Container(
                   decoration: sectionDecoration,
                   padding: EdgeInsets.symmetric(
@@ -62,13 +62,13 @@ class AchievementsAndGiftsSection extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.emoji_events_rounded,
+                        Icons.people_alt_rounded,
                         size: sw(context, 60),
-                        color: Colors.amber.shade600,
+                        color: Colors.blueAccent.shade400,
                       ),
                       SizedBox(height: sh(context, 10)),
                       Text(
-                        loc.translate("my_badges"),
+                        loc.translate("friends"),
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -81,10 +81,10 @@ class AchievementsAndGiftsSection extends StatelessWidget {
               ),
             ),
             SizedBox(width: sw(context, 16)),
-            // Quà (Gifts)
+            // Bài đăng (Posts)
             Expanded(
               child: GestureDetector(
-                onTap: () => Navigator.pushNamed(context, AppRoutes.allGifts),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.home),
                 child: Container(
                   decoration: sectionDecoration,
                   padding: EdgeInsets.symmetric(
@@ -95,13 +95,13 @@ class AchievementsAndGiftsSection extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.card_giftcard_rounded,
+                        Icons.article_rounded,
                         size: sw(context, 60),
-                        color: Colors.pinkAccent.shade200,
+                        color: Colors.orangeAccent.shade200,
                       ),
                       SizedBox(height: sh(context, 10)),
                       Text(
-                        loc.translate("my_gifts"),
+                        loc.translate("posts"),
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,

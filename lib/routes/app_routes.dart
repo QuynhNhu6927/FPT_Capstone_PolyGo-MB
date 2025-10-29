@@ -11,6 +11,7 @@ import '../features/profile/screens/user_info_screen.dart';
 import '../features/profile/screens/update_profile_screen.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/shop/screens/shop_screen.dart';
+import '../features/users/screens/users_profile_screen.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -25,6 +26,7 @@ class AppRoutes {
   static const String shop = '/shop';
   static const String allGifts = '/gifts';
   static const String notifications = '/notifications';
+  static const String userProfile = '/user-profile';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -52,12 +54,14 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AllGiftsScreen());
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationScreen());
-      default:
+      case userProfile:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final userId = args?['id'] as String?;
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Route không tồn tại')),
-          ),
+          builder: (_) => UserProfileScreen(userId: userId),
         );
+      default:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
     }
   }
 }

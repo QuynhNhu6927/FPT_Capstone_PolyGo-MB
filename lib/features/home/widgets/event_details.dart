@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../data/models/events/event_model.dart';
+import '../../../data/repositories/event_repository.dart';
+import '../../../data/services/event_service.dart';
 
 class EventDetail extends StatelessWidget {
-  final Map<String, dynamic> event;
+  final EventModel event;
 
   const EventDetail({super.key, required this.event});
 
@@ -20,11 +26,15 @@ class EventDetail extends StatelessWidget {
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
+    final isPastEvent = event.startAt.isBefore(DateTime.now());
+
+    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
+    final durationFormatted =
+        "${event.expectedDurationInMinutes ~/ 60}h ${event.expectedDurationInMinutes % 60}m";
+
     return Dialog(
       elevation: 12,
-      backgroundColor: isDark
-          ? const Color(0xFF1E1E1E)
-          : theme.cardColor, // darker background for dark mode
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(sw(context, 16)),
       ),
@@ -37,13 +47,12 @@ class EventDetail extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- Header ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
-                      "${event['title'] ?? ''}",
+                      event.title,
                       style: t.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: st(context, 18),
@@ -63,22 +72,52 @@ class EventDetail extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // --- Host info ---
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: event.bannerUrl.isNotEmpty
+                    ? Image.network(
+                  event.bannerUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(Icons.event_note_rounded,
+                          size: 64, color: Colors.white70),
+                    ),
+                  ),
+                )
+                    : Container(
+                  color: Colors.grey[400],
+                  child: const Center(
+                    child: Icon(Icons.event_note_rounded,
+                        size: 64, color: Colors.white70),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: sw(context, 28),
-                    backgroundImage: NetworkImage(
-                      event['hostAvatar'] ?? 'https://i.pravatar.cc/100?img=3',
-                    ),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: event.host.avatarUrl != null &&
+                        event.host.avatarUrl!.isNotEmpty
+                        ? NetworkImage(event.host.avatarUrl!)
+                        : null,
+                    child: (event.host.avatarUrl == null ||
+                        event.host.avatarUrl!.isEmpty)
+                        ? const Icon(Icons.person, size: 36, color: Colors.white70)
+                        : null,
                   ),
                   SizedBox(width: sw(context, 12)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        event['hostName'] ?? 'John Doe',
+                        event.host.name,
                         style: t.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: st(context, 15),
@@ -99,30 +138,34 @@ class EventDetail extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // --- Event Info ---
               Text(
-                event['description'] ?? loc.translate('no_description'),
+                event.description.isNotEmpty
+                    ? event.description
+                    : loc.translate('no_description'),
                 style: t.bodyMedium?.copyWith(
                   fontSize: st(context, 14),
                   height: 1.4,
                   color: textColor,
                 ),
               ),
+
               const SizedBox(height: 16),
 
               _buildInfoRow(
                 context,
                 Icons.language,
                 loc.translate('language'),
-                event['language'] ?? 'English',
+                event.language.name,
                 textColor,
                 secondaryText,
               ),
               _buildInfoRow(
                 context,
-                Icons.favorite_border,
-                loc.translate('interest'),
-                event['interest'] ?? 'Technology',
+                Icons.category_outlined,
+                loc.translate('categories'),
+                event.categories.isNotEmpty
+                    ? event.categories.map((e) => e.name).join(', ')
+                    : loc.translate('none'),
                 textColor,
                 secondaryText,
               ),
@@ -130,7 +173,7 @@ class EventDetail extends StatelessWidget {
                 context,
                 Icons.people_alt_outlined,
                 loc.translate('participants'),
-                "${event['joined'] ?? 45}/${event['max'] ?? 100}",
+                "${event.numberOfParticipants}/${event.capacity}",
                 textColor,
                 secondaryText,
               ),
@@ -138,7 +181,7 @@ class EventDetail extends StatelessWidget {
                 context,
                 Icons.access_time,
                 loc.translate('time'),
-                event['startTime'] ?? '25 Oct 2025, 09:00 AM',
+                dateFormatted,
                 textColor,
                 secondaryText,
               ),
@@ -146,7 +189,15 @@ class EventDetail extends StatelessWidget {
                 context,
                 Icons.timer_outlined,
                 loc.translate('duration'),
-                event['duration'] ?? '3 hours',
+                durationFormatted,
+                textColor,
+                secondaryText,
+              ),
+              _buildInfoRow(
+                context,
+                Icons.monetization_on_outlined,
+                loc.translate('fee'),
+                event.fee > 0 ? "${event.fee}đ" : loc.translate('free'),
                 textColor,
                 secondaryText,
               ),
@@ -156,7 +207,6 @@ class EventDetail extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // --- Buttons ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -165,18 +215,121 @@ class EventDetail extends StatelessWidget {
                     variant: ButtonVariant.outline,
                     size: ButtonSize.md,
                     icon: const Icon(Icons.share_outlined, size: 18),
-                    onPressed: () {},
+                    onPressed: () {
+                      // TODO: implement share logic
+                    },
                   ),
-                  SizedBox(width: sw(context, 12)),
-                  AppButton(
-                    text: loc.translate('join'),
-                    variant: ButtonVariant.primary,
-                    size: ButtonSize.md,
-                    icon: const Icon(Icons.check_circle_outline, size: 18),
-                    onPressed: () {},
-                  ),
+                  if (!isPastEvent) ...[
+                    SizedBox(width: sw(context, 12)),
+                    AppButton(
+                      text: loc.translate('join'),
+                      variant: ButtonVariant.primary,
+                      size: ButtonSize.md,
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('token') ?? '';
+
+                        if (token.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(loc.translate("missing_token"))),
+                          );
+                          return;
+                        }
+
+                        final repository = EventRepository(EventService(ApiClient()));
+
+                        if (event.isPublic) {
+                          try {
+                            await repository.registerEvent(
+                              token: token,
+                              eventId: event.id,
+                            );
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.translate("event_register_success"))),
+                            );
+                            Navigator.pop(context);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                          return;
+                        }
+
+                        final controller = TextEditingController();
+
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            String? errorText;
+                            return StatefulBuilder(builder: (context, setState) {
+                              return AlertDialog(
+                                title: Text(loc.translate("enter_event_password")),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: controller,
+                                      obscureText: true,
+                                      decoration: InputDecoration(
+                                        hintText: loc.translate("password"),
+                                        border: const OutlineInputBorder(),
+                                        errorText: errorText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text(loc.translate("cancel")),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final password = controller.text;
+                                      if (password.isEmpty) {
+                                        setState(() {
+                                          errorText = loc.translate("password_required");
+                                        });
+                                        return;
+                                      }
+
+                                      try {
+                                        await repository.registerEvent(
+                                          token: token,
+                                          eventId: event.id,
+                                          password: password,
+                                        );
+
+                                        if (!context.mounted) return;
+
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(loc.translate("event_register_success"))),
+                                        );
+                                        Navigator.pop(context);
+                                      } catch (e) {
+
+                                        setState(() {
+                                          errorText = loc.translate("wrong_password");
+                                        });
+                                      }
+                                    },
+                                    child: Text(loc.translate("confirm")),
+                                  ),
+                                ],
+                              );
+                            });
+                          },
+                        );
+                      },
+                    ),
+
+                  ],
                 ],
-              ),
+              )
             ],
           ),
         ),
@@ -199,23 +352,28 @@ class EventDetail extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: secondaryText),
           const SizedBox(width: 8),
-          Text(
-            "$label: ",
-            style: t.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: secondaryText,
-              fontSize: st(context, 14),
-            ),
-          ),
           Expanded(
-            child: Text(
-              value,
-              style: t.bodyMedium?.copyWith(
-                color: textColor,
-                fontSize: st(context, 14),
+            child: RichText(
+              text: TextSpan(
+                text: "$label: ",
+                style: t.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: secondaryText,
+                  fontSize: st(context, 14),
+                ),
+                children: [
+                  TextSpan(
+                    text: value,
+                    style: t.bodyMedium?.copyWith(
+                      color: textColor,
+                      fontSize: st(context, 14),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

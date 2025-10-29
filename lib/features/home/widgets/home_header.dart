@@ -5,11 +5,13 @@ import '../../../routes/app_routes.dart';
 class HomeHeader extends StatefulWidget {
   final int currentIndex;
   final Function(int) onItemSelected;
+  final Function(String)? onSearchChanged;
 
   const HomeHeader({
     super.key,
     this.currentIndex = 0,
     required this.onItemSelected,
+    this.onSearchChanged,
   });
 
   @override
@@ -93,14 +95,12 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ---------- HEADER BAR ----------
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
-                // --- Logo (replaced PolyGo with image) ---
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -120,7 +120,6 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 const SizedBox(width: 12),
 
-                // --- Search box ---
                 Expanded(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
@@ -153,9 +152,14 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                               border: InputBorder.none,
                               isCollapsed: true,
                             ),
-                            onSubmitted: (value) {
-                              debugPrint("Searching for: $value");
+                            onChanged: (value) {
+                              widget.onSearchChanged?.call(value);
                             },
+
+                            onSubmitted: (value) {
+                              widget.onSearchChanged?.call(value);
+                            },
+
                           ),
                         ),
                         if (_isSearching)
@@ -175,7 +179,6 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 const SizedBox(width: 12),
 
-                // --- Notification Icon ---
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -213,7 +216,6 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
           const SizedBox(height: 8),
 
-          // ---------- BOTTOM MENU BAR ----------
           Padding(
             padding: const EdgeInsets.only(bottom: 6, top: 2),
             child: Row(

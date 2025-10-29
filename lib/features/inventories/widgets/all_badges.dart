@@ -18,6 +18,7 @@ class AllBadges extends StatefulWidget {
 class _AllBadgesState extends State<AllBadges> {
   bool _loading = true;
   List<BadgeModel> _badges = [];
+  Locale? _currentLocale;
 
   @override
   void initState() {
@@ -25,7 +26,18 @@ class _AllBadgesState extends State<AllBadges> {
     _loadBadges();
   }
 
-  Future<void> _loadBadges() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_currentLocale == null ||
+        _currentLocale!.languageCode != locale.languageCode) {
+      _currentLocale = locale;
+      _loadBadges(lang: locale.languageCode);
+    }
+  }
+
+  Future<void> _loadBadges({String? lang}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -37,7 +49,7 @@ class _AllBadgesState extends State<AllBadges> {
 
     try {
       final repo = BadgeRepository(BadgeService(ApiClient()));
-      final badges = await repo.getMyBadgesAll(token);
+      final badges = await repo.getMyBadgesAll(token, lang: lang ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -174,12 +186,13 @@ class _AllBadgesState extends State<AllBadges> {
                             height: iconSize,
                             width: iconSize,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: iconSize,
-                              width: iconSize,
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.shield, size: 40),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: iconSize,
+                                  width: iconSize,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.shield, size: 40),
+                                ),
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -190,7 +203,9 @@ class _AllBadgesState extends State<AllBadges> {
                             fontSize: titleFontSize,
                             color: hasBadge
                                 ? (isDark ? Colors.white : Colors.black)
-                                : (isDark ? Colors.white70 : Colors.grey[700]),
+                                : (isDark
+                                ? Colors.white70
+                                : Colors.grey[700]),
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2,
@@ -203,8 +218,12 @@ class _AllBadgesState extends State<AllBadges> {
                               : loc.translate("no_description"),
                           style: t.bodySmall?.copyWith(
                             color: hasBadge
-                                ? (isDark ? Colors.white.withOpacity(0.85) : Colors.black87)
-                                : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                                ? (isDark
+                                ? Colors.white.withOpacity(0.85)
+                                : Colors.black87)
+                                : (isDark
+                                ? Colors.grey[400]
+                                : Colors.grey[600]),
                             fontSize: descFontSize,
                           ),
                           textAlign: TextAlign.center,
@@ -214,7 +233,8 @@ class _AllBadgesState extends State<AllBadges> {
                         if (hasBadge && badge.createdAt.isNotEmpty) ...[
                           const SizedBox(height: 10),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 3),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? Colors.white.withOpacity(0.2)
@@ -224,7 +244,9 @@ class _AllBadgesState extends State<AllBadges> {
                             child: Text(
                               "${loc.translate("received_on")}: ${badge.createdAt.split('T').first}",
                               style: t.bodySmall?.copyWith(
-                                color: isDark ? Colors.white : Colors.black,
+                                color: isDark
+                                    ? Colors.white
+                                    : Colors.black,
                                 fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
@@ -242,7 +264,8 @@ class _AllBadgesState extends State<AllBadges> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Center(
-                          child: Icon(Icons.lock, color: Colors.white, size: 40),
+                          child:
+                          Icon(Icons.lock, color: Colors.white, size: 40),
                         ),
                       ),
                     ),
