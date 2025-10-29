@@ -3,8 +3,12 @@ import '../../core/api/api_client.dart';
 import '../../core/config/api_constants.dart';
 import '../models/api_response.dart';
 import '../models/events/coming_event_list_response.dart';
+import '../models/events/event_cancel_request.dart';
+import '../models/events/event_cancel_response.dart';
 import '../models/events/event_list_response.dart';
 import '../models/events/event_register_request.dart';
+import '../models/events/hosted_event_model.dart';
+import '../models/events/joined_event_list_response.dart';
 
 class EventService {
   final ApiClient apiClient;
@@ -91,4 +95,98 @@ class EventService {
       rethrow;
     }
   }
+
+  Future<ApiResponse<HostedEventListResponse>> getHostedEvents({
+    required String token,
+    String lang = 'en',
+    int pageNumber = 1,
+    int pageSize = 10,
+    String? name,
+    List<String>? languageIds,
+    List<String>? interestIds,
+  }) async {
+    try {
+      final queryParameters = {
+        'lang': lang,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+        if (name != null) 'name': name,
+        if (languageIds != null && languageIds.isNotEmpty) 'languageIds': languageIds,
+        if (interestIds != null && interestIds.isNotEmpty) 'interestIds': interestIds,
+      };
+
+      final response = await apiClient.get(
+        ApiConstants.eventsHosted,
+        queryParameters: queryParameters,
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      final data = json['data'] as Map<String, dynamic>? ?? {}; // an toàn với null
+
+      return ApiResponse.fromJson(
+        json,
+            (_) => HostedEventListResponse.fromJson(data), // chỉ dùng data một lần
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<EventCancelResponse>> cancelEvent({
+    required String token,
+    required EventCancelRequest request,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.eventsCancel,
+        data: request.toJson(),
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => EventCancelResponse.fromJson(data),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<JoinedEventListResponse>> getJoinedEvents({
+    required String token,
+    String lang = 'en',
+    int pageNumber = 1,
+    int pageSize = 10,
+    String? name,
+    List<String>? languageIds,
+    List<String>? interestIds,
+  }) async {
+    try {
+      final queryParameters = {
+        'lang': lang,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+        if (name != null) 'name': name,
+        if (languageIds != null && languageIds.isNotEmpty) 'languageIds': languageIds,
+        if (interestIds != null && interestIds.isNotEmpty) 'interestIds': interestIds,
+      };
+
+      final response = await apiClient.get(
+        ApiConstants.eventsJoined,
+        queryParameters: queryParameters,
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (_) => JoinedEventListResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
 }

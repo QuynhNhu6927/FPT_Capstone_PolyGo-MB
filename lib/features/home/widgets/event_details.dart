@@ -7,16 +7,49 @@ import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/event_model.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/event_service.dart';
 
-class EventDetail extends StatelessWidget {
+class EventDetail extends StatefulWidget {
   final EventModel event;
 
   const EventDetail({super.key, required this.event});
 
   @override
+  State<EventDetail> createState() => _EventDetailState();
+}
+
+class _EventDetailState extends State<EventDetail> {
+  double _balance = 0;
+  String _userPlanType = "Free";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    try {
+      final user = await AuthRepository(AuthService(ApiClient())).me(token);
+      if (!mounted) return;
+      setState(() {
+        _balance = user.balance;
+        _userPlanType = user.planType;
+      });
+    } catch (e) {
+      debugPrint("Failed to load user: $e");
+    }
+  }
+  @override
   Widget build(BuildContext context) {
+    final event = widget.event;
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final t = theme.textTheme;
@@ -27,10 +60,51 @@ class EventDetail extends StatelessWidget {
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
     final isPastEvent = event.startAt.isBefore(DateTime.now());
+    bool isDisabled = false;
+    String buttonText = loc.translate('join');
+
+    if (_userPlanType == "Free" && event.planType == "Plus") {
+      isDisabled = true;
+      buttonText = "Plus Only";
+    } else if (event.isParticipant) {
+      isDisabled = true;
+      buttonText = loc.translate('joined');
+    }
 
     final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
     final durationFormatted =
         "${event.expectedDurationInMinutes ~/ 60}h ${event.expectedDurationInMinutes % 60}m";
+
+    Future<bool?> _showPaidEventWarning() {
+      return showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(loc.translate("paid_event_warning")),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(loc.translate("paid_event_confirmation")),
+              const SizedBox(height: 12),
+              Text(
+                "${loc.translate("available_balance")}: $_balanceđ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(loc.translate("cancel")),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(loc.translate("confirm")),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Dialog(
       elevation: 12,
@@ -51,15 +125,27 @@ class EventDetail extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      event.title,
-                      style: t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: st(context, 18),
-                        color: textColor,
-                      ),
+                    child: Row(
+                      children: [
+                        if (event.planType == "Plus") ...[
+                          const SizedBox(width: 6),
+                          Icon(Icons.star, size: 20, color: Colors.amber),
+                        ],
+                        Flexible(
+                          child: Text(
+                            event.title,
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 18),
+                              color: textColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(Icons.close,
@@ -215,21 +301,19 @@ class EventDetail extends StatelessWidget {
                     variant: ButtonVariant.outline,
                     size: ButtonSize.md,
                     icon: const Icon(Icons.share_outlined, size: 18),
-                    onPressed: () {
-                      // TODO: implement share logic
-                    },
+                    onPressed: () {},
                   ),
                   if (!isPastEvent) ...[
                     SizedBox(width: sw(context, 12)),
                     AppButton(
-                      text: loc.translate('join'),
+                      text: buttonText,
                       variant: ButtonVariant.primary,
                       size: ButtonSize.md,
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      onPressed: () async {
+                      onPressed: isDisabled ? null : () async {
+
                         final prefs = await SharedPreferences.getInstance();
                         final token = prefs.getString('token') ?? '';
-
                         if (token.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(loc.translate("missing_token"))),
@@ -237,29 +321,43 @@ class EventDetail extends StatelessWidget {
                           return;
                         }
 
-                        final repository = EventRepository(EventService(ApiClient()));
-
-                        if (event.isPublic) {
+                        Future<void> registerEvent(String password) async {
+                          final repository = EventRepository(EventService(ApiClient()));
                           try {
                             await repository.registerEvent(
                               token: token,
                               eventId: event.id,
+                              password: password,
                             );
-                            if (!context.mounted) return;
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(loc.translate("event_register_success"))),
                             );
                             Navigator.pop(context);
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
+                            final errorString = e.toString();
+                            if (errorString.contains("Error.InvalidEventPassword")) {
+                              throw "wrong_password";
+                            } else {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errorString)),
+                              );
+                            }
                           }
+                        }
+
+                        if (event.fee > 0) {
+                          final confirmPaid = await _showPaidEventWarning();
+                          if (confirmPaid != true) return;
+                        }
+
+                        if (event.isPublic) {
+                          await registerEvent('');
                           return;
                         }
 
                         final controller = TextEditingController();
-
                         await showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -289,8 +387,7 @@ class EventDetail extends StatelessWidget {
                                   ),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      final password = controller.text;
-                                      if (password.isEmpty) {
+                                      if (controller.text.isEmpty) {
                                         setState(() {
                                           errorText = loc.translate("password_required");
                                         });
@@ -298,23 +395,33 @@ class EventDetail extends StatelessWidget {
                                       }
 
                                       try {
-                                        await repository.registerEvent(
+                                        await EventRepository(EventService(ApiClient()))
+                                            .registerEvent(
                                           token: token,
                                           eventId: event.id,
-                                          password: password,
+                                          password: controller.text,
                                         );
 
-                                        if (!context.mounted) return;
+                                        if (!mounted) return;
+
+                                        Navigator.of(context, rootNavigator: true).pop();
+                                        Navigator.pop(context);
 
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(content: Text(loc.translate("event_register_success"))),
                                         );
-                                        Navigator.pop(context);
                                       } catch (e) {
-
-                                        setState(() {
-                                          errorText = loc.translate("wrong_password");
-                                        });
+                                        final err = e.toString();
+                                        if (err.contains("Error.InvalidEventPassword")) {
+                                          setState(() {
+                                            errorText = loc.translate("wrong_password");
+                                          });
+                                        } else {
+                                          if (!mounted) return;
+                                          setState(() {
+                                            errorText = loc.translate("wrong_password");
+                                          });
+                                        }
                                       }
                                     },
                                     child: Text(loc.translate("confirm")),
@@ -326,10 +433,10 @@ class EventDetail extends StatelessWidget {
                         );
                       },
                     ),
-
                   ],
                 ],
               )
+
             ],
           ),
         ),

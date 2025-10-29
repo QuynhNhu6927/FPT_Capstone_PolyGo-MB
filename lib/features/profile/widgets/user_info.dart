@@ -692,6 +692,7 @@ extension MeResponseCopy on MeResponse {
       streakDays: streakDays ?? this.streakDays,
       autoRenewSubscription: autoRenewSubscription ?? this.autoRenewSubscription,
       isNew: isNew ?? this.isNew,
+      planType: planType ?? this.planType,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }

@@ -11,6 +11,7 @@ class MeResponse {
   final bool autoRenewSubscription;
   final int streakDays;
   final bool isNew;
+  final String planType;
   final double balance;
   final DateTime? lastLoginAt;
 
@@ -27,6 +28,7 @@ class MeResponse {
     required this.autoRenewSubscription,
     required this.streakDays,
     required this.isNew,
+    required this.planType,
     required this.balance,
     this.lastLoginAt,
   });
@@ -49,6 +51,7 @@ class MeResponse {
           ? json['streakDays'] as int
           : int.tryParse(json['streakDays']?.toString() ?? '0') ?? 0,
       isNew: json['isNew'] == true,
+      planType: json['planType']?.toString() ?? '',
       balance: (json['balance'] is num)
           ? (json['balance'] as num).toDouble()
           : double.tryParse(json['balance']?.toString() ?? '0') ?? 0.0,
