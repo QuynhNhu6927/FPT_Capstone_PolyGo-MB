@@ -78,7 +78,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
             color: theme.brightness == Brightness.dark
                 ? Colors.grey.withOpacity(0.1)
                 : const Color(0x22000000),
-            blurRadius: 10,
+            blurRadius: 5,
             offset: const Offset(0, -2),
           ),
         ],

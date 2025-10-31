@@ -1,66 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/events/joined_event_model.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/event_service.dart';
 import '../../shared/app_error_state.dart';
-import 'hosted_filter.dart';
 import 'joined_event_details.dart';
 
-class JoinedEvents extends StatefulWidget {
-  const JoinedEvents({super.key});
+class Calendar extends StatefulWidget {
+  const Calendar({super.key});
 
   @override
-  State<JoinedEvents> createState() => _JoinedEventsState();
+  State<Calendar> createState() => _CalendarState();
 }
 
-class _JoinedEventsState extends State<JoinedEvents> {
-  String _token = '';
+class _CalendarState extends State<Calendar> {
+  String? _id;
   late final EventRepository _repository;
   bool _loading = true;
   bool _hasError = false;
   List<JoinedEventModel> _joinedEvents = [];
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
-  String _searchQuery = '';
-  bool _isSearching = false;
 
   Locale? _currentLocale;
-
-  List<Map<String, String>> _filterLanguages = [];
-  List<Map<String, String>> _filterInterests = [];
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
     _repository = EventRepository(EventService(ApiClient()));
-    _loadJoinedEvents();
-    _searchFocusNode.addListener(() {
-      setState(() {
-        _isSearching = _searchFocusNode.hasFocus;
-      });
-    });
+    _initialize();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
-    super.dispose();
+  Future<void> _initialize() async {
+    await _loadUser();
+    await _loadJoinedEvents();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context);
-    if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
+    if (_currentLocale == null ||
+        _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
       _loadJoinedEvents(lang: locale.languageCode);
+    }
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    try {
+      final user = await AuthRepository(AuthService(ApiClient())).me(token);
+      if (!mounted) return;
+      setState(() {
+        _id = user.id;
+      });
+    } catch (e) {
+      debugPrint("Failed to load user: $e");
     }
   }
 
@@ -78,21 +83,24 @@ class _JoinedEventsState extends State<JoinedEvents> {
       final events = await _repository.getJoinedEvents(
         lang: lang ?? 'vi',
         pageNumber: 1,
-        pageSize: 50,
-        languageIds: _filterLanguages.map((e) => e['id']!).toList(),
-        interestIds: _filterInterests.map((e) => e['id']!).toList(),
+        pageSize: 100,
         token: token,
       );
 
       if (!mounted) return;
       setState(() {
-        _joinedEvents = events;
+        _joinedEvents = events.where((e) {
+          final hostStatus = e.status.toLowerCase();
+          final userEventStatus = e.userEvent?.status ?? -1;
+
+          return hostStatus == 'approved' &&
+              (userEventStatus == 0 || userEventStatus == 1);
+        }).toList();
+
         _loading = false;
-        _hasError = false;
       });
     } catch (e, st) {
-      print("Error loading joined events: $e");
-      print(st);
+      debugPrint("Error loading joined events: $e\n$st");
       if (!mounted) return;
       setState(() {
         _hasError = true;
@@ -101,174 +109,119 @@ class _JoinedEventsState extends State<JoinedEvents> {
     }
   }
 
-  List<JoinedEventModel> get _filteredEvents {
-    final query = _searchQuery.trim().toLowerCase();
-    final source = _joinedEvents;
-
-    if (query.isEmpty) return source;
-
-    return source.where((e) => e.title.fuzzyContains(query)).toList();
+  List<JoinedEventModel> _getEventsForDay(DateTime day) {
+    return _joinedEvents.where((e) {
+      return e.status.toLowerCase() != 'cancelled' &&
+          e.startAt.year == day.year &&
+          e.startAt.month == day.month &&
+          e.startAt.day == day.day;
+    }).toList();
   }
-
-  List<String> get _selectedFilters => [
-    ..._filterLanguages.map((e) => e['name'] ?? ''),
-    ..._filterInterests.map((e) => e['name'] ?? ''),
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = width < 600 ? 2 : width < 1000 ? 3 : 4;
     final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) return const Center(child: CircularProgressIndicator());
 
     if (_hasError) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        padding: const EdgeInsets.symmetric(vertical: 32),
         child: AppErrorState(
           onRetry: () => _loadJoinedEvents(lang: _currentLocale?.languageCode),
         ),
       );
     }
 
-    final eventsToShow = _filteredEvents;
+    final selectedEvents = _selectedDay != null
+        ? _getEventsForDay(_selectedDay!)
+        : _getEventsForDay(_focusedDay);
 
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: 42,
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: _isSearching ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                width: 1.5,
+          TableCalendar<JoinedEventModel>(
+            locale: _currentLocale?.languageCode ?? 'vi',
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+            onDaySelected: (selected, focused) {
+              setState(() {
+                _selectedDay = selected;
+                _focusedDay = focused;
+              });
+            },
+            eventLoader: _getEventsForDay,
+            calendarFormat: CalendarFormat.month,
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              titleTextStyle: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
-            child: Row(
-              children: [
-                const SizedBox(width: 10),
-                Icon(Icons.search_rounded, color: _isSearching ? Theme.of(context).colorScheme.primary : Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: loc.translate("search"),
-                      hintStyle: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[600]),
-                      border: InputBorder.none,
-                      isCollapsed: true,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                  ),
-                ),
-                if (_isSearching)
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    color: Colors.grey,
-                    onPressed: () {
-                      _searchController.clear();
-                      _searchFocusNode.unfocus();
-                      setState(() {
-                        _isSearching = false;
-                        _searchQuery = '';
-                      });
-                    },
-                  ),
-              ],
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+              weekendStyle: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            calendarStyle: CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blueAccent.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              markerDecoration: const BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              outsideTextStyle: TextStyle(
+                color: isDark ? Colors.grey[700]! : Colors.grey[400]!,
+              ),
+              defaultTextStyle: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              weekendTextStyle: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HostedFilter()),
-                  );
+          const SizedBox(height: 10),
 
-                  if (result != null && result is Map<String, dynamic>) {
-                    setState(() {
-                      _filterLanguages = List<Map<String, String>>.from(result['languages'] ?? []);
-                      _filterInterests = List<Map<String, String>>.from(result['interests'] ?? []);
-                    });
-                    _loadJoinedEvents(lang: _currentLocale?.languageCode);
-                  }
-                },
-                icon: const Icon(Icons.filter_alt_outlined),
-                label: Text(loc.translate("filter")),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  foregroundColor: theme.colorScheme.onPrimaryContainer,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  elevation: 1,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 38,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _selectedFilters.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final tag = _selectedFilters[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.5)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(tag, style: TextStyle(color: theme.colorScheme.primary, fontSize: 13, fontWeight: FontWeight.w500)),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _filterLanguages.removeWhere((f) => f['name'] == tag);
-                                  _filterInterests.removeWhere((f) => f['name'] == tag);
-                                });
-                                _loadJoinedEvents(lang: _currentLocale?.languageCode);
-                              },
-                              child: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
           Expanded(
-            child: eventsToShow.isEmpty
-                ? Center(child: Text(loc.translate("no_events_found")))
-                : MasonryGridView.count(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              itemCount: eventsToShow.length,
-              itemBuilder: (context, index) => _buildEventCard(eventsToShow[index]),
+            child: selectedEvents.isEmpty
+                ? Center(
+              child: Text(
+                loc.translate("no_events_found"),
+                style: TextStyle(
+                  color: isDark ? Colors.white54 : Colors.black54,
+                  fontSize: 14,
+                ),
+              ),
+            )
+                : ListView.builder(
+              itemCount: selectedEvents.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemBuilder: (context, index) {
+                final event = selectedEvents[index];
+                return _buildEventCard(event, isDark)
+                    .animate()
+                    .fadeIn(duration: 300.ms);
+              },
             ),
           ),
         ],
@@ -276,26 +229,45 @@ class _JoinedEventsState extends State<JoinedEvents> {
     );
   }
 
-  Widget _buildEventCard(JoinedEventModel event) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildEventCard(JoinedEventModel event, bool isDark) {
+    final formattedDate =
+        "${event.startAt.day.toString().padLeft(2, '0')}/${event.startAt.month.toString().padLeft(2, '0')}/${event.startAt.year} "
+        "${event.startAt.hour.toString().padLeft(2, '0')}:${event.startAt.minute.toString().padLeft(2, '0')}";
 
     final cardBackground = isDark
-        ? const LinearGradient(colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)], begin: Alignment.topLeft, end: Alignment.bottomRight)
+        ? const LinearGradient(
+      colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    )
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
 
-    final formattedDate = "${event.startAt.day.toString().padLeft(2, '0')}/${event.startAt.month.toString().padLeft(2, '0')}/${event.startAt.year} ${event.startAt.hour.toString().padLeft(2, '0')}:${event.startAt.minute.toString().padLeft(2, '0')}";
-
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('token') ?? '';
+
+        if (token.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bạn chưa đăng nhập')),
+          );
+          return;
+        }
         showDialog(
           context: context,
-          builder: (context) => JoinedEventDetails(event: event),
+          builder: (context) => JoinedEventDetails(
+            event: event,
+            currentUserId: _id,
+            eventRepository: _repository,
+            token: token,
+            parentContext: context,
+          ),
         );
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           gradient: cardBackground,
           borderRadius: BorderRadius.circular(16),
@@ -307,85 +279,46 @@ class _JoinedEventsState extends State<JoinedEvents> {
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 10,
-                child: event.bannerUrl.isNotEmpty
-                    ? Image.network(
-                  event.bannerUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70),
-                    ),
-                  ),
-                )
-                    : Container(
-                  color: Colors.grey[400],
-                  child: const Center(
-                    child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70),
-                  ),
-                ),
+        child: ListTile(
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: event.bannerUrl.isNotEmpty
+                ? Image.network(
+              event.bannerUrl,
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+            )
+                : Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[400],
+              child: const Icon(
+                Icons.event_note_rounded,
+                size: 32,
+                color: Colors.white70,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 36,
-                      child: Text(
-                        event.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, height: 1.3, color: textColor),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      formattedDate,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: SizedBox(
-                  height: 28,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: event.categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, tagIndex) {
-                      final category = event.categories[tagIndex];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(isDark ? 0.25 : 0.12),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          category.name,
-                          style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w500),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+          title: Text(
+            event.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
+          subtitle: Text(
+            formattedDate,
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 12,
+            ),
           ),
         ),
-      ).animate().fadeIn(duration: 300.ms),
+      ),
     );
   }
 }

@@ -24,7 +24,8 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
 
   final _items = const [
     {'icon': Icons.edit_calendar, 'label': 'my_events'},
-    {'icon': Icons.event_available, 'label': 'calendar'},
+    {'icon': Icons.event_available, 'label': 'joined'},
+    {'icon': Icons.calendar_month, 'label': 'calendar'},
   ];
 
   @override
@@ -84,8 +85,8 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
         boxShadow: [
           BoxShadow(
             color: shadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

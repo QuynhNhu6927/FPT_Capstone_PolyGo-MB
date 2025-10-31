@@ -81,14 +81,14 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       decoration: BoxDecoration(
         color: bgColor,
         boxShadow: [
           BoxShadow(
             color: shadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

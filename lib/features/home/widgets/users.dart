@@ -423,27 +423,35 @@ class _UsersState extends State<Users> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.name ?? 'Unknown',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: isDark ? Colors.white : Colors.black87,
+                child: SizedBox(
+                  height: 48,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        user.name ?? 'Unknown',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          height: 1,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "XP: ${user.experiencePoints}",
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        "XP: ${user.experiencePoints}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, height: 1, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: SizedBox(

@@ -5,6 +5,8 @@ import '../models/api_response.dart';
 import '../models/events/coming_event_list_response.dart';
 import '../models/events/event_cancel_request.dart';
 import '../models/events/event_cancel_response.dart';
+import '../models/events/event_details_response.dart';
+import '../models/events/event_kick_request.dart';
 import '../models/events/event_list_response.dart';
 import '../models/events/event_register_request.dart';
 import '../models/events/hosted_event_model.dart';
@@ -154,6 +156,27 @@ class EventService {
     }
   }
 
+  Future<ApiResponse<EventCancelResponse>> unregisterEvent({
+    required String token,
+    required EventCancelRequest request,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.eventsUnregister,
+        data: request.toJson(),
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => EventCancelResponse.fromJson(data),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
   Future<ApiResponse<JoinedEventListResponse>> getJoinedEvents({
     required String token,
     String lang = 'en',
@@ -183,6 +206,49 @@ class EventService {
       return ApiResponse.fromJson(
         json,
             (_) => JoinedEventListResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<EventDetailsResponse>> getEventDetails({
+    required String token,
+    required String eventId,
+    String lang = 'en',
+  }) async {
+    try {
+      final endpoint = ApiConstants.eventsDetails.replaceFirst('{id}', eventId);
+      final response = await apiClient.get(
+        '$endpoint?lang=$lang',
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => EventDetailsResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<EventKickResponse>> kickUser({
+    required String token,
+    required EventKickRequest request,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.eventsKick,
+        data: request.toJson(),
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => EventKickResponse.fromJson(data),
       );
     } on DioError catch (e) {
       rethrow;

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../shared/app_bottom_bar.dart';
+import '../widgets/calendar.dart';
 import '../widgets/my_events_menu.dart';
 import '../widgets/my_events.dart';
-import '../widgets/calendar.dart';
+import '../widgets/joined_events.dart';
 import '../../shared/app_error_state.dart';
 
 class MyEventsScreen extends StatefulWidget {
@@ -34,6 +35,8 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
           return const MyEvents();
         case 1:
           return const JoinedEvents();
+        case 2:
+          return const Calendar();
         default:
           return const SizedBox.shrink();
       }
