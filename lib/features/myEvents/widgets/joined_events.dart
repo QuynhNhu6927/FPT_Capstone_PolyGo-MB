@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -14,7 +15,7 @@ import '../../shared/app_error_state.dart';
 import 'hosted_filter.dart';
 import 'joined_event_details.dart';
 
-enum EventStatus { upcoming, past, canceled }
+enum EventStatus { upcoming, live, past, canceled }
 
 class JoinedEvents extends StatefulWidget {
   const JoinedEvents({super.key});
@@ -135,26 +136,24 @@ class _JoinedEventsState extends State<JoinedEvents> {
 
   List<JoinedEventModel> get _filteredEvents {
     final query = _searchQuery.trim().toLowerCase();
+    final now = DateTime.now();
+
     final source = (_selectedStatus == null)
         ? _joinedEvents
         : _joinedEvents.where((e) {
-      final now = DateTime.now();
-      if (_selectedStatus == EventStatus.upcoming) {
-
-        return e.startAt.isAfter(now) &&
-            e.status == "Approved" &&
-            e.userEvent.status == 0;
-      } else if (_selectedStatus == EventStatus.past) {
-
-        return e.startAt.isBefore(now) &&
-            e.status == "Approved" &&
-            e.userEvent.status == 0;
-      } else if (_selectedStatus == EventStatus.canceled) {
-
-        return e.userEvent.status == 2 ||
-            e.status == "Cancelled";
+      switch (_selectedStatus) {
+        case EventStatus.upcoming:
+          return e.startAt.isAfter(now) && e.status == "Approved";
+        case EventStatus.live:
+          return e.status == "Live";
+        case EventStatus.canceled:
+          return e.status == "Cancelled";
+        case EventStatus.past:
+          final endTime = e.startAt.add(const Duration(minutes: 30));
+          return endTime.isBefore(now);
+        default:
+          return false;
       }
-      return false;
     }).toList();
 
     if (query.isEmpty) return source;
@@ -217,6 +216,8 @@ class _JoinedEventsState extends State<JoinedEvents> {
           Row(
             children: [
               _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
+              const SizedBox(width: 8),
+              _buildStatusButton(EventStatus.live, "Đang diễn ra"),
               const SizedBox(width: 8),
               _buildStatusButton(EventStatus.past, "Đã kết thúc"),
               const SizedBox(width: 8),
@@ -369,8 +370,9 @@ class _JoinedEventsState extends State<JoinedEvents> {
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
-
-    final formattedDate = "${event.startAt.day.toString().padLeft(2, '0')}/${event.startAt.month.toString().padLeft(2, '0')}/${event.startAt.year} ${event.startAt.hour.toString().padLeft(2, '0')}:${event.startAt.minute.toString().padLeft(2, '0')}";
+    final formattedDate = event.startAt != null
+        ? DateFormat('dd MMM yyyy, HH:mm').format(event.startAt.toLocal())
+        : "";
 
     return GestureDetector(
       onTap: () async {

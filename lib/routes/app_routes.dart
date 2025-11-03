@@ -6,12 +6,14 @@ import '../features/home/screens/notification_screen.dart';
 import '../features/inventories/screens/all_badges_screen.dart';
 import '../features/inventories/screens/all_gifts_screen.dart';
 import '../features/myEvents/screens/my_events_screen.dart';
+import '../features/myEvents/screens/event_waiting_screen.dart';
 import '../features/profile/screens/profile_setup_screen.dart';
 import '../features/profile/screens/user_info_screen.dart';
 import '../features/profile/screens/update_profile_screen.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/shop/screens/shop_screen.dart';
 import '../features/users/screens/users_profile_screen.dart';
+import '../features/myEvents/screens/event_room_screen.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -27,6 +29,8 @@ class AppRoutes {
   static const String allGifts = '/gifts';
   static const String notifications = '/notifications';
   static const String userProfile = '/user-profile';
+  static const String eventWaiting = '/event-waiting';
+  static const String eventRoom = '/event-room';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -59,6 +63,35 @@ class AppRoutes {
         final userId = args?['id'] as String?;
         return MaterialPageRoute(
           builder: (_) => UserProfileScreen(userId: userId),
+        );
+      case eventWaiting:
+        final args = settings.arguments as Map<String, dynamic>?;
+
+        final eventId = args?['eventId'] as String? ?? '';
+        final eventTitle = args?['eventTitle'] as String? ?? '';
+        final hostId = args?['hostId'] as String? ?? '';
+        final hostName = args?['hostName'] as String? ?? '';
+        final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
+
+        return MaterialPageRoute(
+          builder: (_) => WaitingRoomScreen(
+            eventId: eventId,
+            eventTitle: eventTitle,
+            hostId: hostId,
+            hostName: hostName,
+            eventStartAt: startAt,
+          ),
+        );
+
+      case eventRoom:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final eventId = args?['eventId'] as String? ?? '';
+        final eventTitle = args?['eventTitle'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => MeetingRoomScreen(
+            eventId: eventId,
+            eventTitle: eventTitle,
+          ),
         );
       default:
         return MaterialPageRoute(builder: (_) => const LoginScreen());

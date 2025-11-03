@@ -7,6 +7,7 @@ import '../../../../core/utils/responsive.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/joined_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../routes/app_routes.dart';
 import 'hosted_user_list.dart';
 
 class JoinedEventDetails extends StatefulWidget {
@@ -44,8 +45,8 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
     final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
-
-    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(widget.event.startAt);
+    final eventLocal = widget.event.startAt.toLocal();
+    final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal);
 
     return Dialog(
       elevation: 12,
@@ -60,6 +61,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Header ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -84,6 +86,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               Divider(color: dividerColor, thickness: 1),
               const SizedBox(height: 16),
 
+              // --- Banner ---
               AspectRatio(
                 aspectRatio: 16 / 9,
                 child: widget.event.bannerUrl.isNotEmpty
@@ -107,6 +110,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               ),
               const SizedBox(height: 16),
 
+              // --- Host info ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -144,6 +148,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                     ),
                   ),
 
+                  // --- Cancel/Unregister ---
                   PopupMenuButton<String>(
                     icon: Icon(Icons.more_vert, color: secondaryText),
                     position: PopupMenuPosition.under,
@@ -214,10 +219,11 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                           Navigator.of(context, rootNavigator: true).pop();
                                           Navigator.pop(context);
 
-                                          if (widget.onCancel != null) widget.onCancel!();
-                                          if (widget.onEventCanceled != null) widget.onEventCanceled!();
+                                          widget.onCancel?.call();
+                                          widget.onEventCanceled?.call();
 
-                                          ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+                                          ScaffoldMessenger.of(widget.parentContext)
+                                              .showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 res?.message ??
@@ -228,7 +234,8 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                             ),
                                           );
                                         } catch (_) {
-                                          ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+                                          ScaffoldMessenger.of(widget.parentContext)
+                                              .showSnackBar(
                                             SnackBar(
                                               content: Text(loc.translate('error_occurred')),
                                             ),
@@ -237,7 +244,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                       },
                                       child: Text(loc.translate('yes')),
                                     ),
-
                                   ],
                                 );
                               },
@@ -246,7 +252,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                         );
                       }
                     },
-
                     itemBuilder: (ctx) => [
                       PopupMenuItem(
                         value: 'cancel',
@@ -270,6 +275,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               ),
               const SizedBox(height: 20),
 
+              // --- Description ---
               Text(
                 widget.event.description.isNotEmpty
                     ? widget.event.description
@@ -279,6 +285,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               ),
               const SizedBox(height: 16),
 
+              // --- Info rows ---
               _buildInfoRow(context, Icons.language, loc.translate('language'),
                   widget.event.language.name, textColor, secondaryText),
               _buildInfoRow(
@@ -300,7 +307,8 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                 onTapValue: widget.currentUserId == widget.event.host.id
                     ? () async {
                   try {
-                    final eventDetails = await widget.eventRepository.getEventDetails(
+                    final eventDetails =
+                    await widget.eventRepository.getEventDetails(
                       token: widget.token,
                       eventId: widget.event.id,
                     );
@@ -325,7 +333,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                 }
                     : null,
               ),
-
               _buildInfoRow(context, Icons.access_time, loc.translate('time'),
                   dateFormatted, textColor, secondaryText),
 
@@ -333,6 +340,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               Divider(color: dividerColor, thickness: 1),
               const SizedBox(height: 16),
 
+              // --- Bottom buttons ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -342,16 +350,40 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                     size: ButtonSize.md,
                     icon: const Icon(Icons.share_outlined, size: 18),
                     onPressed: () {
-                      //share
+                      // share
                     },
                   ),
                   const SizedBox(width: 12),
-                  AppButton(
-                    text: loc.translate('join_room'),
-                    size: ButtonSize.md,
-                    icon: const Icon(Icons.meeting_room_outlined, size: 18),
-                    onPressed: () {
-                      //join room
+                  Builder(
+                    builder: (_) {
+                      final now = DateTime.now();
+                      final isEventStarted = now.isAfter(widget.event.startAt);
+
+                      return AppButton(
+                        text: isEventStarted ? loc.translate('join_room') : loc.translate('wait'),
+                        size: ButtonSize.md,
+                        icon: Icon(
+                          Icons.meeting_room_outlined,
+                          size: 18,
+                          color: isEventStarted ? null : Colors.grey[400],
+                        ),
+                        onPressed: isEventStarted
+                            ? () {
+                          Navigator.pushReplacementNamed(
+                            context,
+                            AppRoutes.eventWaiting,
+                            arguments: {
+                              'eventId': widget.event.id,
+                              'eventTitle': widget.event.title,
+                            },
+                          );
+                        }
+                            : null,
+                        variant:
+                        isEventStarted ? ButtonVariant.primary : ButtonVariant.outline,
+                        color:
+                        isEventStarted ? Theme.of(context).colorScheme.primary : Colors.grey[300],
+                      );
                     },
                   ),
                 ],
@@ -373,7 +405,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
       String value,
       Color textColor,
       Color? secondaryText, {
-        VoidCallback? onTapValue, // <-- thêm dòng này
+        VoidCallback? onTapValue,
       }) {
     final t = Theme.of(context).textTheme;
     return Padding(

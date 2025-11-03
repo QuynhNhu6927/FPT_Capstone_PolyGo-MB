@@ -11,6 +11,8 @@ import '../models/events/event_list_response.dart';
 import '../models/events/event_register_request.dart';
 import '../models/events/hosted_event_model.dart';
 import '../models/events/joined_event_list_response.dart';
+import '../models/events/update_event_status_request.dart';
+import '../models/events/update_event_status_response.dart';
 
 class EventService {
   final ApiClient apiClient;
@@ -251,6 +253,31 @@ class EventService {
             (data) => EventKickResponse.fromJson(data),
       );
     } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<UpdateEventStatusResponse>> updateEventStatus({
+    required String token,
+    required UpdateEventStatusRequest request,
+  }) async {
+    try {
+      final response = await apiClient.put(
+        ApiConstants.updateStatusAdmin, // endpoint
+        data: request.toJson(),
+        headers: {
+          ApiConstants.headerAuthorization: 'Bearer $token',
+          ApiConstants.headerContentType: ApiConstants.contentTypeJson,
+        },
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => UpdateEventStatusResponse.fromJson(data),
+      );
+    } on DioError catch (e) {
+      print('Update status failed: ${e.response?.statusCode} - ${e.response?.data}');
       rethrow;
     }
   }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -12,7 +13,7 @@ import '../../shared/app_error_state.dart';
 import 'hosted_event_details.dart';
 import 'hosted_filter.dart';
 
-enum EventStatus { upcoming, past, canceled }
+enum EventStatus { upcoming, live, canceled }
 
 class MyEvents extends StatefulWidget {
   const MyEvents({super.key});
@@ -108,17 +109,24 @@ class _MyEventsState extends State<MyEvents> {
     final query = _searchQuery.trim().toLowerCase();
     final source = (_selectedStatus == null)
         ? _hostedEvents
-        : _hostedEvents.where((e) =>
-    _selectedStatus == EventStatus.upcoming
-        ? e.status == "Approved"
-        : _selectedStatus == EventStatus.canceled
-        ? e.status == "Cancelled"
-        : false).toList();
+        : _hostedEvents.where((e) {
+      switch (_selectedStatus) {
+        case EventStatus.upcoming:
+          return e.status == "Approved";
+        case EventStatus.live:
+          return e.status == "Live";
+        case EventStatus.canceled:
+          return e.status == "Cancelled";
+        default:
+          return false;
+      }
+    }).toList();
 
     if (query.isEmpty) return source;
 
     return source.where((e) => e.title.fuzzyContains(query)).toList();
   }
+
 
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
@@ -155,9 +163,12 @@ class _MyEventsState extends State<MyEvents> {
             children: [
               _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
               const SizedBox(width: 8),
+              _buildStatusButton(EventStatus.live, "Đang diễn ra"),
+              const SizedBox(width: 8),
               _buildStatusButton(EventStatus.canceled, "Đã hủy"),
             ],
           ),
+
           const SizedBox(height: 12),
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -330,9 +341,8 @@ class _MyEventsState extends State<MyEvents> {
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
-
     final formattedDate = event.startAt != null
-        ? "${event.startAt.day.toString().padLeft(2, '0')}/${event.startAt.month.toString().padLeft(2, '0')}/${event.startAt.year} ${event.startAt.hour.toString().padLeft(2, '0')}:${event.startAt.minute.toString().padLeft(2, '0')}"
+        ? DateFormat('dd MMM yyyy, HH:mm').format(event.startAt.toLocal())
         : "";
 
     return GestureDetector(

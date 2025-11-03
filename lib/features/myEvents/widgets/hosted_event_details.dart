@@ -8,6 +8,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/event_details_model.dart';
 import '../../../data/models/events/hosted_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../routes/app_routes.dart';
 import 'hosted_user_list.dart';
 
 class HostedEventDetails extends StatefulWidget {
@@ -45,7 +46,9 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
-    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(widget.event.startAt);
+    final eventLocal = widget.event.startAt.toLocal();
+    final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal);
+
     final durationFormatted =
         "${widget.event.expectedDurationInMinutes ~/ 60}h ${widget.event.expectedDurationInMinutes % 60}m";
 
@@ -341,12 +344,41 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                       },
                     ),
                     const SizedBox(width: 12),
-                    AppButton(
-                      text: loc.translate('start'),
-                      size: ButtonSize.md,
-                      icon: const Icon(Icons.play_circle_outline, size: 18),
-                      onPressed: () {
-                        //start event
+                    Builder(
+                      builder: (_) {
+                        final now = DateTime.now();
+                        final isEventStarted = now.isAfter(widget.event.startAt);
+
+                        return AppButton(
+                          text: isEventStarted
+                              ? loc.translate('start')
+                              : loc.translate('wait'),
+                          size: ButtonSize.md,
+                          icon: Icon(
+                            Icons.play_circle_outline,
+                            size: 18,
+                            color: isEventStarted ? null : Colors.grey[400],
+                          ),
+                          onPressed: isEventStarted
+                              ? () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.eventWaiting,
+                              arguments: {
+                                'eventId': widget.event.id,
+                                'eventTitle': widget.event.title,
+                                'hostId': widget.event.host.id,
+                                'hostName': widget.event.host.name,
+                              },
+                            );
+                          }
+                              : null,
+                          variant:
+                          isEventStarted ? ButtonVariant.primary : ButtonVariant.outline,
+                          color: isEventStarted
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.grey[300],
+                        );
                       },
                     ),
                   ],

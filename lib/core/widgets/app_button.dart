@@ -19,7 +19,7 @@ class AppButton extends StatelessWidget {
     this.onPressed,
     this.variant = ButtonVariant.primary,
     this.size = ButtonSize.md,
-    this.disabled = false,
+    this.disabled = false, Color? color,
   });
 
   double get _height {

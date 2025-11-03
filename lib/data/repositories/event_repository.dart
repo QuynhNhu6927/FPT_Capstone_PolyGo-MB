@@ -7,6 +7,8 @@ import '../models/events/event_model.dart';
 import '../models/events/event_register_request.dart';
 import '../models/events/hosted_event_model.dart';
 import '../models/events/joined_event_model.dart';
+import '../models/events/update_event_status_request.dart';
+import '../models/events/update_event_status_response.dart';
 import '../services/event_service.dart';
 
 class EventRepository {
@@ -156,6 +158,30 @@ class EventRepository {
 
     final res = await _service.kickUser(token: token, request: request);
     return res.data;
+  }
+
+  Future<bool> updateEventStatus({
+    required String token,
+    required String eventId,
+    required String status,
+    String? adminNote,
+  }) async {
+    final request = UpdateEventStatusRequest(
+      eventId: eventId,
+      status: status,
+      adminNote: adminNote,
+    );
+
+    final res = await _service.updateEventStatus(
+      token: token,
+      request: request,
+    );
+
+    // Check message từ API
+    if (res.data != null && res.data!.message.contains("Success")) {
+      return true;
+    }
+    return false;
   }
 
 }
