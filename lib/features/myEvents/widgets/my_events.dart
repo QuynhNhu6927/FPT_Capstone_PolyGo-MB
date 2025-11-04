@@ -13,7 +13,7 @@ import '../../shared/app_error_state.dart';
 import 'hosted_event_details.dart';
 import 'hosted_filter.dart';
 
-enum EventStatus { upcoming, live, canceled }
+enum EventStatus { upcoming, live, canceled, pending }
 
 class MyEvents extends StatefulWidget {
   const MyEvents({super.key});
@@ -116,7 +116,9 @@ class _MyEventsState extends State<MyEvents> {
         case EventStatus.live:
           return e.status == "Live";
         case EventStatus.canceled:
-          return e.status == "Cancelled";
+          return e.status == "Cancelled" || e.status == "Rejected";
+        case EventStatus.pending:
+          return e.status == "Pending";
         default:
           return false;
       }
@@ -126,7 +128,6 @@ class _MyEventsState extends State<MyEvents> {
 
     return source.where((e) => e.title.fuzzyContains(query)).toList();
   }
-
 
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
@@ -164,6 +165,8 @@ class _MyEventsState extends State<MyEvents> {
               _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
               const SizedBox(width: 8),
               _buildStatusButton(EventStatus.live, "Đang diễn ra"),
+              const SizedBox(width: 8),
+              _buildStatusButton(EventStatus.pending, "Chờ duyệt"),
               const SizedBox(width: 8),
               _buildStatusButton(EventStatus.canceled, "Đã hủy"),
             ],

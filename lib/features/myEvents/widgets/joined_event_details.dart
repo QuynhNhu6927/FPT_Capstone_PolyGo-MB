@@ -158,128 +158,119 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                   ),
 
                   // --- Cancel/Unregister ---
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: secondaryText),
-                    position: PopupMenuPosition.under,
-                    offset: const Offset(-16, 8),
-                    onSelected: (value) async {
-                      if (value == 'cancel') {
-                        final reasonController = TextEditingController();
-                        String? errorText;
+                  if (widget.event.status != "Completed" && widget.event.status != "Cancelled"  && widget.event.status != "Live")
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: secondaryText),
+                      position: PopupMenuPosition.under,
+                      offset: const Offset(-16, 8),
+                      onSelected: (value) async {
+                        if (value == 'cancel') {
+                          final reasonController = TextEditingController();
+                          String? errorText;
 
-                        await showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (dialogContext) {
-                            return StatefulBuilder(
-                              builder: (context, setState) {
-                                return AlertDialog(
-                                  title: Text(loc.translate('confirm_cancel')),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(loc.translate('enter_cancel_reason')),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        controller: reasonController,
-                                        maxLines: 3,
-                                        decoration: InputDecoration(
-                                          hintText: loc.translate('cancel_reason_placeholder'),
-                                          border: const OutlineInputBorder(),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 8),
-                                          errorText: errorText,
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (dialogContext) {
+                              return StatefulBuilder(
+                                builder: (context, setState) {
+                                  return AlertDialog(
+                                    title: Text(loc.translate('confirm_cancel')),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(loc.translate('enter_cancel_reason')),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          controller: reasonController,
+                                          maxLines: 3,
+                                          decoration: InputDecoration(
+                                            hintText: loc.translate('cancel_reason_placeholder'),
+                                            border: const OutlineInputBorder(),
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            errorText: errorText,
+                                          ),
                                         ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(dialogContext),
+                                        child: Text(loc.translate('no')),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          final reason = reasonController.text.trim();
+                                          if (reason.isEmpty) {
+                                            setState(() {
+                                              errorText = loc.translate('enter_reason_first');
+                                            });
+                                            return;
+                                          }
+
+                                          try {
+                                            final isHost = widget.currentUserId == widget.event.host.id;
+
+                                            final res = isHost
+                                                ? await widget.eventRepository.cancelEvent(
+                                              token: widget.token,
+                                              eventId: widget.event.id,
+                                              reason: reason,
+                                            )
+                                                : await widget.eventRepository.unregisterEvent(
+                                              token: widget.token,
+                                              eventId: widget.event.id,
+                                              reason: reason,
+                                            );
+
+                                            if (!mounted) return;
+
+                                            Navigator.of(context, rootNavigator: true).pop();
+                                            Navigator.pop(context);
+
+                                            widget.onCancel?.call();
+                                            widget.onEventCanceled?.call();
+
+                                            ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  res?.message ??
+                                                      (isHost
+                                                          ? loc.translate('cancel_success')
+                                                          : loc.translate('unregister_success')),
+                                                ),
+                                              ),
+                                            );
+                                          } catch (_) {
+                                            ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+                                              SnackBar(content: Text(loc.translate('error_occurred'))),
+                                            );
+                                          }
+                                        },
+                                        child: Text(loc.translate('yes')),
                                       ),
                                     ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(dialogContext),
-                                      child: Text(loc.translate('no')),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        final reason = reasonController.text.trim();
-                                        if (reason.isEmpty) {
-                                          setState(() {
-                                            errorText = loc.translate('enter_reason_first');
-                                          });
-                                          return;
-                                        }
-
-                                        try {
-                                          final isHost = widget.currentUserId == widget.event.host.id;
-
-                                          final res = isHost
-                                              ? await widget.eventRepository.cancelEvent(
-                                            token: widget.token,
-                                            eventId: widget.event.id,
-                                            reason: reason,
-                                          )
-                                              : await widget.eventRepository.unregisterEvent(
-                                            token: widget.token,
-                                            eventId: widget.event.id,
-                                            reason: reason,
-                                          );
-
-                                          if (!mounted) return;
-
-                                          Navigator.of(context, rootNavigator: true).pop();
-                                          Navigator.pop(context);
-
-                                          widget.onCancel?.call();
-                                          widget.onEventCanceled?.call();
-
-                                          ScaffoldMessenger.of(widget.parentContext)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                res?.message ??
-                                                    (isHost
-                                                        ? loc.translate('cancel_success')
-                                                        : loc.translate('unregister_success')),
-                                              ),
-                                            ),
-                                          );
-                                        } catch (_) {
-                                          ScaffoldMessenger.of(widget.parentContext)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(loc.translate('error_occurred')),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: Text(loc.translate('yes')),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        );
-                      }
-                    },
-                    itemBuilder: (ctx) => [
-                      PopupMenuItem(
-                        value: 'cancel',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.cancel_outlined,
-                                color: Colors.redAccent, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              loc.translate('cancel'),
-                              style: const TextStyle(
-                                  color: Colors.redAccent,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        }
+                      },
+                      itemBuilder: (ctx) => [
+                        PopupMenuItem(
+                          value: 'cancel',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 20),
+                              const SizedBox(width: 8),
+                              Text(loc.translate('cancel'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+
                 ],
               ),
               const SizedBox(height: 20),

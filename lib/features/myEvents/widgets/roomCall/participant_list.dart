@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:polygo_mobile/features/myEvents/widgets/roomCall/participant_controls_dialog.dart';
 import '../../../../data/services/webrtc_controller.dart';
 
 class ParticipantList extends StatelessWidget {
@@ -67,7 +68,6 @@ class ParticipantList extends StatelessWidget {
 
             const Divider(height: 1),
 
-            // 🔹 Danh sách người tham gia
             Expanded(
               child: participants.isEmpty
                   ? const Center(
@@ -96,22 +96,31 @@ class ParticipantList extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    subtitle: Text(
-                      p.role,
-                      style: const TextStyle(color: Colors.black54),
-                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!p.audioEnabled)
-                          const Icon(Icons.mic_off,
-                              color: Colors.red, size: 18),
+                          const Icon(Icons.mic_off, color: Colors.red, size: 18),
                         if (!p.videoEnabled)
-                          const Icon(Icons.videocam_off,
-                              color: Colors.red, size: 18),
+                          const Icon(Icons.videocam_off, color: Colors.red, size: 18),
                         if (p.isHandRaised)
-                          const Icon(Icons.pan_tool,
-                              color: Colors.amber, size: 18),
+                          const Icon(Icons.pan_tool, color: Colors.amber, size: 18),
+                        if (isHost)
+                          IconButton(
+                            icon: const Icon(Icons.more_vert, size: 20),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => ParticipantControlsDialog(
+                                  participant: p,
+                                  initialMicEnabled: p.audioEnabled,
+                                  initialCamEnabled: p.videoEnabled,
+                                ),
+                              );
+                            },
+                          ),
                       ],
                     ),
                   );

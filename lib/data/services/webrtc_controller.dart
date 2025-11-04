@@ -2,13 +2,18 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'dart:async';
+
+import '../../core/api/api_client.dart';
+import '../repositories/auth_repository.dart';
+import 'auth_service.dart';
 
 class Participant {
   final String id;
   final String name;
-  final String role;
+  String role;
   MediaStream? stream;
   bool audioEnabled;
   bool videoEnabled;
@@ -131,6 +136,7 @@ class WebRTCController extends ChangeNotifier {
           args: [eventId, remoteId, candidateJson],
         );
       } catch (e) {
+        //
       }
     };
 
@@ -159,23 +165,35 @@ class WebRTCController extends ChangeNotifier {
     _hub = HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
 
     _hub!.on('SetRole', (args) {
-      final role = args?[0];
       myConnectionId = args?[1];
       hostId = args?[2];
+
+      if (hostId != null && participants.containsKey(hostId)) {
+        participants[hostId!]!.role = "host";
+      }
+
       notifyListeners();
     });
 
-    _hub!.on('UserJoined', (args) {
+    _hub!.on('UserJoined', (args) async {
       final name = args?[0] ?? "Unknown";
-      final role = args?[1] ?? "attendee";
       final connId = args?[2];
+
       participants[connId] = Participant(
         id: connId,
         name: name,
-        role: role == "host" ? "host" : "attendee",
+        role: connId == hostId ? "host" : "attendee",
       );
       notifyListeners();
+
+      if (connId != myConnectionId) {
+        final pc = await createPeer(connId);
+        final offer = await pc.createOffer();
+        await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, 'offer'));
+        await _hub?.invoke("SendOffer", args: [eventId, connId, offer.sdp]);
+      }
     });
+
 
     _hub!.on('UserLeft', (args) {
       final connId = args?[0];
@@ -183,7 +201,6 @@ class WebRTCController extends ChangeNotifier {
       notifyListeners();
     });
 
-    // Khi nhận từ server
     _hub!.on('ReceiveChatMessage', (args) {
       final sender = args?[0] ?? "Unknown";
       final message = args?[1] ?? "";
@@ -240,11 +257,22 @@ class WebRTCController extends ChangeNotifier {
   }
 
   Future<void> joinRoom() async {
-    if (_hub == null || !isConnected) {
-      return;
+    if (_hub == null || !isConnected) return;
+
+    String actualName = userName;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token != null) {
+        final user = await AuthRepository(AuthService(ApiClient())).me(token);
+        actualName = user.name;
+      }
+    } catch (e) {
+      //
     }
 
-    await _hub!.invoke("JoinRoom", args: [eventId, userName]);
+    print("Joining room with userName: $actualName");
+    await _hub!.invoke("JoinRoom", args: [eventId, actualName]);
 
     try {
       final result = await _hub!.invoke("GetParticipants", args: [eventId]);
@@ -254,7 +282,7 @@ class WebRTCController extends ChangeNotifier {
             participants[id] = Participant(
               id: id,
               name: name,
-              role: "attendee",
+              role: id == hostId ? "host" : "attendee",
             );
           }
         });

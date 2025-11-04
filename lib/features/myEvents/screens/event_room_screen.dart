@@ -107,6 +107,12 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       _localRenderer.srcObject = _controller.localStream;
       await _controller.joinRoom();
 
+      // <-- PRINT HOST & PARTICIPANTS HERE
+      print("Controller hostId: ${_controller.hostId}");
+      _controller.participants.forEach((k, v) {
+        print("Participant: id=${v.id}, name=${v.name}, role=${v.role}");
+      });
+
       if (widget.isHost) {
         Future.delayed(const Duration(seconds: 1), () async {
           await _controller.startCall();
@@ -210,8 +216,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final participantList = _controller.participants.values.toList();
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -222,7 +226,9 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
               child: VideoGrid(
                 eventTitle: widget.eventTitle,
                 localRenderer: _localRenderer,
-                participants: participantList,
+                participants: _controller.participants.values
+                    .where((p) => p.id != _controller.myConnectionId) // loại bỏ host
+                    .toList(),
                 isHost: widget.isHost,
               ),
             ),
@@ -230,7 +236,9 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
             // Participant list
             if (isParticipantsOpen)
               ParticipantList(
-                participants: participantList,
+                participants: _controller.participants.values
+                    .where((p) => p.id != _controller.myConnectionId) // loại bỏ host
+                    .toList(),
                 isHost: widget.isHost,
                 onClose: () => setState(() => isParticipantsOpen = false),
               ),

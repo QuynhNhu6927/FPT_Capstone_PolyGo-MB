@@ -136,27 +136,28 @@ class _JoinedEventsState extends State<JoinedEvents> {
 
   List<JoinedEventModel> get _filteredEvents {
     final query = _searchQuery.trim().toLowerCase();
-    final now = DateTime.now();
+
+    final filteredByUserStatus = _joinedEvents.where((e) => e.userEvent.status != 2).toList();
 
     final source = (_selectedStatus == null)
-        ? _joinedEvents
-        : _joinedEvents.where((e) {
+        ? filteredByUserStatus
+        : filteredByUserStatus.where((e) {
       switch (_selectedStatus) {
         case EventStatus.upcoming:
-          return e.startAt.isAfter(now) && e.status == "Approved";
+          return e.status == "Approved";
         case EventStatus.live:
           return e.status == "Live";
+        case EventStatus.past:
+          return e.status == "Completed";
         case EventStatus.canceled:
           return e.status == "Cancelled";
-        case EventStatus.past:
-          final endTime = e.startAt.add(const Duration(minutes: 30));
-          return endTime.isBefore(now);
         default:
           return false;
       }
     }).toList();
 
     if (query.isEmpty) return source;
+
     return source.where((e) => e.title.fuzzyContains(query)).toList();
   }
 
@@ -221,7 +222,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
               const SizedBox(width: 8),
               _buildStatusButton(EventStatus.past, "Đã kết thúc"),
               const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.canceled, "Đã hủy"),
+              _buildStatusButton(EventStatus.canceled, "Đã bị hủy"),
             ],
           ),
           const SizedBox(height: 12),
