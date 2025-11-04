@@ -348,18 +348,25 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                       builder: (_) {
                         final now = DateTime.now();
                         final isEventStarted = now.isAfter(widget.event.startAt);
+                        final isLive = widget.event.status.toLowerCase() == 'live';
+
+                        final buttonText = isLive
+                            ? loc.translate('join') // 🔹 Khi event đang Live
+                            : isEventStarted
+                            ? loc.translate('start') // 🔹 Khi đến giờ nhưng chưa Live
+                            : loc.translate('wait');
+
+                        final canJoin = isLive || isEventStarted;
 
                         return AppButton(
-                          text: isEventStarted
-                              ? loc.translate('start')
-                              : loc.translate('wait'),
+                          text: buttonText,
                           size: ButtonSize.md,
                           icon: Icon(
-                            Icons.play_circle_outline,
+                            isLive ? Icons.login : Icons.play_circle_outline,
                             size: 18,
-                            color: isEventStarted ? null : Colors.grey[400],
+                            color: canJoin ? null : Colors.grey[400],
                           ),
-                          onPressed: isEventStarted
+                          onPressed: canJoin
                               ? () {
                             Navigator.pushReplacementNamed(
                               context,
@@ -367,15 +374,16 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                               arguments: {
                                 'eventId': widget.event.id,
                                 'eventTitle': widget.event.title,
+                                'eventStatus': widget.event.status,
+                                'isHost': true,
                                 'hostId': widget.event.host.id,
                                 'hostName': widget.event.host.name,
                               },
                             );
                           }
                               : null,
-                          variant:
-                          isEventStarted ? ButtonVariant.primary : ButtonVariant.outline,
-                          color: isEventStarted
+                          variant: canJoin ? ButtonVariant.primary : ButtonVariant.outline,
+                          color: canJoin
                               ? Theme.of(context).colorScheme.primary
                               : Colors.grey[300],
                         );

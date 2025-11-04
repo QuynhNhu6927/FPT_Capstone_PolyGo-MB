@@ -37,6 +37,8 @@ class JoinedEventDetails extends StatefulWidget {
 class _JoinedEventDetailsState extends State<JoinedEventDetails> {
   @override
   Widget build(BuildContext context) {
+    debugPrint("Current user id: ${widget.currentUserId}");
+    debugPrint("Event host id: ${widget.event.host.id}");
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final t = theme.textTheme;
@@ -47,6 +49,13 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
     final eventLocal = widget.event.startAt.toLocal();
     final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal);
+
+    final eventStatus = widget.event.status.toLowerCase();
+    final now = DateTime.now();
+    final isHost = widget.currentUserId == widget.event.host.id;
+    final isEventStarted = now.isAfter(widget.event.startAt);
+
+    Widget? actionButton;
 
     return Dialog(
       elevation: 12,
@@ -341,53 +350,112 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
               const SizedBox(height: 16),
 
               // --- Bottom buttons ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  AppButton(
-                    text: loc.translate('share'),
-                    variant: ButtonVariant.outline,
-                    size: ButtonSize.md,
-                    icon: const Icon(Icons.share_outlined, size: 18),
-                    onPressed: () {
-                      // share
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  Builder(
-                    builder: (_) {
-                      final now = DateTime.now();
-                      final isEventStarted = now.isAfter(widget.event.startAt);
+              Builder(
+                builder: (context) {
+                  Widget? actionButton;
 
-                      return AppButton(
-                        text: isEventStarted ? loc.translate('join_room') : loc.translate('wait'),
+                  switch (eventStatus) {
+                    case 'approved':
+                      if (isEventStarted) {
+                        actionButton = AppButton(
+                          text: isHost ? loc.translate('start') : loc.translate('join'),
+                          size: ButtonSize.md,
+                          icon: const Icon(Icons.meeting_room_outlined, size: 18),
+                          variant: ButtonVariant.primary,
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.eventWaiting,
+                              arguments: {
+                                'eventId': widget.event.id,
+                                'eventTitle': widget.event.title,
+                                'eventStatus': widget.event.status,
+                                'isHost': widget.currentUserId == widget.event.host.id,
+                                'hostId': widget.event.host.id,
+                                'initialMic': true,
+                              },
+                            );
+                          },
+                        );
+                      } else {
+                        actionButton = AppButton(
+                          text: loc.translate('wait'),
+                          size: ButtonSize.md,
+                          icon: Icon(Icons.access_time, size: 18, color: Colors.grey[400]),
+                          variant: ButtonVariant.outline,
+                          onPressed: null,
+                          color: Colors.grey[300],
+                        );
+                      }
+                      break;
+
+                    case 'live':
+                      actionButton = AppButton(
+                        text: loc.translate('join'),
                         size: ButtonSize.md,
-                        icon: Icon(
-                          Icons.meeting_room_outlined,
-                          size: 18,
-                          color: isEventStarted ? null : Colors.grey[400],
-                        ),
-                        onPressed: isEventStarted
-                            ? () {
+                        icon: const Icon(Icons.meeting_room_outlined, size: 18),
+                        variant: ButtonVariant.primary,
+                        onPressed: () {
                           Navigator.pushReplacementNamed(
                             context,
                             AppRoutes.eventWaiting,
                             arguments: {
                               'eventId': widget.event.id,
                               'eventTitle': widget.event.title,
+                              'eventStatus': widget.event.status,
+                              'isHost': widget.currentUserId == widget.event.host.id,
+                              'hostId': widget.event.host.id,
+                              'initialMic': true,
                             },
                           );
-                        }
-                            : null,
-                        variant:
-                        isEventStarted ? ButtonVariant.primary : ButtonVariant.outline,
-                        color:
-                        isEventStarted ? Theme.of(context).colorScheme.primary : Colors.grey[300],
+                        },
                       );
-                    },
-                  ),
-                ],
+                      break;
+
+                    case 'completed':
+                      actionButton = AppButton(
+                        text: loc.translate('share'),
+                        variant: ButtonVariant.outline,
+                        size: ButtonSize.md,
+                        icon: const Icon(Icons.share_outlined, size: 18),
+                        onPressed: () {
+                          // TODO: handle share
+                        },
+                      );
+                      break;
+
+                    case 'cancelled':
+                    case 'rejected':
+                      actionButton = null;
+                      break;
+
+                    default:
+                      actionButton = null;
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (eventStatus == 'completed') ...[
+                        actionButton!,
+                      ] else if (actionButton != null) ...[
+                        AppButton(
+                          text: loc.translate('share'),
+                          variant: ButtonVariant.outline,
+                          size: ButtonSize.md,
+                          icon: const Icon(Icons.share_outlined, size: 18),
+                          onPressed: () {
+                            // TODO: handle share
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        actionButton!,
+                      ],
+                    ],
+                  );
+                },
               ),
+
             ],
           ),
         ),

@@ -69,6 +69,7 @@ class AppRoutes {
 
         final eventId = args?['eventId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
+        final eventStatus = args?['eventStatus'] as String? ?? '';
         final hostId = args?['hostId'] as String? ?? '';
         final hostName = args?['hostName'] as String? ?? '';
         final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
@@ -80,6 +81,7 @@ class AppRoutes {
             hostId: hostId,
             hostName: hostName,
             eventStartAt: startAt,
+            eventStatus: eventStatus,
           ),
         );
 
@@ -87,10 +89,12 @@ class AppRoutes {
         final args = settings.arguments as Map<String, dynamic>?;
         final eventId = args?['eventId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
+        final eventStatus = args?['eventStatus'] as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => MeetingRoomScreen(
             eventId: eventId,
             eventTitle: eventTitle,
+            eventStatus: eventStatus,
           ),
         );
       default:

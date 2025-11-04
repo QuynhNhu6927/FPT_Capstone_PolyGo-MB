@@ -89,14 +89,7 @@ class _CalendarState extends State<Calendar> {
 
       if (!mounted) return;
       setState(() {
-        _joinedEvents = events.where((e) {
-          final hostStatus = e.status.toLowerCase();
-          final userEventStatus = e.userEvent?.status ?? -1;
-
-          return hostStatus == 'approved' &&
-              (userEventStatus == 0 || userEventStatus == 1);
-        }).toList();
-
+        _joinedEvents = events.toList();
         _loading = false;
       });
     } catch (e, st) {
@@ -185,10 +178,6 @@ class _CalendarState extends State<Calendar> {
                 color: Colors.blueAccent,
                 shape: BoxShape.circle,
               ),
-              markerDecoration: const BoxDecoration(
-                color: Colors.blueAccent,
-                shape: BoxShape.circle,
-              ),
               outsideTextStyle: TextStyle(
                 color: isDark ? Colors.grey[700]! : Colors.grey[400]!,
               ),
@@ -198,31 +187,82 @@ class _CalendarState extends State<Calendar> {
               weekendTextStyle: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
               ),
+              markerDecoration: const BoxDecoration(shape: BoxShape.circle),
+            ),
+
+            calendarBuilders: CalendarBuilders<JoinedEventModel>(
+              markerBuilder: (context, date, events) {
+                if (events.isEmpty) return null;
+
+                // Lọc bỏ event Cancelled
+                final filtered = events
+                    .where((e) => e.status.toLowerCase() != 'cancelled')
+                    .toList();
+                if (filtered.isEmpty) return null;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: filtered.take(3).map((e) {
+                    Color color;
+                    switch (e.status.toLowerCase()) {
+                      case 'approved':
+                        color = Colors.blueAccent;
+                        break;
+                      case 'rejected':
+                        color = Colors.amber;
+                        break;
+                      case 'live':
+                        color = Colors.green;
+                        break;
+                      case 'completed':
+                        color = Colors.red;
+                        break;
+                      default:
+                        color = Colors.grey;
+                    }
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ),
+
           const SizedBox(height: 10),
 
           Expanded(
             child: selectedEvents.isEmpty
                 ? Center(
-              child: Text(
-                loc.translate("no_events_found"),
-                style: TextStyle(
-                  color: isDark ? Colors.white54 : Colors.black54,
-                  fontSize: 14,
-                ),
-              ),
-            )
+                    child: Text(
+                      loc.translate("no_events_found"),
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: selectedEvents.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemBuilder: (context, index) {
-                final event = selectedEvents[index];
-                return _buildEventCard(event, isDark)
-                    .animate()
-                    .fadeIn(duration: 300.ms);
-              },
-            ),
+                    itemCount: selectedEvents.length,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemBuilder: (context, index) {
+                      final event = selectedEvents[index];
+                      return _buildEventCard(
+                        event,
+                        isDark,
+                      ).animate().fadeIn(duration: 300.ms);
+                    },
+                  ),
           ),
         ],
       ),
@@ -236,10 +276,10 @@ class _CalendarState extends State<Calendar> {
 
     final cardBackground = isDark
         ? const LinearGradient(
-      colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    )
+            colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
@@ -250,9 +290,9 @@ class _CalendarState extends State<Calendar> {
         final token = prefs.getString('token') ?? '';
 
         if (token.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Bạn chưa đăng nhập')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Bạn chưa đăng nhập')));
           return;
         }
         showDialog(
@@ -284,21 +324,21 @@ class _CalendarState extends State<Calendar> {
             borderRadius: BorderRadius.circular(8),
             child: event.bannerUrl.isNotEmpty
                 ? Image.network(
-              event.bannerUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            )
+                    event.bannerUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  )
                 : Container(
-              width: 60,
-              height: 60,
-              color: Colors.grey[400],
-              child: const Icon(
-                Icons.event_note_rounded,
-                size: 32,
-                color: Colors.white70,
-              ),
-            ),
+                    width: 60,
+                    height: 60,
+                    color: Colors.grey[400],
+                    child: const Icon(
+                      Icons.event_note_rounded,
+                      size: 32,
+                      color: Colors.white70,
+                    ),
+                  ),
           ),
           title: Text(
             event.title,
@@ -312,10 +352,7 @@ class _CalendarState extends State<Calendar> {
           ),
           subtitle: Text(
             formattedDate,
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey[500], fontSize: 12),
           ),
         ),
       ),
