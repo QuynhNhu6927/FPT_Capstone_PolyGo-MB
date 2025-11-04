@@ -410,20 +410,69 @@ class _UserInfoState extends State<UserInfo> {
               children: [
                 GestureDetector(
                   onTap: () => _showFullAvatar(context),
-                  child: CircleAvatar(
-                    radius: sw(context, 36),
-                    backgroundImage:
-                    (avatarUrl != null && avatarUrl.isNotEmpty) ? NetworkImage(avatarUrl) : null,
-                    child: (avatarUrl == null || avatarUrl.isEmpty)
-                        ? Container(
-                      width: sw(context, 72),
-                      height: sw(context, 72),
-                      color: Colors.grey[400],
-                      child: const Icon(Icons.person, size: 36, color: Colors.white),
-                    )
-                        : null,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // --- Avatar với viền gradient nếu Plus ---
+                      Container(
+                        padding: (_user?.planType == 'Plus') ? EdgeInsets.all(3) : EdgeInsets.zero,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: (_user?.planType == 'Plus')
+                              ? const LinearGradient(
+                            colors: [Colors.orange, Colors.amber],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                              : null,
+                        ),
+                        child: CircleAvatar(
+                          radius: sw(context, 36),
+                          backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                              ? NetworkImage(avatarUrl)
+                              : null,
+                          child: (avatarUrl == null || avatarUrl.isEmpty)
+                              ? Container(
+                            width: sw(context, 72),
+                            height: sw(context, 72),
+                            color: Colors.grey[400],
+                            child: const Icon(Icons.person, size: 36, color: Colors.white),
+                          )
+                              : null,
+                        ),
+                      ),
+
+                      // --- Tag tròn nhỏ "P" gradient ---
+                      if (_user?.planType == 'Plus')
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: sw(context, 20),
+                            height: sw(context, 20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Colors.orange, Colors.amber],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "P",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: st(context, 12),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+
                 SizedBox(width: sw(context, 16)),
                 Expanded(
                   child: Column(
@@ -445,9 +494,6 @@ class _UserInfoState extends State<UserInfo> {
                           spacing: 4,
                           runSpacing: 2,
                           children: [
-                            const Icon(Icons.star, color: Colors.blueAccent, size: 18),
-                            Text(meritLevel, style: t.bodyMedium),
-                            const Text("•"),
                             Text("$experiencePoints EXP", style: t.bodyMedium),
                           ],
                         ),

@@ -135,87 +135,188 @@ class _UserProfileState extends State<UserProfile> {
 
     return Align(
       alignment: Alignment.topCenter,
-      child: Container(
-        width: containerWidth,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
-                : [Colors.white, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ✅ Header: Avatar + Name (handle null avatar safely)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (avatarUrl != null && avatarUrl.isNotEmpty)
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundImage: NetworkImage(avatarUrl),
-                  )
-                else
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Colors.grey[300],
-                    child: const Icon(Icons.person, color: Colors.white, size: 36),
-                  ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: t.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      if (meritLevel != null || experiencePoints != null)
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: [
-                            if (meritLevel != null) ...[
-                              const Icon(Icons.star,
-                                  color: Colors.blueAccent, size: 18),
-                              Text(meritLevel, style: t.bodyMedium),
-                            ],
-                            if (meritLevel != null && experiencePoints != null)
-                              const Text("•"),
-                            if (experiencePoints != null)
-                              Text("$experiencePoints EXP", style: t.bodyMedium),
-                          ],
-                        ),
-                    ],
-                  ),
+      child: Column(
+        children: [
+          // ---------------- Header: Avatar + Name + EXP ----------------
+          Container(
+            width: containerWidth,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                    : [Colors.white, Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // --- Avatar với viền gradient nếu Plus ---
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          padding: (user?.planType == 'Plus') ? const EdgeInsets.all(3) : EdgeInsets.zero,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: (user?.planType == 'Plus')
+                                ? const LinearGradient(
+                              colors: [Colors.orange, Colors.amber],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                                : null,
+                          ),
+                          child: CircleAvatar(
+                            radius: 36,
+                            backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                                ? NetworkImage(avatarUrl)
+                                : null,
+                            backgroundColor: Colors.grey[300],
+                            child: (avatarUrl == null || avatarUrl.isEmpty)
+                                ? const Icon(Icons.person, color: Colors.white, size: 36)
+                                : null,
+                          ),
+                        ),
+                        if (user?.planType == 'Plus')
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  colors: [Colors.orange, Colors.amber],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                "P",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
 
-            const SizedBox(height: 20),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: t.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (meritLevel != null || experiencePoints != null)
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 4,
+                              runSpacing: 2,
+                              children: [
+                                if (experiencePoints != null)
+                                  Text("$experiencePoints EXP", style: t.bodyMedium),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
 
-            // ✅ Introduction (only show if not null & not empty)
-            if (introduction != null && introduction.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                const SizedBox(height: 25),
+
+                // ---------------- Buttons ----------------
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start, // căn lề trái
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.person_add),
+                      label: const Text("Add Friend"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB), // màu xanh nút
+                        foregroundColor: Colors.white, // chữ và icon trắng
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.card_giftcard),
+                      label: const Text("Send Gift"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white, 
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ).animate().fadeIn(duration: 400.ms),
+
+          const SizedBox(height: 16),
+
+          // ---------------- Info Section: Introduction, Languages, Interests ----------------
+          Container(
+            width: containerWidth,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                    : [Colors.white, Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (introduction != null && introduction.isNotEmpty) ...[
                   Text(
                     "Introduction",
                     style: t.titleMedium?.copyWith(
@@ -230,13 +331,8 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                   const SizedBox(height: 20),
                 ],
-              ),
 
-            // ✅ Info Sections
-            if (!hasNoData)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                if (!hasNoData) ...[
                   if (nativeLangs.isNotEmpty) ...[
                     Text(
                       "Native Languages",
@@ -272,26 +368,26 @@ class _UserProfileState extends State<UserProfile> {
                     const SizedBox(height: 8),
                     _buildTagList(interests, const Color(0xFFF3F4F6)),
                   ],
-                ],
-              )
-            else
-              Container(
-                width: double.infinity,
-                padding:
-                const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                child: Text(
-                  "No information yet.",
-                  style: t.bodyMedium?.copyWith(
-                    fontSize: 15,
-                    color: theme.colorScheme.outline,
-                    fontStyle: FontStyle.italic,
+                ] else
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    child: Text(
+                      "No information yet.",
+                      style: t.bodyMedium?.copyWith(
+                        fontSize: 15,
+                        color: theme.colorScheme.outline,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-          ],
-        ),
-      ).animate().fadeIn(duration: 400.ms),
+              ],
+            ),
+          ).animate().fadeIn(duration: 400.ms),
+        ],
+      ),
     );
+
   }
 
   Widget _buildTagList(List<String> items, Color color) {

@@ -300,7 +300,9 @@ class _EventsContentState extends State<EventsContent> {
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
+    final formattedDate = event.startAt != null
+        ? DateFormat('dd MMM yyyy, HH:mm').format(event.startAt.toLocal())
+        : '';
 
     return GestureDetector(
       onTap: () => showDialog(context: context, barrierDismissible: true, builder: (_) => EventDetail(event: event)),

@@ -11,6 +11,7 @@ class WaitingRoomScreen extends StatefulWidget {
   final String eventId;
   final String eventTitle;
   final String hostId;
+  final String eventStatus;
   final String hostName;
   final DateTime eventStartAt;
 
@@ -18,6 +19,7 @@ class WaitingRoomScreen extends StatefulWidget {
     super.key,
     required this.eventId,
     required this.eventTitle,
+    required this.eventStatus,
     required this.hostId,
     required this.hostName,
     required this.eventStartAt,
@@ -41,7 +43,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   @override
   void initState() {
     super.initState();
-    _initStream();
+
     _loadCurrentUser();
     _checkEventStatus();
   }
@@ -58,8 +60,9 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         _currentUserId = user.id;
         _isHost = user.id == widget.hostId;
       });
+      _initStream();
     } catch (e) {
-      print("Failed to load user: $e");
+      //
     }
   }
 
@@ -94,9 +97,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
       controller.localStream = stream;
 
       setState(() => isInitialized = true);
-      print("[WaitingRoom] ✓ Stream initialized");
     } catch (e) {
-      print("[WaitingRoom] Media error: $e");
       setState(() {
         permissionError =
         "Permission denied. Please allow access to microphone and camera.";
@@ -134,6 +135,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
           eventId: widget.eventId,
           eventTitle: widget.eventTitle,
           isHost: _isHost,
+          eventStatus: widget.eventStatus,
           initialMicOn: isMicOn,
           initialCameraOn: isCameraOn,
         ),
@@ -250,7 +252,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
                 ),
                 label: Text(
                   _isHost
-                      ? (_eventStarted ? "Start Meeting" : "Wait for Start")
+                      ? (_eventStarted ? "Join Meeting" : "Wait for Start")
                       : "Join Meeting",
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
