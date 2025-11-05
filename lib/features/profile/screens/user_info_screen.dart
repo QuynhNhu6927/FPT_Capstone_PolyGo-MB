@@ -92,47 +92,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               ),
               AchievementsAndGiftsSection(),
               FriendSocialSection(),
-              // const SizedBox(height: 260),
-              //
-              // Center(
-              //   child: ConstrainedBox(
-              //     constraints: BoxConstraints(maxWidth: maxFormWidth),
-              //     child: Padding(
-              //       padding: const EdgeInsets.symmetric(
-              //           horizontal: 24.0, vertical: 8),
-              //       child: SizedBox(
-              //         width: double.infinity,
-              //         child: ElevatedButton.icon(
-              //           onPressed: () => _logout(context),
-              //           icon: const Icon(Icons.logout,
-              //               color: Colors.white, size: 20),
-              //           label: const Text(
-              //             "Logout",
-              //             style: TextStyle(
-              //               fontSize: 16,
-              //               fontWeight: FontWeight.w600,
-              //               color: Colors.white,
-              //             ),
-              //           ),
-              //           style: ElevatedButton.styleFrom(
-              //             backgroundColor: Theme.of(context)
-              //                 .colorScheme
-              //                 .error
-              //                 .withOpacity(0.9),
-              //             padding:
-              //             const EdgeInsets.symmetric(vertical: 14),
-              //             shape: RoundedRectangleBorder(
-              //               borderRadius: BorderRadius.circular(12),
-              //             ),
-              //             elevation: 3,
-              //             shadowColor: Colors.black26,
-              //           ),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(height: 20),
             ],
           ),
         ),

@@ -6,6 +6,7 @@ class UserByIdResponse {
   final String? mail;
   final String? meritLevel;
   final String? gender;
+  final String friendStatus;
   final int? experiencePoints;
   final String? planType;
   final List<dynamic>? speakingLanguages;
@@ -22,6 +23,7 @@ class UserByIdResponse {
     this.mail,
     this.meritLevel,
     this.gender,
+    required this.friendStatus,
     this.experiencePoints,
     this.planType,
     this.speakingLanguages,
@@ -39,6 +41,7 @@ class UserByIdResponse {
       mail: json['mail'],
       meritLevel: json['meritLevel'],
       gender: json['gender'],
+      friendStatus: json['friendStatus'] ?? '',
       experiencePoints: json['experiencePoints'],
       planType: json['planType'],
       speakingLanguages: List<dynamic>.from(json['speakingLanguages'] ?? []),
@@ -57,6 +60,7 @@ class UserByIdResponse {
     'mail': mail,
     'meritLevel': meritLevel,
     'gender': gender,
+    'friendStatus': friendStatus,
     'experiencePoints': experiencePoints,
     'planType': planType,
     'speakingLanguages': speakingLanguages,

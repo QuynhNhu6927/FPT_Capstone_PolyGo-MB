@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'dart:async';
@@ -50,6 +49,7 @@ class WebRTCController extends ChangeNotifier {
   final String userName;
   final bool isHost;
 
+  final VoidCallback? onRoomEnded;
   HubConnection? _hub;
   bool isConnected = false;
   String? myConnectionId;
@@ -66,6 +66,7 @@ class WebRTCController extends ChangeNotifier {
     required this.isHost,
     this.localAudioEnabled = true,
     this.localVideoEnabled = true,
+    this.onRoomEnded,
   });
 
   Future<void> initLocalMedia() async {
@@ -194,7 +195,6 @@ class WebRTCController extends ChangeNotifier {
       }
     });
 
-
     _hub!.on('UserLeft', (args) {
       final connId = args?[0];
       participants.remove(connId);
@@ -235,6 +235,14 @@ class WebRTCController extends ChangeNotifier {
       }
 
       await pc.setRemoteDescription(RTCSessionDescription(sdp, 'answer'));
+    });
+
+    _hub!.on('RoomEnded', (args) async {
+      print("Room has ended by host");
+      await leaveRoom();
+      if (onRoomEnded != null) {
+        onRoomEnded!();
+      }
     });
 
     _hub!.on('ReceiveIceCandidate', (args) async {
@@ -369,6 +377,16 @@ class WebRTCController extends ChangeNotifier {
   void removeChatListener(ValueChanged<ChatMessage> listener) {
     _chatListeners.remove(listener);
   }
+
+  Future<void> endEvent() async {
+    if (!isHost) return;
+    try {
+      await _hub?.invoke("EndRoom", args: [eventId]);
+    } catch (e) {
+      print("Failed to end room: $e");
+    }
+  }
+
 }
 
 String _preferH264(String sdp) {

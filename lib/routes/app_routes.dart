@@ -5,12 +5,14 @@ import '../features/auth/screens/forget_password_screen.dart';
 import '../features/home/screens/notification_screen.dart';
 import '../features/inventories/screens/all_badges_screen.dart';
 import '../features/inventories/screens/all_gifts_screen.dart';
+import '../features/inventories/screens/friends_screen.dart';
 import '../features/myEvents/screens/my_events_screen.dart';
 import '../features/myEvents/screens/event_waiting_screen.dart';
 import '../features/profile/screens/profile_setup_screen.dart';
 import '../features/profile/screens/user_info_screen.dart';
 import '../features/profile/screens/update_profile_screen.dart';
 import '../features/home/screens/home_screen.dart';
+import '../features/rating/screens/end_meeting_sceen.dart';
 import '../features/shop/screens/shop_screen.dart';
 import '../features/users/screens/users_profile_screen.dart';
 import '../features/myEvents/screens/event_room_screen.dart';
@@ -31,6 +33,8 @@ class AppRoutes {
   static const String userProfile = '/user-profile';
   static const String eventWaiting = '/event-waiting';
   static const String eventRoom = '/event-room';
+  static const String friends = '/friend-list';
+  static const String endMeeting = '/end-meeting';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -95,6 +99,22 @@ class AppRoutes {
             eventId: eventId,
             eventTitle: eventTitle,
             eventStatus: eventStatus,
+          ),
+        );
+      case friends:
+        return MaterialPageRoute(builder: (_) => const FriendsScreen());
+      case endMeeting:
+        final args = settings.arguments as Map<String, dynamic>?;
+
+        final eventName = args?['eventName'] as String? ?? '';
+        final eventId = args?['eventId'] as String? ?? '';
+        final hostName = args?['hostName'] as String? ?? '';
+
+        return MaterialPageRoute(
+          builder: (_) => EndMeetingScreen(
+            eventName: eventName,
+            hostName: hostName,
+            eventId: eventId,
           ),
         );
       default:

@@ -6,6 +6,8 @@ import '../../../core/api/api_client.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/event_service.dart';
 import '../../../data/services/webrtc_controller.dart';
+import '../../../routes/app_routes.dart';
+import '../../rating/screens/end_meeting_sceen.dart';
 import '../widgets/roomCall/chat_panel.dart';
 import '../widgets/roomCall/meeting_controls.dart';
 import '../widgets/roomCall/participant_list.dart';
@@ -67,6 +69,24 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isHost: widget.isHost,
       localAudioEnabled: widget.initialMicOn,
       localVideoEnabled: widget.initialCameraOn,
+      onRoomEnded: () {
+        if (!widget.isHost && mounted) {
+          final hostName = _controller.hostId != null
+              ? _controller.participants[_controller.hostId!]?.name ?? "Host"
+              : "Host";
+
+          Navigator.pushReplacementNamed(
+            context,
+            AppRoutes.endMeeting,
+            arguments: {
+              'eventId': widget.eventId,
+              'eventName': widget.eventTitle,
+              'hostName': _controller.participants[_controller.hostId!]?.name ?? 'Host',
+            },
+          );
+
+        }
+      },
     );
     _initMeeting();
   }
@@ -203,8 +223,11 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         _showSnack("Failed to update event status.");
       }
 
-      await _controller.leaveRoom();
-      if (mounted) Navigator.pop(context);
+      await _controller.endEvent();
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
+      }
     } catch (e) {
       _showSnack("Error ending event: $e");
     }
@@ -227,7 +250,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 eventTitle: widget.eventTitle,
                 localRenderer: _localRenderer,
                 participants: _controller.participants.values
-                    .where((p) => p.id != _controller.myConnectionId) // loại bỏ host
+                    .where((p) => p.id != _controller.myConnectionId)
                     .toList(),
                 isHost: widget.isHost,
               ),
@@ -237,7 +260,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
             if (isParticipantsOpen)
               ParticipantList(
                 participants: _controller.participants.values
-                    .where((p) => p.id != _controller.myConnectionId) // loại bỏ host
+                    .where((p) => p.id != _controller.myConnectionId)
                     .toList(),
                 isHost: widget.isHost,
                 onClose: () => setState(() => isParticipantsOpen = false),
