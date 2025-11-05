@@ -3,7 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:polygo_mobile/features/profile/widgets/tag_list.dart';
 import 'package:polygo_mobile/features/profile/widgets/update_user_info.dart';
+import 'package:polygo_mobile/features/profile/widgets/user_info_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
@@ -12,7 +14,6 @@ import '../../../../data/models/auth/me_response.dart';
 import '../../../../data/repositories/auth_repository.dart';
 import '../../../../data/services/auth_service.dart';
 import '../../../../routes/app_routes.dart';
-import '../../../core/widgets/app_dropdown.dart';
 import '../../../data/models/user/update_userinfo_request.dart';
 import '../../../data/repositories/interest_repository.dart';
 import '../../../data/repositories/language_repository.dart';
@@ -24,7 +25,6 @@ import '../../../data/services/media_service.dart';
 import '../../../data/services/user_service.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
-import 'change_password_form.dart';
 
 class UserInfo extends StatefulWidget {
   final VoidCallback? onError;
@@ -70,8 +70,11 @@ class _UserInfoState extends State<UserInfo> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final locale = InheritedLocale.of(context).locale;
-    if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
+    final locale = InheritedLocale
+        .of(context)
+        .locale;
+    if (_currentLocale == null ||
+        _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
       if (_user != null) {
         _loadLearningLanguages(lang: locale.languageCode);
@@ -103,7 +106,9 @@ class _UserInfoState extends State<UserInfo> {
 
       if (!mounted) return;
 
-      final locale = InheritedLocale.of(context).locale;
+      final locale = InheritedLocale
+          .of(context)
+          .locale;
       _currentLocale = locale;
 
       setState(() {
@@ -134,7 +139,8 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingInterests = true);
       final repo = InterestRepository(InterestService(ApiClient()));
-      final interests = await repo.getInterestsMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
+      final interests = await repo.getInterestsMe(
+          token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -155,7 +161,8 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingLearning = true);
       final repo = LanguageRepository(LanguageService(ApiClient()));
-      final langs = await repo.getLearningLanguagesMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
+      final langs = await repo.getLearningLanguagesMe(
+          token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -175,7 +182,8 @@ class _UserInfoState extends State<UserInfo> {
     try {
       setState(() => _loadingNative = true);
       final repo = LanguageRepository(LanguageService(ApiClient()));
-      final langs = await repo.getSpeakingLanguagesMe(token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
+      final langs = await repo.getSpeakingLanguagesMe(
+          token, lang: lang ?? _currentLocale?.languageCode ?? 'vi');
 
       if (!mounted) return;
       setState(() {
@@ -194,45 +202,47 @@ class _UserInfoState extends State<UserInfo> {
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black87,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(
-          children: [
-            if (avatarUrl != null && avatarUrl.isNotEmpty)
-              Center(
-                child: Image.network(
-                  avatarUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
+      builder: (_) =>
+          Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.zero,
+            child: Stack(
+              children: [
+                if (avatarUrl != null && avatarUrl.isNotEmpty)
+                  Center(
+                    child: Image.network(
+                      avatarUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                Positioned(
+                  top: 40,
+                  right: 20,
+                  child: FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.blue,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _updateAvatar();
+                    },
+                    child: const Icon(Icons.edit, color: Colors.white),
+                  ),
                 ),
-              ),
-            Positioned(
-              top: 40,
-              right: 20,
-              child: FloatingActionButton(
-                mini: true,
-                backgroundColor: Colors.blue,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _updateAvatar();
-                },
-                child: const Icon(Icons.edit, color: Colors.white),
-              ),
+                Positioned(
+                  top: 40,
+                  left: 20,
+                  child: IconButton(
+                    icon: const Icon(
+                        Icons.close, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              top: 40,
-              left: 20,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -321,16 +331,17 @@ class _UserInfoState extends State<UserInfo> {
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black54,
-      builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-        backgroundColor: Colors.transparent,
-        child: UpdateUserInfoForm(
-          user: _user!,
-          onUpdated: (updatedUser) {
-            setState(() => _user = updatedUser);
-          },
-        ),
-      ),
+      builder: (_) =>
+          Dialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            backgroundColor: Colors.transparent,
+            child: UpdateUserInfoForm(
+              user: _user!,
+              onUpdated: (updatedUser) {
+                setState(() => _user = updatedUser);
+              },
+            ),
+          ),
     );
   }
 
@@ -340,7 +351,10 @@ class _UserInfoState extends State<UserInfo> {
     final isDark = theme.brightness == Brightness.dark;
     final t = theme.textTheme;
     final loc = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     final bool hasNoData =
         _nativeLangs.isEmpty && _learningLangs.isEmpty && _interests.isEmpty;
@@ -373,204 +387,96 @@ class _UserInfoState extends State<UserInfo> {
 
     if (_user == null) return const SizedBox.shrink();
 
-    final avatarUrl = _user?.avatarUrl;
-    final name = _user?.name ?? '';
-    final meritLevel = _user?.meritLevel;
-    final experiencePoints = _user?.experiencePoints;
     final introduction = _user?.introduction;
 
     return Align(
       alignment: Alignment.topCenter,
-      child: Container(
-        width: containerWidth,
-        padding: EdgeInsets.all(sw(context, 24)),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
-                : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
-          ),
-          borderRadius: BorderRadius.circular(sw(context, 16)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => _showFullAvatar(context),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // --- Avatar với viền gradient nếu Plus ---
-                      Container(
-                        padding: (_user?.planType == 'Plus') ? EdgeInsets.all(3) : EdgeInsets.zero,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: (_user?.planType == 'Plus')
-                              ? const LinearGradient(
-                            colors: [Colors.orange, Colors.amber],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                              : null,
-                        ),
-                        child: CircleAvatar(
-                          radius: sw(context, 36),
-                          backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                              ? NetworkImage(avatarUrl)
-                              : null,
-                          child: (avatarUrl == null || avatarUrl.isEmpty)
-                              ? Container(
-                            width: sw(context, 72),
-                            height: sw(context, 72),
-                            color: Colors.grey[400],
-                            child: const Icon(Icons.person, size: 36, color: Colors.white),
-                          )
-                              : null,
-                        ),
-                      ),
-
-                      // --- Tag tròn nhỏ "P" gradient ---
-                      if (_user?.planType == 'Plus')
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: sw(context, 20),
-                            height: sw(context, 20),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Colors.orange, Colors.amber],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              "P",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: st(context, 12),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+      child: Column(
+        children: [
+          // ----------------- Container 1: Header -----------------
+          Container(
+            width: containerWidth,
+            padding: EdgeInsets.all(sw(context, 24)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                    : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+              ),
+              borderRadius: BorderRadius.circular(sw(context, 16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-
-                SizedBox(width: sw(context, 16)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (name.isNotEmpty)
-                        Text(
-                          name,
-                          style: t.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: st(context, 20),
-                          ),
-                        ),
-                      if (meritLevel != null && experiencePoints != null)
-                        SizedBox(height: sh(context, 4)),
-                      if (meritLevel != null && experiencePoints != null)
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: [
-                            Text("$experiencePoints EXP", style: t.bodyMedium),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-                AppDropdown(
-                  icon: Icons.settings,
-                  currentValue: "",
-                  items: [
-                    loc.translate("personal_info"),
-                    loc.translate("languages_interests"),
-                    loc.translate("change_password"),
-                    loc.translate("logout"),
-                  ],
-                  showIcon: true,
-                  showValue: false,
-                  showArrow: false,
-                  onSelected: (value) {
-                    if (value == loc.translate("personal_info")) {
-                      _showUpdateInfoForm();
-                    } else if (value == loc.translate("languages_interests")) {
-                      Navigator.pushNamed(context, AppRoutes.updateProfile).then((updated) {
-                        if (updated == true) {
-                          _loadUser();
-                        }
-                      });
-                    } else if (value == loc.translate("change_password")) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierColor: Colors.black54,
-                        builder: (_) => Dialog(
-                          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-                          backgroundColor: Colors.transparent,
-                          child: const ChangePasswordForm(),
-                        ),
-                      );
-                    } else if (value == loc.translate("logout")) {
-                      _logout(context);
-                    }
-                  },
-                )
               ],
             ),
-            SizedBox(height: sh(context, 20)),
+            child: UserInfoHeader(
+              user: _user!,
+              onShowFullAvatar: () => _showFullAvatar(context),
+              onShowUpdateInfoForm: _showUpdateInfoForm,
+              onLogout: () => _logout(context),
+              onReloadUser: _loadUser,
+            ),
+          ).animate().fadeIn(duration: 400.ms),
 
-            if (introduction != null && introduction.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    loc.translate("introduction"),
-                    style: t.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: st(context, 16),
-                    ),
-                  ),
-                  SizedBox(height: sh(context, 8)),
-                  Text(
-                    introduction,
-                    style: t.bodyMedium?.copyWith(fontSize: st(context, 14)),
-                  ),
-                  SizedBox(height: sh(context, 20)),
-                ],
+          SizedBox(height: sh(context, 12)),
+
+          // ----------------- Container 2: Info details -----------------
+          Container(
+            width: containerWidth,
+            padding: EdgeInsets.all(sw(context, 24)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                    : [const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
               ),
-
-            Column(
+              borderRadius: BorderRadius.circular(sw(context, 16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (introduction != null && introduction.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        loc.translate("introduction"),
+                        style: t.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: st(context, 16),
+                        ),
+                      ),
+                      SizedBox(height: sh(context, 8)),
+                      Text(
+                        introduction,
+                        style: t.bodyMedium?.copyWith(fontSize: st(context,
+                            14)),
+                      ),
+                      SizedBox(height: sh(context, 20)),
+                    ],
+                  ),
+
+                // Languages + Interests
                 if (hasNoData)
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.updateProfile).then((updated) {
-                        if (updated == true) {
-                          _loadUser();
-                        }
+                      Navigator.pushNamed(context, AppRoutes.updateProfile)
+                          .then((updated) {
+                        if (updated == true) _loadUser();
                       });
                     },
                     child: Container(
@@ -590,119 +496,50 @@ class _UserInfoState extends State<UserInfo> {
                       ),
                     ),
                   )
-                else ...[
-                  // Native Language
-                  if (_nativeLangs.isNotEmpty) ...[
-                    Text(
-                      loc.translate("native_language"),
-                      style: t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: st(context, 15),
-                      ),
-                    ),
-                    SizedBox(height: sh(context, 8)),
-                    SizedBox(
-                      height: sh(context, 25),
-                      child: _loadingNative
-                          ? const Center(child: CircularProgressIndicator())
-                          : ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _nativeLangs.length,
-                        separatorBuilder: (_, __) => SizedBox(width: sw(context, 8)),
-                        itemBuilder: (_, index) => _buildTag(
-                          context,
-                          _nativeLangs[index],
-                          color: Colors.green[100]!,
+                else
+                  ...[
+                    if (_nativeLangs.isNotEmpty) ...[
+                      Text(
+                        loc.translate("native_language"),
+                        style: t.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: st(context, 15),
                         ),
                       ),
-                    ),
-                    SizedBox(height: sh(context, 16)),
-                  ],
-
-                  // Learning Language
-                  if (_learningLangs.isNotEmpty) ...[
-                    Text(
-                      loc.translate("learning"),
-                      style: t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: st(context, 15),
-                      ),
-                    ),
-                    SizedBox(height: sh(context, 8)),
-                    SizedBox(
-                      height: sh(context, 25),
-                      child: _loadingLearning
-                          ? const Center(child: CircularProgressIndicator())
-                          : ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _learningLangs.length,
-                        separatorBuilder: (_, __) => SizedBox(width: sw(context, 8)),
-                        itemBuilder: (_, index) => _buildTag(
-                          context,
-                          _learningLangs[index],
-                          color: Colors.blue[100]!,
+                      SizedBox(height: sh(context, 8)),
+                      TagListWidget(
+                          tags: _nativeLangs, color: Colors.green[100]),
+                      SizedBox(height: sh(context, 16)),
+                    ],
+                    if (_learningLangs.isNotEmpty) ...[
+                      Text(
+                        loc.translate("learning"),
+                        style: t.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: st(context, 15),
                         ),
                       ),
-                    ),
-                    SizedBox(height: sh(context, 20)),
-                  ],
-
-                  // Interests
-                  if (_interests.isNotEmpty) ...[
-                    Text(
-                      loc.translate("interests"),
-                      style: t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: st(context, 16),
+                      SizedBox(height: sh(context, 8)),
+                      TagListWidget(
+                          tags: _learningLangs, color: Colors.blue[100]),
+                      SizedBox(height: sh(context, 20)),
+                    ],
+                    if (_interests.isNotEmpty) ...[
+                      Text(
+                        loc.translate("interests"),
+                        style: t.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: st(context, 16),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: sh(context, 8)),
-                    SizedBox(
-                      height: sh(context, 25),
-                      child: _loadingInterests
-                          ? const Center(child: CircularProgressIndicator())
-                          : ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _interests.length,
-                        separatorBuilder: (_, __) => SizedBox(width: sw(context, 8)),
-                        itemBuilder: (_, index) =>
-                            _buildTag(context, _interests[index]),
-                      ),
-                    ),
+                      SizedBox(height: sh(context, 8)),
+                      TagListWidget(tags: _interests),
+                    ],
                   ],
-                ],
               ],
             ),
-          ],
-        ),
-      ).animate().fadeIn(duration: 400.ms),
-    );
-  }
-
-  Widget _buildTag(BuildContext context, String text, {Color? color}) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    Color backgroundColor =
-        color ?? (isDark ? Colors.grey[800]! : const Color(0xFFF3F4F6));
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: sw(context, 12),
-        vertical: sh(context, 4),
-      ),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(sw(context, 20)),
-      ),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: st(context, 13),
-          color: Colors.black,
-        ),
+          ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
+        ],
       ),
     );
   }

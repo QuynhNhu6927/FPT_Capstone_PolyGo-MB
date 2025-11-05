@@ -51,7 +51,7 @@ class FriendSocialSection extends StatelessWidget {
             // Bạn bè (Friends)
             Expanded(
               child: GestureDetector(
-                onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.friends),
                 child: Container(
                   decoration: sectionDecoration,
                   padding: EdgeInsets.symmetric(

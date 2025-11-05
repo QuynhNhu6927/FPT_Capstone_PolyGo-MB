@@ -59,8 +59,8 @@ class ApiClient {
   }
 
   Future<Response> delete(String endpoint,
-      {Map<String, dynamic>? queryParameters, Map<String, String>? headers}) async {
+      {dynamic data, Map<String, dynamic>? queryParameters, Map<String, String>? headers}) async {
     return await dio.delete(endpoint,
-        queryParameters: queryParameters, options: Options(headers: headers));
+        data: data, queryParameters: queryParameters, options: Options(headers: headers));
   }
 }
