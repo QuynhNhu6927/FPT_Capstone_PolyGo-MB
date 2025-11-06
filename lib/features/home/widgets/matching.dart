@@ -148,7 +148,6 @@ class _MatchingState extends State<Matching> {
       ...user.learningLanguages.map((e) => e.name),
     ];
 
-    // ✅ Kiểm tra xem người dùng có avatar không
     final hasAvatar = (user.avatarUrl != null && user.avatarUrl!.isNotEmpty);
 
     return Container(

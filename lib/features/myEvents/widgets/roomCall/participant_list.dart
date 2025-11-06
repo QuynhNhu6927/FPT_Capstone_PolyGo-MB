@@ -32,7 +32,7 @@ class ParticipantList extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: Column(
           children: [
-            // 🔹 Header
+            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

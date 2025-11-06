@@ -45,7 +45,7 @@ class VideoGrid extends StatelessWidget {
           ),
         ),
 
-        // Host video lớn
+        // Host video
         Expanded(
           flex: 2,
           child: Padding(
@@ -58,7 +58,7 @@ class VideoGrid extends StatelessWidget {
           ),
         ),
 
-        // Other participants (attendees)
+        // attendees
         if (participants.isNotEmpty)
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.25,
@@ -74,7 +74,7 @@ class VideoGrid extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * 0.3,
                     child: ParticipantCard(
                       participant: p,
-                      isHost: isHost, // host có thể điều khiển attendee
+                      isHost: isHost,
                     ),
                   );
                 },
@@ -82,7 +82,6 @@ class VideoGrid extends StatelessWidget {
             ),
           ),
 
-        // "+X" nếu có nhiều attendee
         if (participants.length > 4)
           Align(
             alignment: Alignment.centerRight,

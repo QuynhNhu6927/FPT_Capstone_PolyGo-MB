@@ -171,7 +171,6 @@ class _RequestsState extends State<Requests> {
             child: const Icon(Icons.person, color: Colors.white, size: 25),
           );
 
-          // Nếu planType == Plus thì dùng ShinyAvatar
           if (user.planType == "Plus") {
             avatar = ShinyAvatar(avatarUrl: user.avatarUrl);
           }

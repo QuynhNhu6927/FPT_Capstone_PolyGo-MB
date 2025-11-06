@@ -8,6 +8,8 @@ import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/joined_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../routes/app_routes.dart';
+import '../../rating/screens/rates_screen.dart';
+import '../../rating/screens/rating_screen.dart';
 import 'hosted_user_list.dart';
 
 class JoinedEventDetails extends StatefulWidget {
@@ -35,10 +37,34 @@ class JoinedEventDetails extends StatefulWidget {
 }
 
 class _JoinedEventDetailsState extends State<JoinedEventDetails> {
+  bool? hasRating;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMyRating();
+  }
+
+  Future<void> fetchMyRating() async {
+    try {
+      final myRating = await widget.eventRepository.getMyRating(
+        token: widget.token,
+        eventId: widget.event.id,
+      );
+      if (!mounted) return;
+
+      setState(() {
+        hasRating = myRating?.hasRating ?? false;
+      });
+    } catch (e) {
+      setState(() {
+        hasRating = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    debugPrint("Current user id: ${widget.currentUserId}");
-    debugPrint("Event host id: ${widget.event.host.id}");
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final t = theme.textTheme;
@@ -54,7 +80,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
     final now = DateTime.now();
     final isHost = widget.currentUserId == widget.event.host.id;
     final isEventStarted = now.isAfter(widget.event.startAt);
-
     Widget? actionButton;
 
     return Dialog(
@@ -424,25 +449,102 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                       actionButton = null;
                   }
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (eventStatus == 'completed') ...[
-                        actionButton!,
-                      ] else if (actionButton != null) ...[
+                  // --- Build Row with additional Rate/View Rating button ---
+                  List<Widget> buttons = [];
+
+                  if (actionButton != null) {
+                    // Nếu event completed, actionButton là share
+                    buttons.add(actionButton);
+                  }
+
+                  if (eventStatus == 'completed') {
+                    if (isHost) {
+                      // Host luôn xem rating
+                      buttons.add(const SizedBox(width: 12));
+                      buttons.add(
                         AppButton(
-                          text: loc.translate('share'),
-                          variant: ButtonVariant.outline,
+                          text: loc.translate('view_rating'),
                           size: ButtonSize.md,
-                          icon: const Icon(Icons.share_outlined, size: 18),
+                          variant: ButtonVariant.outline,
+                          icon: const Icon(Icons.star_outline, size: 18),
                           onPressed: () {
-                            // TODO: handle share
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RatesScreen(
+                                  eventId: widget.event.id,
+                                ),
+                              ),
+                            );
                           },
                         ),
-                        const SizedBox(width: 12),
-                        actionButton!,
-                      ],
-                    ],
+                      );
+                    } else {
+                      // Không phải host
+                      buttons.add(const SizedBox(width: 12));
+                      if (hasRating == true) {
+                        // Nếu đã rate → View Rating
+                        buttons.add(
+                          AppButton(
+                            text: loc.translate('view_rating'),
+                            size: ButtonSize.md,
+                            variant: ButtonVariant.outline,
+                            icon: const Icon(Icons.star_outline, size: 18),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RatesScreen(
+                                    eventId: widget.event.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        // Nếu chưa rate → Rate
+                        buttons.add(
+                          AppButton(
+                            text: loc.translate('rate'),
+                            size: ButtonSize.md,
+                            variant: ButtonVariant.primary,
+                            icon: const Icon(Icons.star_rate_outlined, size: 18),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RatingScreen(
+                                    eventId: widget.event.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    }
+                  }
+
+                  if (eventStatus != 'completed' && actionButton != null) {
+                    buttons.insert(
+                      0,
+                      AppButton(
+                        text: loc.translate('share'),
+                        variant: ButtonVariant.outline,
+                        size: ButtonSize.md,
+                        icon: const Icon(Icons.share_outlined, size: 18),
+                        onPressed: () {
+                          // TODO: handle share
+                        },
+                      ),
+                    );
+                    buttons.insert(1, const SizedBox(width: 12));
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: buttons,
                   );
                 },
               ),

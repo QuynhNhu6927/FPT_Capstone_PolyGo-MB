@@ -101,6 +101,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
+                // Logo
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -113,13 +114,14 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                       'lib/assets/Primary.png',
                       fit: BoxFit.cover,
                       height: 48,
-                      width: 80,
+                      width: 75,
                     ),
                   ),
                 ),
 
                 const SizedBox(width: 12),
 
+                // Search bar
                 Expanded(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
@@ -152,14 +154,8 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                               border: InputBorder.none,
                               isCollapsed: true,
                             ),
-                            onChanged: (value) {
-                              widget.onSearchChanged?.call(value);
-                            },
-
-                            onSubmitted: (value) {
-                              widget.onSearchChanged?.call(value);
-                            },
-
+                            onChanged: widget.onSearchChanged,
+                            onSubmitted: widget.onSearchChanged,
                           ),
                         ),
                         if (_isSearching)
@@ -179,6 +175,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 const SizedBox(width: 12),
 
+                // --- NEW: Chat icon ---
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -189,7 +186,44 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                       icon: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Icon(Icons.notifications_none_rounded, size: 26, color: searchTextColor),
+                          Icon(Icons.chat_bubble_outline_rounded,
+                              size: 26, color: searchTextColor),
+                          Positioned(
+                            right: -1,
+                            top: -1,
+                            child: Container(
+                              width: 9,
+                              height: 9,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.conversations);
+                      },
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Notification icon (existing)
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 250),
+                  opacity: _isSearching ? 0.0 : 1.0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    width: _isSearching ? 0 : 42,
+                    child: IconButton(
+                      icon: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(Icons.notifications_none_rounded,
+                              size: 26, color: searchTextColor),
                           Positioned(
                             right: -1,
                             top: -1,
@@ -211,7 +245,8 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                   ),
                 ),
               ],
-            ),
+            )
+
           ),
 
           const SizedBox(height: 8),

@@ -257,7 +257,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               ),
               const SizedBox(width: 12),
 
-              // 🎁 Gift Button
+              // Gift Button
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},
@@ -275,7 +275,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               ),
               const SizedBox(width: 12),
 
-              // 💬 Message Button
+              // Message Button
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},

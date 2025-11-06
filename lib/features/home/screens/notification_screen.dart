@@ -23,7 +23,7 @@ class NotificationScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: const Notification(), //
+      body: const Notification(),
       bottomNavigationBar: const SafeArea(
         top: false,
         child: AppBottomBar(currentIndex: 4),

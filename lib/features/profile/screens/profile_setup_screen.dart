@@ -28,7 +28,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   void _nextStep() {
-    if (_currentStep < 3) { // giờ có 4 bước (0–3)
+    if (_currentStep < 3) {
       setState(() => _currentStep++);
     }
   }
@@ -51,7 +51,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         },
       ),
 
-      // Bước chọn ngôn ngữ học
       SetupLanguageLearn(
         initialSelected: _learningLangs,
         onNext: (langs) {
@@ -60,7 +59,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         },
       ),
 
-      // Bước chọn ngôn ngữ biết
       SetupLanguageKnown(
         initialSelected: _speakingLangs,
         onNext: (langs) {
@@ -70,7 +68,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         onBack: _prevStep,
       ),
 
-      // Bước chọn sở thích
       SetupInterests(
         onBack: _prevStep,
         learningLangs: _learningLangs,

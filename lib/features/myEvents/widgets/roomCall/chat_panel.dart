@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../data/services/webrtc_controller.dart';
 
 class ChatPanel extends StatefulWidget {
-  final List<ChatMessage> messages; //
+  final List<ChatMessage> messages;
   final TextEditingController controller;
   final ValueChanged<String> onSend;
   final VoidCallback onClose;
-  final String myName; //
+  final String myName;
 
   const ChatPanel({
     super.key,
@@ -56,7 +56,7 @@ class _ChatPanelState extends State<ChatPanel> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: Column(
           children: [
-            // 🔹 Header
+            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -76,7 +76,7 @@ class _ChatPanelState extends State<ChatPanel> {
 
             const Divider(height: 1),
 
-            // 🔹 List tin nhắn
+            // List tin nhắn
             Expanded(
               child: widget.messages.isEmpty
                   ? const Center(child: Text("Chưa có tin nhắn nào", style: TextStyle(color: Colors.grey)))
@@ -87,26 +87,62 @@ class _ChatPanelState extends State<ChatPanel> {
                 itemBuilder: (context, index) {
                   final msg = widget.messages[index];
                   final isMe = msg.sender == widget.myName;
-                  return Align(
-                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.blueAccent : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        msg.message,
-                        style: TextStyle(color: isMe ? Colors.white : Colors.black87),
-                      ),
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                      children: [
+                        // Tên người gửi
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            msg.sender,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 2),
+
+                        // Hộp tin nhắn
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          margin: EdgeInsets.only(left: isMe ? 50 : 0, right: isMe ? 0 : 50),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.blueAccent : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            msg.message,
+                            style: TextStyle(color: isMe ? Colors.white : Colors.black87),
+                          ),
+                        ),
+
+                        const SizedBox(height: 2),
+
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            "${msg.timestamp.hour.toString().padLeft(2, '0')}:${msg.timestamp.minute.toString().padLeft(2, '0')}",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },
+
               ),
             ),
 
-            // 🔹 Input field
+            // Input field
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: const BoxDecoration(

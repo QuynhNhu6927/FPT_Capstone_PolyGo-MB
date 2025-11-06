@@ -6,6 +6,7 @@ import 'package:signalr_core/signalr_core.dart';
 import 'dart:async';
 
 import '../../core/api/api_client.dart';
+import '../../core/config/api_constants.dart';
 import '../repositories/auth_repository.dart';
 import 'auth_service.dart';
 
@@ -46,7 +47,7 @@ class WebRTCController extends ChangeNotifier {
   final Map<String, RTCPeerConnection> _peerConnections = {};
   List<ChatMessage> chatMessages = [];
   final String eventId;
-  final String userName;
+  String userName;
   final bool isHost;
 
   final VoidCallback? onRoomEnded;
@@ -162,7 +163,7 @@ class WebRTCController extends ChangeNotifier {
   }
 
   Future<void> initSignalR() async {
-    final hubUrl = "http://160.25.81.144:8080/eventRoomHub";
+    final hubUrl = '${ApiConstants.baseUrl}/eventRoomHub';
     _hub = HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
 
     _hub!.on('SetRole', (args) {
@@ -238,7 +239,7 @@ class WebRTCController extends ChangeNotifier {
     });
 
     _hub!.on('RoomEnded', (args) async {
-      print("Room has ended by host");
+      //
       await leaveRoom();
       if (onRoomEnded != null) {
         onRoomEnded!();
@@ -279,7 +280,7 @@ class WebRTCController extends ChangeNotifier {
       //
     }
 
-    print("Joining room with userName: $actualName");
+    //
     await _hub!.invoke("JoinRoom", args: [eventId, actualName]);
 
     try {
@@ -383,7 +384,7 @@ class WebRTCController extends ChangeNotifier {
     try {
       await _hub?.invoke("EndRoom", args: [eventId]);
     } catch (e) {
-      print("Failed to end room: $e");
+      //
     }
   }
 

@@ -28,7 +28,6 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
 
-    // max width của form trên desktop/tablet
     double maxFormWidth = isDesktop
         ? 500
         : isTablet

@@ -48,7 +48,7 @@ class AchievementsAndGiftsSection extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Thành tựu (Badges)
+            // Badges
             Expanded(
               child: GestureDetector(
                 onTap: () => Navigator.pushNamed(context, AppRoutes.allBadges),
@@ -81,7 +81,7 @@ class AchievementsAndGiftsSection extends StatelessWidget {
               ),
             ),
             SizedBox(width: sw(context, 16)),
-            // Quà (Gifts)
+            // Gifts
             Expanded(
               child: GestureDetector(
                 onTap: () => Navigator.pushNamed(context, AppRoutes.allGifts),

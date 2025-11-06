@@ -8,15 +8,23 @@ import '../widgets/joined_events.dart';
 import '../../shared/app_error_state.dart';
 
 class MyEventsScreen extends StatefulWidget {
-  const MyEventsScreen({super.key});
+  final int initialTab;
+
+  const MyEventsScreen({super.key, this.initialTab = 0});
 
   @override
   State<MyEventsScreen> createState() => _MyEventsScreenState();
 }
 
 class _MyEventsScreenState extends State<MyEventsScreen> {
-  int _selectedTab = 0;
+  late int _selectedTab;
   bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTab = widget.initialTab; // khởi tạo theo tham số
+  }
 
   void _onTabSelected(int index) {
     setState(() => _selectedTab = index);
@@ -58,10 +66,9 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
         child: Column(
           children: [
             MyEventsMenu(
-                currentIndex: _selectedTab,
-                onItemSelected: _onTabSelected,
+              currentIndex: _selectedTab,
+              onItemSelected: _onTabSelected,
             ),
-
             Expanded(
               child: _hasError
                   ? AppErrorState(onRetry: _retry)
@@ -70,7 +77,6 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
           ],
         ),
       ),
-
       bottomNavigationBar: SafeArea(
         top: false,
         child: const AppBottomBar(currentIndex: 1),

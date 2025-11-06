@@ -48,7 +48,7 @@ class FriendSocialSection extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Bạn bè (Friends)
+            // Friends
             Expanded(
               child: GestureDetector(
                 onTap: () => Navigator.pushNamed(context, AppRoutes.friends),
@@ -81,7 +81,7 @@ class FriendSocialSection extends StatelessWidget {
               ),
             ),
             SizedBox(width: sw(context, 16)),
-            // Bài đăng (Posts)
+            // Posts
             Expanded(
               child: GestureDetector(
                 onTap: () => Navigator.pushNamed(context, AppRoutes.home),

@@ -3,11 +3,12 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/api/api_client.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/event_service.dart';
 import '../../../data/services/webrtc_controller.dart';
 import '../../../routes/app_routes.dart';
-import '../../rating/screens/end_meeting_sceen.dart';
 import '../widgets/roomCall/chat_panel.dart';
 import '../widgets/roomCall/meeting_controls.dart';
 import '../widgets/roomCall/participant_list.dart';
@@ -125,9 +126,18 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isMicOn = _controller.localAudioEnabled;
       isCameraOn = _controller.localVideoEnabled;
       _localRenderer.srcObject = _controller.localStream;
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token != null && token.isNotEmpty) {
+        try {
+          final user = await AuthRepository(AuthService(ApiClient())).me(token);
+          _controller.userName = user.name;
+        } catch (e) {
+          print("Failed to get user info: $e");
+        }
+      }
       await _controller.joinRoom();
 
-      // <-- PRINT HOST & PARTICIPANTS HERE
       print("Controller hostId: ${_controller.hostId}");
       _controller.participants.forEach((k, v) {
         print("Participant: id=${v.id}, name=${v.name}, role=${v.role}");

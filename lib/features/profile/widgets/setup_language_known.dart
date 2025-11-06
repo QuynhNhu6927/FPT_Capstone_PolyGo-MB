@@ -104,7 +104,7 @@ class _SetupLanguageKnownState extends State<SetupLanguageKnown> {
     final backgroundSelected = theme.colorScheme.primary.withOpacity(0.1);
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6); // responsive
+    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(sw(context, 24)),

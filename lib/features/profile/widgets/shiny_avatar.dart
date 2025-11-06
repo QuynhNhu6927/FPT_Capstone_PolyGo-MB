@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class ShinyAvatar extends StatefulWidget {
   final String? avatarUrl;
-  final double radius; // thêm tham số radius
+  final double radius;
   const ShinyAvatar({super.key, required this.avatarUrl, this.radius = 25});
 
   @override
@@ -37,7 +37,7 @@ class _ShinyAvatarState extends State<ShinyAvatar>
         return Container(
           width: widget.radius * 2,
           height: widget.radius * 2,
-          padding: const EdgeInsets.all(3), // khung sáng
+          padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: SweepGradient(

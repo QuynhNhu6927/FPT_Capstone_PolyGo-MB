@@ -27,7 +27,7 @@ class UpdateSpeakingLanguage extends StatefulWidget {
 }
 
 class _UpdateSpeakingLanguageState extends State<UpdateSpeakingLanguage> {
-  late List<String> _selected = []; // khởi tạo ngay
+  late List<String> _selected = [];
   List<SpeakLanguageModel> _languages = [];
   bool _isLoading = true;
   String? _error;
@@ -102,7 +102,7 @@ class _UpdateSpeakingLanguageState extends State<UpdateSpeakingLanguage> {
     final backgroundSelected = theme.colorScheme.primary.withOpacity(0.1);
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6); // responsive
+    final crossAxisCount = (screenWidth ~/ 220).clamp(2, 6);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(sw(context, 24)),

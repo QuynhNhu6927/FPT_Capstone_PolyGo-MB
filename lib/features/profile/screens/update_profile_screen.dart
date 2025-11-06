@@ -21,7 +21,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   List<String> _selectedSpeaking = [];
   List<String> _selectedInterests = [];
 
-  // để lưu giá trị ban đầu khi load màn hình
   List<String> _initialLearning = [];
   List<String> _initialSpeaking = [];
   List<String> _initialInterests = [];
@@ -39,12 +38,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 
-    // ban đầu gán giá trị initial = selected
     _selectedLearning = List.from(_initialLearning);
     _selectedSpeaking = List.from(_initialSpeaking);
     _selectedInterests = List.from(_initialInterests);
 
-    setState(() {}); // refresh UI
+    setState(() {});
   }
 
   void _onNextLearning(List<String> selected) {
@@ -63,18 +61,15 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 
-    // Kiểm tra có thay đổi không
     final bool hasChange = _selectedLearning.toSet() != _initialLearning.toSet() ||
         _selectedSpeaking.toSet() != _initialSpeaking.toSet() ||
         _selectedInterests.toSet() != _initialInterests.toSet();
 
     if (!hasChange) {
-      // không có gì thay đổi, pop và trả về false
       Navigator.of(context).pop(false);
       return;
     }
 
-    // nếu có thay đổi thì gọi API
     final req = UpdateProfileRequest(
       learningLanguageIds: _selectedLearning,
       speakingLanguageIds: _selectedSpeaking,
@@ -84,18 +79,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     try {
       await _userRepo.updateProfile(token, req);
 
-      // sau khi thành công, cập nhật initial = selected
       _initialLearning = List.from(_selectedLearning);
       _initialSpeaking = List.from(_selectedSpeaking);
       _initialInterests = List.from(_selectedInterests);
 
-      // show toast thành công
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
         );
 
-        Navigator.of(context).pop(true); // pop trả về true chỉ **sau khi thành công**
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       // show error

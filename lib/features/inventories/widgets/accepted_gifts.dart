@@ -132,7 +132,7 @@ class _AcceptedGiftsState extends State<AcceptedGifts> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hàng 1: Avatar + tên + quà
+              // Avatar + tên + quà
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

@@ -111,7 +111,7 @@ class _WalletState extends State<Wallet> {
       );
     }
 
-    // UI hiển thị balance và transactions
+    // balance và transactions
     final theme = Theme.of(context);
     final t = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -122,7 +122,7 @@ class _WalletState extends State<Wallet> {
       child: ListView(
         padding: EdgeInsets.symmetric(horizontal: sw(context, 16), vertical: sh(context, 16)),
         children: [
-          // Section: My Wallet
+          // My Wallet
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(
@@ -206,7 +206,7 @@ class _WalletState extends State<Wallet> {
             ),
           ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.2, end: 0),
           SizedBox(height: sh(context, 24)),
-          // Section: Transactions
+          // Transactions
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(

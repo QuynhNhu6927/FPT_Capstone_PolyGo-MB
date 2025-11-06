@@ -42,7 +42,7 @@ class _HostedUserListState extends State<HostedUserList> {
     setState(() {
       final index = participants.indexWhere((u) => u.id == userId);
       if (index != -1) {
-        participants[index] = participants[index].copyWith(status: 3); // hoặc remove nếu muốn xóa
+        participants[index] = participants[index].copyWith(status: 3);
       }
     });
     widget.onKick?.call(userId);
@@ -211,7 +211,7 @@ class _HostedUserListState extends State<HostedUserList> {
                                         ? reasonController.text
                                         : 'Vi phạm quy định',
                                   );
-                                  _handleKick(user.id); // <-- cập nhật UI
+                                  _handleKick(user.id);
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Kick thất bại: $e')),

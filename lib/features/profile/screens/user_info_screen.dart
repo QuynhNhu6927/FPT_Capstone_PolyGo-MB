@@ -50,7 +50,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       _isRetrying = true;
     });
 
-    // cho widget con reload
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) setState(() => _isRetrying = false);
     });

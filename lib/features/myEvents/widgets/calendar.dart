@@ -65,7 +65,7 @@ class _CalendarState extends State<Calendar> {
         _id = user.id;
       });
     } catch (e) {
-      debugPrint("Failed to load user: $e");
+      //
     }
   }
 
@@ -92,8 +92,7 @@ class _CalendarState extends State<Calendar> {
         _joinedEvents = events.toList();
         _loading = false;
       });
-    } catch (e, st) {
-      debugPrint("Error loading joined events: $e\n$st");
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _hasError = true;
@@ -104,7 +103,7 @@ class _CalendarState extends State<Calendar> {
 
   List<JoinedEventModel> _getEventsForDay(DateTime day) {
     return _joinedEvents.where((e) {
-      return e.status.toLowerCase() != 'cancelled' &&
+      return e.status.toLowerCase() != 'cancelled'  && e.userEvent.status != 2 &&
           e.startAt.year == day.year &&
           e.startAt.month == day.month &&
           e.startAt.day == day.day;
@@ -194,7 +193,6 @@ class _CalendarState extends State<Calendar> {
               markerBuilder: (context, date, events) {
                 if (events.isEmpty) return null;
 
-                // Lọc bỏ event Cancelled
                 final filtered = events
                     .where((e) => e.status.toLowerCase() != 'cancelled')
                     .toList();
@@ -215,7 +213,7 @@ class _CalendarState extends State<Calendar> {
                         color = Colors.green;
                         break;
                       case 'completed':
-                        color = Colors.red;
+                        color = Colors.grey;
                         break;
                       default:
                         color = Colors.grey;

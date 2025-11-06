@@ -28,7 +28,6 @@ class _ShopScreenState extends State<ShopScreen> {
       _isRetrying = true;
     });
 
-    // Reset isRetrying sau một chút để trigger reload cho widget con
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) setState(() => _isRetrying = false);
     });

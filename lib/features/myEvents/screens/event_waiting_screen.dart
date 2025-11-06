@@ -172,7 +172,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 🔹 Camera Preview
+            // Camera Preview
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: AspectRatio(
@@ -200,7 +200,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
 
             const SizedBox(height: 12),
 
-            // 🔹 Mic / Cam / Settings
+            // Mic / Cam / Settings
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -230,7 +230,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
 
             const SizedBox(height: 30),
 
-            // 🔹 Start / Join button
+            // Start / Join button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ElevatedButton.icon(
