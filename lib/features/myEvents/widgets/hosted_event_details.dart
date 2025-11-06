@@ -9,6 +9,7 @@ import '../../../data/models/events/event_details_model.dart';
 import '../../../data/models/events/hosted_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../routes/app_routes.dart';
+import '../../rating/screens/rates_screen.dart';
 import 'hosted_user_list.dart';
 
 class HostedEventDetails extends StatefulWidget {
@@ -417,65 +418,91 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                   Divider(color: dividerColor, thickness: 1),
                   const SizedBox(height: 16),
 
-                  if (widget.event.status == 'Approved' || widget.event.status.toLowerCase() == 'live')
+                  if (widget.event.status == 'Approved' || widget.event.status.toLowerCase() == 'live' || widget.event.status == 'Completed')
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        // Share button
                         AppButton(
                           text: loc.translate('share'),
                           variant: ButtonVariant.outline,
                           size: ButtonSize.md,
                           icon: const Icon(Icons.share_outlined, size: 18),
                           onPressed: () {
-                            //share
+                            // Chức năng share chưa cần
                           },
                         ),
                         const SizedBox(width: 12),
-                        Builder(
-                          builder: (_) {
-                            final now = DateTime.now();
-                            final isEventStarted = now.isAfter(widget.event.startAt);
-                            final isLive = widget.event.status.toLowerCase() == 'live';
 
-                            final buttonText = isLive
-                                ? loc.translate('join')
-                                : isEventStarted
-                                ? loc.translate('start')
-                                : loc.translate('wait');
+                        // View rating button (chỉ hiển thị khi Completed)
+                        if (widget.event.status == 'Completed')
+                          AppButton(
+                            text: loc.translate('view_rating'),
+                            variant: ButtonVariant.outline,
+                            size: ButtonSize.md,
+                            icon: const Icon(Icons.star_outline, size: 18),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RatesScreen(
+                                    eventId: widget.event.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
 
-                            final canJoin = isLive || isEventStarted;
+                        // Join/Start/Wait button cho Approved/Live
+                        if (widget.event.status == 'Approved' || widget.event.status.toLowerCase() == 'live')
+                          Builder(
+                            builder: (_) {
+                              final now = DateTime.now();
+                              final isEventStarted = now.isAfter(widget.event.startAt);
+                              final isLive = widget.event.status.toLowerCase() == 'live';
 
-                            return AppButton(
-                              text: buttonText,
-                              size: ButtonSize.md,
-                              icon: Icon(
-                                isLive ? Icons.login : Icons.play_circle_outline,
-                                size: 18,
-                                color: canJoin ? null : Colors.grey[400],
-                              ),
-                              onPressed: canJoin
-                                  ? () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.eventWaiting,
-                                  arguments: {
-                                    'eventId': widget.event.id,
-                                    'eventTitle': widget.event.title,
-                                    'eventStatus': widget.event.status,
-                                    'isHost': true,
-                                    'hostId': widget.event.host.id,
-                                    'hostName': widget.event.host.name,
-                                  },
-                                );
-                              }
-                                  : null,
-                              variant: canJoin ? ButtonVariant.primary : ButtonVariant.outline,
-                              color: canJoin
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey[300],
-                            );
-                          },
-                        ),
+                              final buttonText = isLive
+                                  ? loc.translate('join')
+                                  : isEventStarted
+                                  ? loc.translate('start')
+                                  : loc.translate('wait');
+
+                              final canJoin = isLive || isEventStarted;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: AppButton(
+                                  text: buttonText,
+                                  size: ButtonSize.md,
+                                  icon: Icon(
+                                    isLive ? Icons.login : Icons.play_circle_outline,
+                                    size: 18,
+                                    color: canJoin ? null : Colors.grey[400],
+                                  ),
+                                  onPressed: canJoin
+                                      ? () {
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      AppRoutes.eventWaiting,
+                                      arguments: {
+                                        'eventId': widget.event.id,
+                                        'eventTitle': widget.event.title,
+                                        'eventStatus': widget.event.status,
+                                        'isHost': true,
+                                        'hostId': widget.event.host.id,
+                                        'hostName': widget.event.host.name,
+                                      },
+                                    );
+                                  }
+                                      : null,
+                                  variant: canJoin ? ButtonVariant.primary : ButtonVariant.outline,
+                                  color: canJoin
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.grey[300],
+                                ),
+                              );
+                            },
+                          ),
                       ],
                     ),
 

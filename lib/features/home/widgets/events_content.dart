@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:intl/intl.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../data/models/events/coming_event_model.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/event_service.dart';
 import '../../shared/app_error_state.dart';
-import 'event_details.dart';
+import 'event_card.dart';
 import 'event_filter.dart';
+import 'event_filter_bar.dart';
 
 class EventsContent extends StatefulWidget {
   final String searchQuery;
@@ -26,11 +26,16 @@ class _EventsContentState extends State<EventsContent> {
 
   bool _loading = true;
   bool _hasError = false;
+  bool _isLoadingMore = false;
 
-  List<EventModel> _allEvents = [];
+  // Matching events (phân trang)
   List<EventModel> _matchingEvents = [];
+  int _currentPage = 1;
+  int _totalPages = 1;
+  int _pageSize = 8;
 
-  bool _isShowingMatching = true;
+  // Upcoming events (khi có filter)
+  List<ComingEventModel> _filteredUpcomingEvents = [];
 
   List<Map<String, String>> _filterLanguages = [];
   List<Map<String, String>> _filterInterests = [];
@@ -42,7 +47,8 @@ class _EventsContentState extends State<EventsContent> {
     ..._filterInterests.map((e) => e['name'] ?? ''),
   ];
 
-  bool get _hasActiveFilter => _filterLanguages.isNotEmpty || _filterInterests.isNotEmpty;
+  bool get _hasActiveFilter =>
+      _filterLanguages.isNotEmpty || _filterInterests.isNotEmpty;
 
   @override
   void initState() {
@@ -50,21 +56,78 @@ class _EventsContentState extends State<EventsContent> {
     _repository = EventRepository(EventService(ApiClient()));
   }
 
+  bool _initialized = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context);
-    if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
+
+    if (locale.languageCode == "en" && !_initialized) {
+      return;
+    }
+
+    if (!_initialized) {
+      _initialized = true;
       _currentLocale = locale;
-      _loadMatchingEvents(lang: locale.languageCode);
+      Future.microtask(() {
+        _loadMatchingEvents(reset: true, lang: locale.languageCode);
+      });
+    } else if (_currentLocale!.languageCode != locale.languageCode) {
+      _currentLocale = locale;
+      Future.microtask(() {
+        _loadMatchingEvents(reset: true, lang: locale.languageCode);
+      });
     }
   }
 
-  Future<void> _loadMatchingEvents({String? lang}) async {
+  Future<void> _loadMatchingEvents({bool reset = false, String? lang}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _hasError = false;
+        _currentPage = 1;
+        _matchingEvents.clear();
+      });
+    } else {
+      setState(() => _isLoadingMore = true);
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      if (token.isEmpty) throw Exception("Missing token");
+
+      final response = await _repository.getMatchingEventsPaged(
+        token,
+        lang: lang ?? 'vi',
+        pageNumber: _currentPage,
+        pageSize: _pageSize,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _matchingEvents.addAll(response.items);
+        _totalPages = response.totalPages;
+        _loading = false;
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _hasError = true;
+        _loading = false;
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  // API UPCOMING (filter)
+  Future<void> _loadUpcomingEvents({String? lang}) async {
     setState(() {
       _loading = true;
       _hasError = false;
-      _isShowingMatching = true;
+      _filteredUpcomingEvents.clear();
     });
 
     try {
@@ -75,54 +138,20 @@ class _EventsContentState extends State<EventsContent> {
       final languageIds = _filterLanguages.map((e) => e['id']!).toList();
       final interestIds = _filterInterests.map((e) => e['id']!).toList();
 
-      final comingEvents = await _repository.getUpcomingEvents(
+      final response = await _repository.getUpcomingEventsPaged(
         token,
         lang: lang ?? 'vi',
         pageNumber: 1,
-        pageSize: 50,
+        pageSize: _pageSize,
         languageIds: languageIds,
         interestIds: interestIds,
       );
 
-      final events = comingEvents.map((e) => EventModel(
-        id: e.id,
-        title: e.title,
-        description: e.description,
-        status: e.status,
-        startAt: e.startAt,
-        expectedDurationInMinutes: e.expectedDurationInMinutes,
-        registerDeadline: e.registerDeadline,
-        allowLateRegister: e.allowLateRegister,
-        capacity: e.capacity,
-        fee: e.fee.toInt(),
-        bannerUrl: e.bannerUrl,
-        isPublic: e.isPublic,
-        numberOfParticipants: e.numberOfParticipants,
-        planType: e.planType,
-        isParticipant: e.isParticipant,
-        host: HostModel(
-          id: e.host.id,
-          name: e.host.name,
-          avatarUrl: e.host.avatarUrl,
-        ),
-        language: LanguageModel(
-          id: e.language.id,
-          code: e.language.code,
-          name: e.language.name,
-          iconUrl: e.language.iconUrl,
-        ),
-        categories: e.categories.map((c) => CategoryModel(
-          id: c.id,
-          name: c.name,
-          iconUrl: c.iconUrl,
-        )).toList(),
-      )).toList();
-
       if (!mounted) return;
       setState(() {
-        _matchingEvents = events;
+        _filteredUpcomingEvents = response.items;
+        _totalPages = response.totalPages;
         _loading = false;
-        _hasError = false;
       });
     } catch (e) {
       if (!mounted) return;
@@ -133,52 +162,29 @@ class _EventsContentState extends State<EventsContent> {
     }
   }
 
-  Future<void> _loadAllEvents({String? lang}) async {
-    setState(() {
-      _loading = true;
-      _hasError = false;
-      _isShowingMatching = false;
-    });
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
-      if (token.isEmpty) throw Exception("Missing token");
-
-      final events = await _repository.getMatchingEvents(
-        token,
-        lang: lang ?? 'vi',
-        pageNumber: 1,
-        pageSize: 50,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _allEvents = events;
-        _loading = false;
-        _hasError = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _hasError = true;
-        _loading = false;
-      });
-    }
-  }
-
-  List<EventModel> get _filteredEvents {
+  List<dynamic> get _displayedEvents {
     final query = widget.searchQuery.trim();
-    final source = _hasActiveFilter ? _matchingEvents : (_isShowingMatching ? _matchingEvents : _allEvents);
+    final source = _hasActiveFilter
+        ? _filteredUpcomingEvents
+        : _matchingEvents;
 
     if (query.isEmpty) return source;
 
-    return source.where((e) => e.title.fuzzyContains(query)).toList();
+    return source.where((e) {
+      if (e is EventModel) {
+        return e.title.fuzzyContains(query);
+      } else if (e is ComingEventModel) {
+        return e.title.fuzzyContains(query);
+      }
+      return false;
+    }).toList();
   }
+
+  bool get _canLoadMore =>
+      !_hasActiveFilter && _currentPage < _totalPages && !_isLoadingMore;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 2 : width < 1000 ? 3 : 4;
     final loc = AppLocalizations.of(context);
@@ -191,177 +197,97 @@ class _EventsContentState extends State<EventsContent> {
         child: AppErrorState(
           onRetry: () {
             if (_hasActiveFilter) {
-              _loadMatchingEvents(lang: _currentLocale?.languageCode);
+              _loadUpcomingEvents(lang: _currentLocale?.languageCode);
             } else {
-              _loadAllEvents(lang: _currentLocale?.languageCode);
+              _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
             }
           },
         ),
       );
     }
 
-    final eventsToShow = _filteredEvents;
-    if (eventsToShow.isEmpty) return Center(child: Text(loc.translate("no_events_found")));
+    final eventsToShow = _displayedEvents;
 
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EventFilter()),
-                  );
-
-                  if (result != null && result is Map<String, dynamic>) {
-                    setState(() {
-                      _filterLanguages = List<Map<String, String>>.from(result['languages'] ?? []);
-                      _filterInterests = List<Map<String, String>>.from(result['interests'] ?? []);
-                    });
-                    _loadMatchingEvents(lang: _currentLocale?.languageCode);
-                  }
-                },
-                icon: const Icon(Icons.filter_alt_outlined),
-                label: Text(loc.translate("filter")),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  foregroundColor: theme.colorScheme.onPrimaryContainer,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  elevation: 1,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 38,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _selectedFilters.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final tag = _selectedFilters[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.5)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(tag, style: TextStyle(color: theme.colorScheme.primary, fontSize: 13, fontWeight: FontWeight.w500)),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _filterLanguages.removeWhere((f) => f['name'] == tag);
-                                  _filterInterests.removeWhere((f) => f['name'] == tag);
-                                });
-                                _hasActiveFilter ? _loadMatchingEvents(lang: _currentLocale?.languageCode) : _loadAllEvents(lang: _currentLocale?.languageCode);
-                              },
-                              child: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+          EventFilterBar(
+            selectedFilters: _selectedFilters,
+            onOpenFilter: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EventFilter()),
+              );
+              if (result != null && result is Map<String, dynamic>) {
+                setState(() {
+                  _filterLanguages =
+                  List<Map<String, String>>.from(result['languages'] ?? []);
+                  _filterInterests =
+                  List<Map<String, String>>.from(result['interests'] ?? []);
+                });
+                if (_hasActiveFilter) {
+                  _loadUpcomingEvents(lang: _currentLocale?.languageCode);
+                } else {
+                  _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
+                }
+              }
+            },
+            onRemoveFilter: (tag) {
+              setState(() {
+                _filterLanguages.removeWhere((f) => f['name'] == tag);
+                _filterInterests.removeWhere((f) => f['name'] == tag);
+              });
+              _hasActiveFilter
+                  ? _loadUpcomingEvents(lang: _currentLocale?.languageCode)
+                  : _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
+            },
           ),
           const SizedBox(height: 16),
+
           Expanded(
-            child: MasonryGridView.count(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              itemCount: eventsToShow.length,
-              itemBuilder: (context, index) => _buildEventCard(context, eventsToShow[index]),
+            child: eventsToShow.isEmpty
+                ? Center(child: Text(loc.translate("no_events_found")))
+                : SingleChildScrollView(
+              child: Column(
+                children: [
+                  MasonryGridView.count(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    itemCount: eventsToShow.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) =>
+                        EventCard(event: eventsToShow[index]),
+                  ),
+                  if (_canLoadMore)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() => _currentPage++);
+                          _loadMatchingEvents(
+                            reset: false,
+                            lang: _currentLocale?.languageCode,
+                          );
+                        },
+                        child: _isLoadingMore
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                            : Text(loc.translate("load_more")),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildEventCard(BuildContext context, EventModel event) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final cardBackground = isDark
-        ? const LinearGradient(colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)], begin: Alignment.topLeft, end: Alignment.bottomRight)
-        : const LinearGradient(colors: [Colors.white, Colors.white]);
-
-    final textColor = isDark ? Colors.white70 : Colors.black87;
-    final formattedDate = event.startAt != null
-        ? DateFormat('dd MMM yyyy, HH:mm').format(event.startAt.toLocal())
-        : '';
-
-    return GestureDetector(
-      onTap: () => showDialog(context: context, barrierDismissible: true, builder: (_) => EventDetail(event: event)),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: isDark ? Colors.black.withOpacity(0.3) : Colors.black12, blurRadius: 8, offset: const Offset(0, 4))],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 10,
-                child: event.bannerUrl.isNotEmpty
-                    ? Image.network(event.bannerUrl, fit: BoxFit.cover, width: double.infinity, errorBuilder: (_, __, ___) => Container(color: Colors.grey[300], child: const Center(child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70))))
-                    : Container(color: Colors.grey[400], child: const Center(child: Icon(Icons.event_note_rounded, size: 64, color: Colors.white70))),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  SizedBox(
-                    height: 36,
-                    child: Text(event.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, height: 1.3, color: textColor)),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(formattedDate, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey[500])),
-                ]),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: SizedBox(
-                  height: 28,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: event.categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, tagIndex) {
-                      final category = event.categories[tagIndex];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(isDark ? 0.25 : 0.12),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(category.name, style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w500)),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ).animate().fadeIn(duration: 300.ms),
     );
   }
 }

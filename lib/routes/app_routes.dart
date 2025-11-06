@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:polygo_mobile/features/chat/screens/conversation_list_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/forget_password_screen.dart';
+import '../features/chat/screens/conversation_screen.dart';
 import '../features/home/screens/notification_screen.dart';
 import '../features/inventories/screens/all_badges_screen.dart';
 import '../features/inventories/screens/all_gifts_screen.dart';
@@ -13,6 +15,8 @@ import '../features/profile/screens/user_info_screen.dart';
 import '../features/profile/screens/update_profile_screen.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/rating/screens/end_meeting_sceen.dart';
+import '../features/rating/screens/rates_screen.dart';
+import '../features/rating/screens/rating_screen.dart';
 import '../features/shop/screens/shop_screen.dart';
 import '../features/users/screens/users_profile_screen.dart';
 import '../features/myEvents/screens/event_room_screen.dart';
@@ -35,6 +39,10 @@ class AppRoutes {
   static const String eventRoom = '/event-room';
   static const String friends = '/friend-list';
   static const String endMeeting = '/end-meeting';
+  static const String rating = '/rating';
+  static const String rates = '/rates';
+  static const String conversations = '/conversations';
+  static const String conversation = '/conversation';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -105,17 +113,47 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const FriendsScreen());
       case endMeeting:
         final args = settings.arguments as Map<String, dynamic>?;
-
-        final eventName = args?['eventName'] as String? ?? '';
         final eventId = args?['eventId'] as String? ?? '';
-        final hostName = args?['hostName'] as String? ?? '';
-
         return MaterialPageRoute(
           builder: (_) => EndMeetingScreen(
-            eventName: eventName,
-            hostName: hostName,
             eventId: eventId,
           ),
+        );
+      case rating:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final eventId = args?['eventId'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => RatingScreen(
+            eventId: eventId,
+          )
+        );
+      case rates:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final eventId = args?['eventId'] as String? ?? '';
+        return MaterialPageRoute(
+            builder: (_) => RatesScreen(
+              eventId: eventId,
+            )
+        );
+      case conversations:
+        return MaterialPageRoute(builder: (_) => const ConversationListScreen());
+      case conversation:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final eventId = args?['eventId'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => EndMeetingScreen(
+            eventId: eventId,
+          ),
+        );
+      case rating:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final conversationId = args?['conversationId'] as String? ?? '';
+        final userName = args?['userName'] as String? ?? '';
+        return MaterialPageRoute(
+            builder: (_) => ConversationScreen(
+              conversationId: conversationId,
+              userName: userName,
+            )
         );
       default:
         return MaterialPageRoute(builder: (_) => const LoginScreen());

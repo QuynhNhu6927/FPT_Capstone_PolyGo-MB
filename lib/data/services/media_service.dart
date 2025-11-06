@@ -46,7 +46,7 @@ class MediaService {
         statusCode: response.statusCode,
       );
     } on DioError catch (e) {
-      print('Upload file error: ${e.response?.data}');
+      //
       rethrow;
     }
   }

@@ -45,7 +45,7 @@ class GiftService {
       );
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Get gifts error: ${e.response?.data}');
+        //
       }
       rethrow;
     }
@@ -103,7 +103,7 @@ class GiftService {
       );
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Get my gifts error: ${e.response?.data}');
+        //
       }
       rethrow;
     }
@@ -161,7 +161,7 @@ class GiftService {
       );
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Get received gifts error: ${e.response?.data}');
+        //
       }
       rethrow;
     }

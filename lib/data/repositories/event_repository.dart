@@ -1,10 +1,20 @@
+import 'package:flutter/cupertino.dart';
+
+import '../models/api_response.dart';
+import '../models/events/coming_event_list_response.dart';
 import '../models/events/coming_event_model.dart';
 import '../models/events/event_cancel_request.dart';
 import '../models/events/event_cancel_response.dart';
 import '../models/events/event_details_model.dart';
 import '../models/events/event_kick_request.dart';
+import '../models/events/event_list_response.dart';
 import '../models/events/event_model.dart';
+import '../models/events/event_my_rating_response.dart';
+import '../models/events/event_rating_item.dart';
+import '../models/events/event_rating_request.dart';
+import '../models/events/event_rating_response.dart';
 import '../models/events/event_register_request.dart';
+import '../models/events/event_update_rating_request.dart';
 import '../models/events/hosted_event_model.dart';
 import '../models/events/joined_event_model.dart';
 import '../models/events/update_event_status_request.dart';
@@ -33,6 +43,30 @@ class EventRepository {
     return res.data!.items;
   }
 
+  Future<EventListResponse> getMatchingEventsPaged(
+      String token, {
+        String lang = 'en',
+        int pageNumber = 1,
+        int pageSize = 8,
+      }) async {
+    final res = await _service.getMatchingEvents(
+      token: token,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+
+    return res.data ?? EventListResponse(
+      items: [],
+      totalItems: 0,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize: pageSize,
+      hasPreviousPage: false,
+      hasNextPage: false,
+    );
+  }
+
   Future<List<ComingEventModel>> getUpcomingEvents(
       String token, {
         String lang = 'en',
@@ -52,6 +86,38 @@ class EventRepository {
 
     if (res.data == null) return [];
     return res.data!.items;
+  }
+
+  Future<ComingEventListResponse> getUpcomingEventsPaged(
+      String token, {
+        String lang = 'en',
+        int pageNumber = 1,
+        int pageSize = 10,
+        List<String>? languageIds,
+        List<String>? interestIds,
+      }) async {
+    final res = await _service.getUpcomingEvents(
+      token: token,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      languageIds: languageIds,
+      interestIds: interestIds,
+    );
+
+    if (res.data == null) {
+      return ComingEventListResponse(
+        items: [],
+        totalItems: 0,
+        currentPage: 1,
+        totalPages: 1,
+        pageSize: pageSize,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      );
+    }
+
+    return res.data!;
   }
 
   Future<EventRegisterResponse?> registerEvent({
@@ -144,6 +210,18 @@ class EventRepository {
     return res.data?.data;
   }
 
+  Future<EventModel?> getEventDetail({
+    required String token,
+    required String eventId,
+    String lang = 'en',
+  }) async {
+    return await _service.getEventDetail(
+      token: token,
+      eventId: eventId,
+      lang: lang,
+    );
+  }
+
   Future<EventKickResponse?> kickUser({
     required String token,
     required String eventId,
@@ -177,11 +255,79 @@ class EventRepository {
       request: request,
     );
 
-    // Check message từ API
     if (res.data != null && res.data!.message.contains("Success")) {
       return true;
     }
     return false;
   }
+
+  Future<ApiResponse<EventRatingResponse>> rateEvent({
+    required String token,
+    required String eventId,
+    int rating = 5,
+    String comment = '',
+    String giftId = '',
+    int giftQuantity = 0,
+  }) async {
+    final request = EventRatingRequest(
+      eventId: eventId,
+      rating: rating,
+      comment: comment,
+      giftId: giftId,
+      giftQuantity: giftQuantity,
+    );
+
+    return await _service.rateEvent(token: token, request: request);
+  }
+
+  Future<EventMyRatingModel?> getMyRating({
+    required String token,
+    required String eventId,
+  }) async {
+    try {
+      final res = await _service.getMyRating(token: token, eventId: eventId);
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<EventRatingItem>> getAllRatings({
+    required String token,
+    required String eventId,
+    String lang = 'en',
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      final res = await _service.getAllRatings(
+        token: token,
+        eventId: eventId,
+        lang: lang,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      );
+
+      return res.items;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<ApiResponse<EventRatingResponse>> updateRating({
+    required String token,
+    required String eventId,
+    required int rating,
+    required String comment,
+  }) async {
+    final request = EventUpdateRatingRequest(
+      eventId: eventId,
+      rating: rating,
+      comment: comment,
+    );
+
+    return await _service.updateRating(token: token, request: request);
+  }
+
 
 }

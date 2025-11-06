@@ -88,7 +88,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
         _id = user.id;
       });
     } catch (e) {
-      debugPrint("Failed to load user: $e");
+      //
     }
   }
 
@@ -123,9 +123,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
         _loading = false;
         _hasError = false;
       });
-    } catch (e, st) {
-      print("Error loading joined events: $e");
-      print(st);
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _hasError = true;
@@ -188,22 +186,20 @@ class _JoinedEventsState extends State<JoinedEvents> {
       final theme = Theme.of(context);
       final isSelected = _selectedStatus == status;
 
-      return Expanded(
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _selectedStatus = isSelected ? null : status;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
-            foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            elevation: 1,
-          ),
-          child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+      return ElevatedButton(
+        onPressed: () {
+          setState(() {
+            _selectedStatus = isSelected ? null : status;
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
+          foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          elevation: 1,
         ),
+        child: Text(label, style: const TextStyle(fontSize: 14)),
       );
     }
 
@@ -214,16 +210,19 @@ class _JoinedEventsState extends State<JoinedEvents> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.live, "Đang diễn ra"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.past, "Đã kết thúc"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.canceled, "Đã bị hủy"),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.live, "Đang diễn ra"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.canceled, "Đã bị hủy"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.past, "Đã kết thúc"),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           AnimatedContainer(

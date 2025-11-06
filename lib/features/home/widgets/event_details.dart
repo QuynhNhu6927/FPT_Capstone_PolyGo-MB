@@ -44,7 +44,7 @@ class _EventDetailState extends State<EventDetail> {
         _userPlanType = user.planType;
       });
     } catch (e) {
-      debugPrint("Failed to load user: $e");
+      //
     }
   }
   @override

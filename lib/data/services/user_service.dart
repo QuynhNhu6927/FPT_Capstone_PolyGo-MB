@@ -68,7 +68,7 @@ class UserService {
       return ApiResponse.fromJson(response.data as Map<String, dynamic>, (_) => null);
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Update profile (me) error: ${e.response?.data}');
+        //
       }
       rethrow;
     }

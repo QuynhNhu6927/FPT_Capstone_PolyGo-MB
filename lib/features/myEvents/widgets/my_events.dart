@@ -13,7 +13,7 @@ import '../../shared/app_error_state.dart';
 import 'hosted_event_details.dart';
 import 'hosted_filter.dart';
 
-enum EventStatus { upcoming, live, canceled, pending }
+enum EventStatus { upcoming, live, canceled, pending, completed }
 
 class MyEvents extends StatefulWidget {
   const MyEvents({super.key});
@@ -94,9 +94,7 @@ class _MyEventsState extends State<MyEvents> {
         _loading = false;
         _hasError = false;
       });
-    } catch (e, st) {
-      print("Error loading events: $e");
-      print(st);
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _hasError = true;
@@ -119,6 +117,8 @@ class _MyEventsState extends State<MyEvents> {
           return e.status == "Cancelled" || e.status == "Rejected";
         case EventStatus.pending:
           return e.status == "Pending";
+        case EventStatus.completed:
+          return e.status == "Completed";
         default:
           return false;
       }
@@ -160,16 +160,21 @@ class _MyEventsState extends State<MyEvents> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.live, "Đang diễn ra"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.pending, "Chờ duyệt"),
-              const SizedBox(width: 8),
-              _buildStatusButton(EventStatus.canceled, "Đã hủy"),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.live, "Đang diễn ra"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.pending, "Chờ duyệt"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.canceled, "Đã hủy"),
+                const SizedBox(width: 8),
+                _buildStatusButton(EventStatus.completed, "Đã kết thúc"),
+              ],
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -316,22 +321,20 @@ class _MyEventsState extends State<MyEvents> {
     final theme = Theme.of(context);
     final isSelected = _selectedStatus == status;
 
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _selectedStatus = isSelected ? null : status;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
-          foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          elevation: 1,
-        ),
-        child: Text(label),
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _selectedStatus = isSelected ? null : status;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
+        foregroundColor: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        elevation: 1,
       ),
+      child: Text(label, style: const TextStyle(fontSize: 14)),
     );
   }
 

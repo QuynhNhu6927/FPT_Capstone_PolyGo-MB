@@ -128,7 +128,6 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
       if (!mounted) return;
       Navigator.pushNamed(context, AppRoutes.login);
     } catch (e) {
-      print("Reset password error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).translate("reset_failed")),

@@ -44,7 +44,7 @@ class SubscriptionService {
       );
     } on DioError catch (e) {
       if (e.response != null) {
-        print('Get subscription plans error: ${e.response?.data}');
+       //
       }
       rethrow;
     }
