@@ -26,12 +26,12 @@ class ConversationMessage {
     return [];
   }
 
-  /// Hàm tiện ích tách chuỗi image theo "keyword"
+  /// tách chuỗi image theo "keyword"
   List<String> _parseImageContent(String content) {
-    if (content.contains('keyword')) {
-      return content.split('keyword');
+    if (content.contains('<<~IMG~>>')) {
+      return content.split('<<~IMG~>>');
     } else {
-      return [content]; // 1 ảnh
+      return [content];
     }
   }
 

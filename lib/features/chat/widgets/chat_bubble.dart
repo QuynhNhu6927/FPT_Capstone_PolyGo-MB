@@ -80,22 +80,23 @@ class ChatBubble extends StatelessWidget {
     if (images.isEmpty) return const SizedBox.shrink();
 
     if (images.length == 1) {
-      // Ảnh đơn
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 200,
-            maxHeight: 200, // giới hạn chiều cao
-          ),
-          child: Image.network(
-            images[0],
-            fit: BoxFit.cover,
+      return GestureDetector(
+        onTap: () => _showFullImage(context, images),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+              maxHeight: 200,
+            ),
+            child: Image.network(
+              images[0],
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       );
     } else {
-      // Nhiều ảnh: hiển thị dạng grid
       return GestureDetector(
         onTap: () => _showFullImage(context, images),
         child: ClipRRect(
@@ -116,7 +117,6 @@ class ChatBubble extends StatelessWidget {
               itemCount: images.length > 9 ? 9 : images.length,
               itemBuilder: (context, index) {
                 if (index == 8 && images.length > 9) {
-                  // overlay cho ảnh cuối
                   return Stack(
                     fit: StackFit.expand,
                     children: [

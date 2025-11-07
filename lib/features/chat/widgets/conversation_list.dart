@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -33,77 +35,53 @@ class _ConversationListState extends State<ConversationList> {
   @override
   void initState() {
     super.initState();
-    _loadConversations(loadMore: false).then((_) {
-      _initSignalR();
-    });
-  }
-
-  Future<void> _initSignalR() async {
-    final prefs = await SharedPreferences.getInstance();
-    _userId = prefs.getString('userId') ?? '';
-    final token = prefs.getString('token');
-    if (token == null) {
-      return;
-    }
 
     _chatSignalrService = ChatSignalrService();
 
-    try {
-      await _chatSignalrService.initHub(
-        conversationId: '',
-        onReceiveMessage: (data) {
+    _loadConversations(loadMore: false).then((_) {
+      _chatSignalrService.initHub();
+    });
 
-          final convId = data['conversationId'] as String;
-          final senderId = data['senderId'] as String;
-          final content = data['content'] as String?;
-          final sentAt = data['sentAt'] as String?;
-          final type = data['type'] is int
-              ? data['type'] as int
-              : int.tryParse(data['type']?.toString() ?? '0') ?? 0;
+    _chatSignalrService.messageStream.listen((data) {
+      final convId = data['conversationId'] as String;
+      final senderId = data['senderId'] as String;
+      final content = data['content'] as String?;
+      final sentAt = data['sentAt'] as String?;
+      final type = data['type'] is int ? data['type'] as int : 0;
 
-          setState(() {
-            final index = _conversations.indexWhere((c) => c.id == convId);
-            if (index != -1) {
-              final conv = _conversations[index];
-              conv.lastMessage = LastMessage(
+      if (!mounted) return;
+
+      setState(() {
+        final index = _conversations.indexWhere((c) => c.id == convId);
+        if (index != -1) {
+          final conv = _conversations[index];
+          conv.lastMessage = LastMessage(
+            type: type,
+            content: content,
+            sentAt: sentAt,
+            isSentByYou: senderId == _userId,
+          );
+          _conversations.removeAt(index);
+          _conversations.insert(0, conv);
+        } else {
+          _conversations.insert(
+            0,
+            Conversation(
+              id: convId,
+              user: User(id: senderId, name: "Người dùng mới"),
+              lastMessage: LastMessage(
                 type: type,
                 content: content,
                 sentAt: sentAt,
                 isSentByYou: senderId == _userId,
-              );
-              _conversations.removeAt(index);
-              _conversations.insert(0, conv);
-            } else {
-              _conversations.insert(
-                0,
-                Conversation(
-                  id: convId,
-                  user: User(id: senderId, name: "Người dùng mới"),
-                  lastMessage: LastMessage(
-                    type: 2,
-                    content: content,
-                    sentAt: sentAt,
-                    isSentByYou: senderId == _userId,
-                  ),
-                ),
-              );
-            }
-          });
-        },
-      );
-
-      for (var conv in _conversations) {
-        try {
-          await _chatSignalrService.joinConversation(conv.id);
-        } catch (e) {
-          //
+              ),
+            ),
+          );
         }
-      }
-
-    } catch (e) {
-      //
-    }
+      });
+    });
   }
+
 
   Future<void> _loadConversations({bool loadMore = false}) async {
     if (_isLoading) return;
@@ -245,10 +223,11 @@ class _ConversationListState extends State<ConversationList> {
                         builder: (_) => ConversationScreen(
                           conversationId: conv.id,
                           userName: conv.user.name,
+                          avatarHeader: conv.user.avatarUrl ?? '',
                         ),
                       ),
                     );
-                    _loadConversations(loadMore: false);
+                    // _loadConversations(loadMore: false);
                   },
                   leading: Stack(
                     children: [
@@ -264,26 +243,6 @@ class _ConversationListState extends State<ConversationList> {
                             ? const Icon(Icons.person, color: Colors.white, size: 28)
                             : null,
                       ),
-                      if (unread > 0)
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: colorPrimary,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              unread.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                   title: Text(
@@ -319,18 +278,34 @@ class _ConversationListState extends State<ConversationList> {
 }
 
 String _getLastMessageText(LastMessage lastMessage) {
-  if (lastMessage.type == null) return '';
-
   final isMe = lastMessage.isSentByYou ?? false;
 
   switch (lastMessage.type) {
     case 0: // Text
       final content = lastMessage.content ?? '';
-      return isMe ? 'Bạn: $content' : content;// h
-    case 1: // Img
-      return isMe ? 'Bạn: đã gửi 1 ảnh' : 'Đã gửi cho bạn 1 ảnh';
-    case 2: //
-      return isMe ? 'Bạn: đã gửi nhiều ảnh' : 'Đã gửi cho bạn nhiều ảnh';
+      return isMe ? 'Bạn: $content' : content;
+
+    case 1: // 1 ảnh
+      return isMe ? 'Bạn: đã gửi 1 ảnh' : 'Đã gửi 1 ảnh';
+
+    case 2:
+      int count = 0;
+      if (lastMessage.content != null && lastMessage.content!.isNotEmpty) {
+        try {
+          final decoded = lastMessage.content!;
+          final list = jsonDecode(decoded);
+          if (list is List) {
+            count = list.length;
+          } else {
+            count = 1;
+          }
+        } catch (e) {
+          debugPrint('decode lastMessage.content failed: $e');
+          count = 1;
+        }
+      }
+      return isMe ? 'Bạn: đã gửi nhiều ảnh' : 'Đã gửi nhiều ảnh';
+
     default:
       final content = lastMessage.content ?? '';
       return isMe ? 'Bạn: $content' : content;

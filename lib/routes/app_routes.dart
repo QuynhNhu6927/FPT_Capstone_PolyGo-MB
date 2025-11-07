@@ -149,10 +149,12 @@ class AppRoutes {
         final args = settings.arguments as Map<String, dynamic>?;
         final conversationId = args?['conversationId'] as String? ?? '';
         final userName = args?['userName'] as String? ?? '';
+        final avatarHeader = args?['avatarHeader'] as String? ?? '';
         return MaterialPageRoute(
             builder: (_) => ConversationScreen(
               conversationId: conversationId,
               userName: userName,
+              avatarHeader: avatarHeader,
             )
         );
       default:
