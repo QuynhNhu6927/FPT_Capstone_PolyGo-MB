@@ -491,6 +491,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                         'isHost': true,
                                         'hostId': widget.event.host.id,
                                         'hostName': widget.event.host.name,
+                                        'startAt': widget.event.startAt,
                                       },
                                     );
                                   }

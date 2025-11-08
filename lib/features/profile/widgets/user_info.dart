@@ -12,7 +12,7 @@ import '../../../../core/utils/responsive.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../data/models/auth/me_response.dart';
 import '../../../../data/repositories/auth_repository.dart';
-import '../../../../data/services/auth_service.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../data/models/user/update_userinfo_request.dart';
 import '../../../data/repositories/interest_repository.dart';
@@ -449,27 +449,6 @@ class _UserInfoState extends State<UserInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (introduction != null && introduction.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.translate("introduction"),
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: st(context, 16),
-                        ),
-                      ),
-                      SizedBox(height: sh(context, 8)),
-                      Text(
-                        introduction,
-                        style: t.bodyMedium?.copyWith(fontSize: st(context,
-                            14)),
-                      ),
-                      SizedBox(height: sh(context, 20)),
-                    ],
-                  ),
-
                 // Languages + Interests
                 if (hasNoData)
                   GestureDetector(

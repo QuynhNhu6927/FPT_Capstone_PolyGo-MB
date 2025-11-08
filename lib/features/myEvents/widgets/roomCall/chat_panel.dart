@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../data/services/webrtc_controller.dart';
+import '../../../../data/services/signalr/webrtc_controller.dart';
 
 class ChatPanel extends StatefulWidget {
   final List<ChatMessage> messages;
@@ -42,6 +42,12 @@ class _ChatPanelState extends State<ChatPanel> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 0.45;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final cardColor = theme.cardColor;
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
+    final secondaryTextColor = theme.textTheme.bodySmall?.color ?? Colors.black45;
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
@@ -52,7 +58,7 @@ class _ChatPanelState extends State<ChatPanel> {
       height: height,
       child: Material(
         elevation: 16,
-        color: const Color(0xFFF8F9FA),
+        color: backgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: Column(
           children: [
@@ -60,16 +66,23 @@ class _ChatPanelState extends State<ChatPanel> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                color: cardColor,
+                boxShadow: [
+                  BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, 2)),
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Chat", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
-                  IconButton(icon: const Icon(Icons.close, color: Colors.black54), onPressed: widget.onClose),
+                  Text(
+                    "Chat",
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(icon: Icon(Icons.close, color: theme.iconTheme.color), onPressed: widget.onClose),
                 ],
               ),
             ),
@@ -79,7 +92,12 @@ class _ChatPanelState extends State<ChatPanel> {
             // List tin nhắn
             Expanded(
               child: widget.messages.isEmpty
-                  ? const Center(child: Text("Chưa có tin nhắn nào", style: TextStyle(color: Colors.grey)))
+                  ? Center(
+                child: Text(
+                  "Chưa có tin nhắn nào",
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+              )
                   : ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(12),
@@ -95,13 +113,13 @@ class _ChatPanelState extends State<ChatPanel> {
                       children: [
                         // Tên người gửi
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             msg.sender,
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: secondaryTextColor,
                               fontSize: 12,
-                              color: Colors.black54,
                             ),
                           ),
                         ),
@@ -113,24 +131,27 @@ class _ChatPanelState extends State<ChatPanel> {
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           margin: EdgeInsets.only(left: isMe ? 50 : 0, right: isMe ? 0 : 50),
                           decoration: BoxDecoration(
-                            color: isMe ? Colors.blueAccent : Colors.grey[300],
+                            color: isMe ? theme.colorScheme.primary : theme.dividerColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             msg.message,
-                            style: TextStyle(color: isMe ? Colors.white : Colors.black87),
+                            style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black,
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 2),
 
+                        // Thời gian
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             "${msg.timestamp.hour.toString().padLeft(2, '0')}:${msg.timestamp.minute.toString().padLeft(2, '0')}",
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
-                              color: Colors.black45,
+                              color: secondaryTextColor,
                             ),
                           ),
                         ),
@@ -138,34 +159,35 @@ class _ChatPanelState extends State<ChatPanel> {
                     ),
                   );
                 },
-
               ),
             ),
 
             // Input field
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, -1))],
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black12, blurRadius: 3, offset: const Offset(0, -1)),
+                ],
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: widget.controller,
-                      style: const TextStyle(color: Colors.black87),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
                         hintText: "Nhập tin nhắn...",
-                        hintStyle: TextStyle(color: Colors.black45),
+                        hintStyle: TextStyle(color: secondaryTextColor),
                         border: InputBorder.none,
                         isDense: true,
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Colors.blueAccent),
+                    icon: Icon(Icons.send, color: theme.colorScheme.primary),
                     onPressed: () {
                       if (widget.controller.text.trim().isNotEmpty) {
                         widget.onSend(widget.controller.text.trim());

@@ -5,10 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'dart:async';
 
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../repositories/auth_repository.dart';
-import 'auth_service.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../repositories/auth_repository.dart';
+import '../auth_service.dart';
 
 class Participant {
   final String id;
@@ -86,8 +86,10 @@ class WebRTCController extends ChangeNotifier {
       };
 
       localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      localStream?.getAudioTracks().forEach((t) => t.enabled = localAudioEnabled);
-      localStream?.getVideoTracks().forEach((t) => t.enabled = localVideoEnabled);
+      localStream?.getAudioTracks().forEach((t) =>
+      t.enabled = localAudioEnabled);
+      localStream?.getVideoTracks().forEach((t) =>
+      t.enabled = localVideoEnabled);
       notifyListeners();
     } catch (e) {
       //
@@ -147,11 +149,12 @@ class WebRTCController extends ChangeNotifier {
         final stream = event.streams.first;
         participants.putIfAbsent(
           remoteId,
-              () => Participant(
-            id: remoteId,
-            name: "Guest-$remoteId",
-            role: "attendee",
-          ),
+              () =>
+              Participant(
+                id: remoteId,
+                name: "Guest-$remoteId",
+                role: "attendee",
+              ),
         );
         participants[remoteId]!.stream = stream;
         notifyListeners();
@@ -164,20 +167,32 @@ class WebRTCController extends ChangeNotifier {
 
   Future<void> initSignalR() async {
     final hubUrl = '${ApiConstants.baseUrl}/eventRoomHub';
+    print("[SignalR] 🔌 Connecting to $hubUrl ...");
     _hub = HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
 
+    _hub!.onclose((error) {
+      print("[SignalR] ❌ Disconnected: $error");
+    });
+    _hub!.onreconnecting((error) {
+      print("[SignalR] ⚠️ Reconnecting... cause=$error");
+    });
+    _hub!.onreconnected((connectionId) {
+      print("[SignalR] ✅ Reconnected with new connId=$connectionId");
+    });
+
     _hub!.on('SetRole', (args) {
+      print("[SignalR] 📩 SetRole event: $args");
       myConnectionId = args?[1];
       hostId = args?[2];
 
       if (hostId != null && participants.containsKey(hostId)) {
         participants[hostId!]!.role = "host";
       }
-
       notifyListeners();
     });
 
     _hub!.on('UserJoined', (args) async {
+      print("[SignalR] 👋 UserJoined: $args");
       final name = args?[0] ?? "Unknown";
       final connId = args?[2];
 
@@ -189,20 +204,41 @@ class WebRTCController extends ChangeNotifier {
       notifyListeners();
 
       if (connId != myConnectionId) {
+        print("[SignalR] 🔄 Creating offer to $connId ...");
         final pc = await createPeer(connId);
         final offer = await pc.createOffer();
         await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, 'offer'));
         await _hub?.invoke("SendOffer", args: [eventId, connId, offer.sdp]);
+        print("[SignalR] 📤 Sent offer to $connId");
+      }
+    });
+
+    _hub!.on('ReceiveMediaState', (args) {
+      print("[SignalR] 🎧 ReceiveMediaState: $args");
+      final fromConnId = args?[0];
+      final type = args?[1];
+      final enabled = args?[2];
+
+      if (fromConnId != null && participants.containsKey(fromConnId)) {
+        final p = participants[fromConnId]!;
+        if (type == 'audio') {
+          p.audioEnabled = enabled;
+        } else if (type == 'video') {
+          p.videoEnabled = enabled;
+        }
+        notifyListeners();
       }
     });
 
     _hub!.on('UserLeft', (args) {
+      print("[SignalR] 👋 UserLeft: $args");
       final connId = args?[0];
       participants.remove(connId);
       notifyListeners();
     });
 
     _hub!.on('ReceiveChatMessage', (args) {
+      print("[SignalR] 💬 ReceiveChatMessage: $args");
       final sender = args?[0] ?? "Unknown";
       final message = args?[1] ?? "";
       final chatMessage = ChatMessage(sender: sender, message: message);
@@ -213,7 +249,30 @@ class WebRTCController extends ChangeNotifier {
       notifyListeners();
     });
 
+    _hub!.on('ToggleMicCommand', (args) {
+      print("[SignalR] 🎤 Received ToggleMicCommand: $args");
+      final enabled = args?[0] ?? true;
+      localStream?.getAudioTracks().forEach((t) {
+        t.enabled = enabled;
+        print("[SignalR] 🎚 Audio track ${t.id} -> ${enabled ? 'ENABLED' : 'DISABLED'}");
+      });
+      localAudioEnabled = enabled;
+      notifyListeners();
+    });
+
+    _hub!.on('ToggleCamCommand', (args) {
+      print("[SignalR] 🎥 Received ToggleCamCommand: $args");
+      final enabled = args?[0] ?? true;
+      localStream?.getVideoTracks().forEach((t) {
+        t.enabled = enabled;
+        print("[SignalR] 🎚 Video track ${t.id} -> ${enabled ? 'ENABLED' : 'DISABLED'}");
+      });
+      localVideoEnabled = enabled;
+      notifyListeners();
+    });
+
     _hub!.on('ReceiveOffer', (args) async {
+      print("[SignalR] 📩 ReceiveOffer: $args");
       final fromConnId = args?[0];
       final sdp = args?[1];
 
@@ -224,14 +283,17 @@ class WebRTCController extends ChangeNotifier {
       await pc.setLocalDescription(answer);
 
       await _hub?.invoke("SendAnswer", args: [eventId, fromConnId, answer.sdp]);
+      print("[SignalR] 📤 Sent Answer to $fromConnId");
     });
 
     _hub!.on('ReceiveAnswer', (args) async {
+      print("[SignalR] 📩 ReceiveAnswer: $args");
       final fromConnId = args?[0];
       final sdp = args?[1];
 
       final pc = _peerConnections[fromConnId];
       if (pc == null) {
+        print("[SignalR] ⚠️ No peer for $fromConnId");
         return;
       }
 
@@ -239,7 +301,7 @@ class WebRTCController extends ChangeNotifier {
     });
 
     _hub!.on('RoomEnded', (args) async {
-      //
+      print("[SignalR] 🛑 RoomEnded event received");
       await leaveRoom();
       if (onRoomEnded != null) {
         onRoomEnded!();
@@ -247,6 +309,7 @@ class WebRTCController extends ChangeNotifier {
     });
 
     _hub!.on('ReceiveIceCandidate', (args) async {
+      print("[SignalR] 🧊 ReceiveIceCandidate: $args");
       final fromConnId = args?[0];
       final candidateJson = args?[1];
       final data = jsonDecode(candidateJson);
@@ -263,28 +326,23 @@ class WebRTCController extends ChangeNotifier {
 
     await _hub!.start();
     isConnected = true;
+    print("[SignalR] ✅ Connected successfully!");
   }
 
-  Future<void> joinRoom() async {
-    if (_hub == null || !isConnected) return;
-
-    String actualName = userName;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token != null) {
-        final user = await AuthRepository(AuthService(ApiClient())).me(token);
-        actualName = user.name;
-      }
-    } catch (e) {
-      //
+  Future<void> joinRoom({required bool isHost}) async {
+    if (_hub == null || !isConnected) {
+      print("[SignalR] ❌ joinRoom() failed: hub not connected");
+      return;
     }
 
-    //
-    await _hub!.invoke("JoinRoom", args: [eventId, actualName]);
+    String actualName = userName;
+
+    print("[SignalR] 🚪 Joining room $eventId as $actualName with isHost=$isHost...");
+    await _hub!.invoke("JoinRoom", args: [eventId, actualName, isHost]);
 
     try {
       final result = await _hub!.invoke("GetParticipants", args: [eventId]);
+      print("[SignalR] 👥 GetParticipants result: $result");
       if (result is Map) {
         result.forEach((id, name) {
           if (id != myConnectionId) {
@@ -298,7 +356,7 @@ class WebRTCController extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      //
+      print("[SignalR] ⚠️ GetParticipants failed: $e");
     }
   }
 
@@ -320,20 +378,52 @@ class WebRTCController extends ChangeNotifier {
     }
   }
 
-  // --- Toggle Audio / Video ---
+  // --- Toggle Audio / Video với broadcast ---
   Future<void> toggleAudio() async {
-    final audioTrack = localStream?.getAudioTracks().firstOrNull;
+    final audioTrack = localStream
+        ?.getAudioTracks()
+        .firstOrNull;
     if (audioTrack == null) return;
+
     audioTrack.enabled = !audioTrack.enabled;
     localAudioEnabled = audioTrack.enabled;
+
+    // Gửi trạng thái cho server
+    if (_hub != null && isConnected) {
+      try {
+        await _hub!.invoke("BroadcastMediaState", args: [
+          eventId,
+          myConnectionId,
+          "audio",
+          localAudioEnabled,
+        ]);
+      } catch (e) {}
+    }
+
     notifyListeners();
   }
 
   Future<void> toggleVideo() async {
-    final videoTrack = localStream?.getVideoTracks().firstOrNull;
+    final videoTrack = localStream
+        ?.getVideoTracks()
+        .firstOrNull;
     if (videoTrack == null) return;
+
     videoTrack.enabled = !videoTrack.enabled;
     localVideoEnabled = videoTrack.enabled;
+
+    // Gửi trạng thái cho server
+    if (_hub != null && isConnected) {
+      try {
+        await _hub!.invoke("BroadcastMediaState", args: [
+          eventId,
+          myConnectionId,
+          "video",
+          localVideoEnabled,
+        ]);
+      } catch (e) {}
+    }
+
     notifyListeners();
   }
 
@@ -386,6 +476,51 @@ class WebRTCController extends ChangeNotifier {
     } catch (e) {
       //
     }
+  }
+
+  Future<void> muteAllParticipants() async {
+    if (!isConnected || _hub == null) return;
+
+    final participantIds = participants.keys.where((id) => id != myConnectionId).toList();
+
+    for (final id in participantIds) {
+      try {
+        await _hub!.invoke("ToggleMic", args: [eventId, id, false]);
+
+        if (participants.containsKey(id)) {
+          participants[id]!.audioEnabled = false;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print("[SignalR] ✗ Failed to mute $id: $e");
+        }
+      }
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> turnOffAllParticipantCameras() async {
+    if (!isConnected || _hub == null) return;
+
+    final participantIds = participants.keys.where((id) => id != myConnectionId).toList();
+
+    for (final id in participantIds) {
+      try {
+        await _hub!.invoke("ToggleCam", args: [eventId, id, false]);
+
+        // **Cập nhật trạng thái ngay lập tức**
+        if (participants.containsKey(id)) {
+          participants[id]!.videoEnabled = false;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print("[SignalR] ✗ Failed to turn off camera for $id: $e");
+        }
+      }
+    }
+
+    notifyListeners();
   }
 
 }

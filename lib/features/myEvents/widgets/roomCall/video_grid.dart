@@ -1,115 +1,153 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:polygo_mobile/features/myEvents/widgets/roomCall/participant_controls_dialog.dart';
-import '../../../../data/services/webrtc_controller.dart';
+import '../../../../data/services/signalr/webrtc_controller.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:polygo_mobile/features/myEvents/widgets/roomCall/participant_controls_dialog.dart';
+import '../../../../data/services/signalr/webrtc_controller.dart';
 
 class VideoGrid extends StatelessWidget {
   final String eventTitle;
   final RTCVideoRenderer localRenderer;
   final List<Participant> participants;
-  final bool isHost;
+  final WebRTCController controller;
+  final bool widgetIsHost;
 
   const VideoGrid({
     super.key,
     required this.localRenderer,
     required this.participants,
     required this.eventTitle,
-    this.isHost = false,
+    required this.controller,
+    required this.widgetIsHost,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hostParticipant = Participant(
-      id: 'local',
-      name: isHost ? 'You (Host)' : 'You',
-      role: 'host',
-      stream: localRenderer.srcObject,
-    );
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        // Local participant (user hiện tại)
+        final localParticipant = Participant(
+          id: 'local',
+          name: widgetIsHost ? 'You (Host)' : 'You',
+          role: 'host',
+          stream: controller.localStream,
+          audioEnabled: controller.localAudioEnabled,
+          videoEnabled: controller.localVideoEnabled,
+        );
 
-    return Column(
-      children: [
-        // Header
-        Container(
-          width: double.infinity,
-          color: Colors.black87,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Text(
-            eventTitle,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        // --- Phân loại host và các participant khác ---
+        final allParticipants = [...participants, localParticipant];
 
-        // Host video
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ParticipantCard(
-              participant: hostParticipant,
-              isLarge: true,
-              isHost: isHost,
-            ),
-          ),
-        ),
+        // Tìm host dựa trên hostId
+        final hostParticipant = allParticipants.firstWhere(
+              (p) => p.id == controller.hostId || p.role == 'host',
+          orElse: () => localParticipant,
+        );
 
-        // attendees
-        if (participants.isNotEmpty)
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.25,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: participants.length > 4 ? 4 : participants.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final p = participants[index];
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: ParticipantCard(
-                      participant: p,
-                      isHost: isHost,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+        // Các participant còn lại
+        final otherParticipants =
+        allParticipants.where((p) => p.id != hostParticipant.id).toList();
 
-        if (participants.length > 4)
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              width: 60,
-              height: 60,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.white12,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              alignment: Alignment.center,
+        // --- LOG ---
+        print("=== Participants List Updated ===");
+        print("Local user is host? ${widgetIsHost}, controller.hostId=${controller.hostId}");
+        for (var p in allParticipants) {
+          print("Participant id=${p.id}, name=${p.name}, role=${p.role}");
+        }
+        print("===============================");
+
+        return Column(
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              color: Colors.black87,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Text(
-                '+${participants.length - 4}',
+                eventTitle,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
                   fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // Video lớn nhất là host
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ParticipantCard(
+                  participant: hostParticipant,
+                  isLarge: true,
+                  isHost: true,
                 ),
               ),
             ),
-          ),
 
-        const SizedBox(height: kToolbarHeight + 20),
-      ],
+            // Các participant còn lại (nhỏ)
+            if (otherParticipants.isNotEmpty)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.25,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: otherParticipants.length > 4 ? 4 : otherParticipants.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final p = otherParticipants[index];
+                      return SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: ParticipantCard(
+                          participant: p,
+                          isLarge: false,
+                          isHost: p.id == controller.hostId,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+            if (otherParticipants.length > 4)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '+${otherParticipants.length - 4}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: kToolbarHeight + 20),
+          ],
+        );
+      },
     );
   }
 }
+
 /// --- Participant Card ---
 class ParticipantCard extends StatefulWidget {
   final Participant participant;
@@ -171,7 +209,8 @@ class _ParticipantCardState extends State<ParticipantCard> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          hasVideo && _renderer.textureId != null
+          // Video / Placeholder
+          (_renderer.textureId != null && p.videoEnabled == true && p.stream != null)
               ? RTCVideoView(
             _renderer,
             mirror: p.role == 'local',
@@ -186,26 +225,7 @@ class _ParticipantCardState extends State<ParticipantCard> {
               color: Colors.white54,
             ),
           ),
-          if (widget.isHost != false)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.more_vert, color: Colors.white, size: 20),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => ParticipantControlsDialog(
-                      participant: widget.participant,
-                      initialMicEnabled: true,
-                      initialCamEnabled: false,
-                    ),
-                  );
-                },
-              ),
-            ),
+          // Name + icons
           Positioned(
             left: 8,
             bottom: 8,
@@ -216,87 +236,40 @@ class _ParticipantCardState extends State<ParticipantCard> {
                 color: Colors.black45,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Text(
-                p.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      p.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  if (p.audioEnabled != null)
+                    Icon(
+                      p.audioEnabled! ? Icons.mic : Icons.mic_off,
+                      color: p.audioEnabled! ? Colors.white : Colors.redAccent,
+                      size: 20,
+                    ),
+                  const SizedBox(width: 4),
+                  if (p.videoEnabled != null)
+                    Icon(
+                      p.videoEnabled! ? Icons.videocam : Icons.videocam_off,
+                      color: p.videoEnabled! ? Colors.white : Colors.redAccent,
+                      size: 20,
+                    ),
+                ],
               ),
             ),
           ),
         ],
       ),
     );
+
   }
+
 }
-
-void _showParticipantControls(BuildContext context, Participant participant) {
-  bool micEnabled = true;
-  bool camEnabled = false;
-
-  showDialog(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Text("Controls for ${participant.name}"),
-            content: SizedBox(
-              width: 200,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // --- Mic row ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.mic, color: Colors.black87),
-                          SizedBox(width: 8),
-                          Text("Mic"),
-                        ],
-                      ),
-                      Switch(
-                        value: micEnabled,
-                        onChanged: (v) => setState(() => micEnabled = v),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // --- Cam row ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.videocam, color: Colors.black87),
-                          SizedBox(width: 8),
-                          Text("Camera"),
-                        ],
-                      ),
-                      Switch(
-                        value: camEnabled,
-                        onChanged: null, // disabled
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Close"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-

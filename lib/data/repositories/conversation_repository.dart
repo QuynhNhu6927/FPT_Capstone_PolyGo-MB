@@ -79,4 +79,17 @@ class ConversationRepository {
 
     return res.data!;
   }
+
+  Future<Conversation?> getConversationById({
+    required String token,
+    required String conversationId,
+  }) async {
+    final res = await _service.getConversationById(
+      token: token,
+      conversationId: conversationId,
+    );
+
+    return res.data;
+  }
+
 }

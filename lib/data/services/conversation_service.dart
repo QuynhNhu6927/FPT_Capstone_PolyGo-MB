@@ -80,4 +80,32 @@ class ConversationService {
       rethrow;
     }
   }
+
+  Future<ApiResponse<Conversation>> getConversationById({
+    required String token,
+    required String conversationId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        ApiConstants.getConversationById.replaceFirst('{id}', conversationId),
+        headers: {
+          ApiConstants.headerAuthorization: 'Bearer $token',
+        },
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      final dataJson = json['data'] as Map<String, dynamic>?;
+
+      return ApiResponse.fromJson(
+        json,
+            (data) => dataJson != null
+            ? Conversation.fromJson(dataJson)
+            : throw Exception("Conversation data is null"),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+
 }

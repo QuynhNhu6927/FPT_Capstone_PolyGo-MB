@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,19 +29,22 @@ class _EventsContentState extends State<EventsContent> {
   bool _hasError = false;
   bool _isLoadingMore = false;
 
-  // Matching events (phân trang)
   List<EventModel> _matchingEvents = [];
   int _currentPage = 1;
   int _totalPages = 1;
   int _pageSize = 8;
 
-  // Upcoming events (khi có filter)
   List<ComingEventModel> _filteredUpcomingEvents = [];
 
   List<Map<String, String>> _filterLanguages = [];
   List<Map<String, String>> _filterInterests = [];
 
   Locale? _currentLocale;
+  bool _initialized = false;
+
+  final ScrollController _scrollController = ScrollController();
+  bool _showFilterBar = true;
+  double _lastOffset = 0;
 
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
@@ -54,9 +58,25 @@ class _EventsContentState extends State<EventsContent> {
   void initState() {
     super.initState();
     _repository = EventRepository(EventService(ApiClient()));
+
+    _scrollController.addListener(() {
+      final offset = _scrollController.offset;
+
+      if (offset > _lastOffset && offset - _lastOffset > 10) {
+        if (_showFilterBar) setState(() => _showFilterBar = false);
+      } else if (offset < _lastOffset && _lastOffset - offset > 10) {
+        if (!_showFilterBar) setState(() => _showFilterBar = true);
+      }
+
+      _lastOffset = offset;
+    });
   }
 
-  bool _initialized = false;
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -118,7 +138,6 @@ class _EventsContentState extends State<EventsContent> {
     }
   }
 
-  // API UPCOMING (filter)
   Future<void> _loadUpcomingEvents({String? lang}) async {
     setState(() {
       _loading = true;
@@ -160,9 +179,8 @@ class _EventsContentState extends State<EventsContent> {
 
   List<dynamic> get _displayedEvents {
     final query = widget.searchQuery.trim();
-    final source = _hasActiveFilter
-        ? _filteredUpcomingEvents
-        : _matchingEvents;
+    final source =
+    _hasActiveFilter ? _filteredUpcomingEvents : _matchingEvents;
 
     if (query.isEmpty) return source;
 
@@ -195,7 +213,8 @@ class _EventsContentState extends State<EventsContent> {
             if (_hasActiveFilter) {
               _loadUpcomingEvents(lang: _currentLocale?.languageCode);
             } else {
-              _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
+              _loadMatchingEvents(
+                  reset: true, lang: _currentLocale?.languageCode);
             }
           },
         ),
@@ -209,43 +228,66 @@ class _EventsContentState extends State<EventsContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          EventFilterBar(
-            selectedFilters: _selectedFilters,
-            onOpenFilter: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EventFilter()),
-              );
-              if (result != null && result is Map<String, dynamic>) {
-                setState(() {
-                  _filterLanguages =
-                  List<Map<String, String>>.from(result['languages'] ?? []);
-                  _filterInterests =
-                  List<Map<String, String>>.from(result['interests'] ?? []);
-                });
-                if (_hasActiveFilter) {
-                  _loadUpcomingEvents(lang: _currentLocale?.languageCode);
-                } else {
-                  _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
-                }
-              }
-            },
-            onRemoveFilter: (tag) {
-              setState(() {
-                _filterLanguages.removeWhere((f) => f['name'] == tag);
-                _filterInterests.removeWhere((f) => f['name'] == tag);
-              });
-              _hasActiveFilter
-                  ? _loadUpcomingEvents(lang: _currentLocale?.languageCode)
-                  : _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
-            },
+          // Filter bar ẩn/hiện có animation
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => SizeTransition(
+              sizeFactor: animation,
+              axisAlignment: -1,
+              child: FadeTransition(opacity: animation, child: child),
+            ),
+            child: _showFilterBar
+                ? Container(
+              key: const ValueKey('filterBar'),
+              margin: const EdgeInsets.only(bottom: 16),
+              child: EventFilterBar(
+                selectedFilters: _selectedFilters,
+                onOpenFilter: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EventFilter()),
+                  );
+                  if (result != null && result is Map<String, dynamic>) {
+                    setState(() {
+                      _filterLanguages = List<Map<String, String>>.from(
+                          result['languages'] ?? []);
+                      _filterInterests = List<Map<String, String>>.from(
+                          result['interests'] ?? []);
+                    });
+                    if (_hasActiveFilter) {
+                      _loadUpcomingEvents(
+                          lang: _currentLocale?.languageCode);
+                    } else {
+                      _loadMatchingEvents(
+                          reset: true,
+                          lang: _currentLocale?.languageCode);
+                    }
+                  }
+                },
+                onRemoveFilter: (tag) {
+                  setState(() {
+                    _filterLanguages
+                        .removeWhere((f) => f['name'] == tag);
+                    _filterInterests
+                        .removeWhere((f) => f['name'] == tag);
+                  });
+                  _hasActiveFilter
+                      ? _loadUpcomingEvents(
+                      lang: _currentLocale?.languageCode)
+                      : _loadMatchingEvents(
+                      reset: true,
+                      lang: _currentLocale?.languageCode);
+                },
+              ),
+            )
+                : const SizedBox.shrink(),
           ),
-          const SizedBox(height: 16),
 
           Expanded(
             child: eventsToShow.isEmpty
                 ? Center(child: Text(loc.translate("no_events_found")))
                 : SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 children: [
                   MasonryGridView.count(
@@ -273,7 +315,8 @@ class _EventsContentState extends State<EventsContent> {
                             ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2),
                         )
                             : Text(loc.translate("load_more")),
                       ),
@@ -281,7 +324,7 @@ class _EventsContentState extends State<EventsContent> {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

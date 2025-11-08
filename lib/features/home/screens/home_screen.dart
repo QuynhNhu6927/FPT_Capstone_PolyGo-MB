@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
 import '../widgets/events_content.dart';
-import '../widgets/matching.dart';
 import '../widgets/users.dart';
 import '../widgets/home_header.dart';
 
@@ -56,19 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
         key: const ValueKey('events'),
         searchQuery: _searchQuery,
       ),
-      Matching(
-        key: const ValueKey('matching'),
-        onError: _onChildError,
-        onLoaded: _onChildLoaded,
-        isRetrying: _isRetrying,
-        searchQuery: _searchQuery,
-      ),
       Users(
         key: const ValueKey('users'),
         onLoaded: _onChildLoaded,
         onError: _onChildError,
         isRetrying: _isRetrying,
         searchQuery: _searchQuery,
+      ),
+      const Center(
+        child: Text('Game', style: TextStyle(fontSize: 24)),
       ),
       const Center(
         child: Text('Explore', style: TextStyle(fontSize: 24)),

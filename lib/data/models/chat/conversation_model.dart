@@ -18,32 +18,48 @@ class LastMessage {
 
 class Conversation {
   final String id;
+  bool hasSeen;
   LastMessage lastMessage;
   final User user;
 
-  Conversation({required this.id, required this.lastMessage, required this.user});
+  Conversation({
+    required this.id,
+    required this.hasSeen,
+    required this.lastMessage,
+    required this.user,
+  });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
       id: json['id'],
+      hasSeen: json['hasSeen'] ?? false,
       lastMessage: LastMessage.fromJson(json['lastMessage']),
       user: User.fromJson(json['user']),
     );
   }
 }
 
-
 class User {
   final String id;
   final String name;
   final String? avatarUrl;
+  bool isOnline;
+  String? lastActiveAt;
 
-  User({required this.id, required this.name, this.avatarUrl});
+  User({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+    this.isOnline = false,
+    this.lastActiveAt,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json['id'],
     name: json['name'],
     avatarUrl: json['avatarUrl'],
+    isOnline: json['isOnline'] ?? false,
+    lastActiveAt: json['lastActiveAt'],
   );
 }
 

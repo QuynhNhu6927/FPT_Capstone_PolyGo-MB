@@ -53,10 +53,36 @@ class _UsersState extends State<Users> {
     ..._filterInterests.map((e) => e['name'] ?? ''),
   ];
 
+  final ScrollController _scrollController = ScrollController();
+  bool _showFilterBar = true;
+  double _lastOffset = 0;
+
   @override
   void initState() {
     super.initState();
     _repository = UserRepository(UserService(ApiClient()));
+
+    _scrollController.addListener(() {
+      final offset = _scrollController.offset;
+
+      if (offset > _lastOffset && offset - _lastOffset > 10) {
+        if (_showFilterBar) {
+          setState(() => _showFilterBar = false);
+        }
+      } else if (offset < _lastOffset && _lastOffset - offset > 10) {
+        if (!_showFilterBar) {
+          setState(() => _showFilterBar = true);
+        }
+      }
+
+      _lastOffset = offset;
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -237,109 +263,133 @@ class _UsersState extends State<Users> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const FilterPopUp()),
-                  );
-
-                  if (result != null && result is Map<String, dynamic>) {
-                    setState(() {
-                      _filterLearn = List<Map<String, String>>.from(result['learn'] ?? []);
-                      _filterKnown = List<Map<String, String>>.from(result['known'] ?? []);
-                      _filterInterests = List<Map<String, String>>.from(result['interests'] ?? []);
-                    });
-                    _loadAllUsers(lang: _currentLocale?.languageCode);
-                  }
-                },
-                icon: const Icon(Icons.filter_alt_outlined),
-                label: const Text('Filter'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  foregroundColor: theme.colorScheme.onPrimaryContainer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => SizeTransition(
+              sizeFactor: animation,
+              axisAlignment: -1, // thu nhỏ từ trên xuống
+              child: FadeTransition(opacity: animation, child: child),
+            ),
+            child: _showFilterBar
+                ? Container(
+              key: const ValueKey('filterBar'),
+              padding: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  elevation: 1,
-                ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 38,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _selectedFilters.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final tag = _selectedFilters[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: theme.colorScheme.primary.withOpacity(0.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const FilterPopUp()),
+                          );
+                          if (result != null && result is Map<String, dynamic>) {
+                            setState(() {
+                              _filterLearn = List<Map<String, String>>.from(result['learn'] ?? []);
+                              _filterKnown = List<Map<String, String>>.from(result['known'] ?? []);
+                              _filterInterests = List<Map<String, String>>.from(result['interests'] ?? []);
+                            });
+                            _loadAllUsers(lang: _currentLocale?.languageCode);
+                          }
+                        },
+                        icon: const Icon(Icons.filter_alt_outlined),
+                        label: const Text('Filter'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          foregroundColor: theme.colorScheme.onPrimaryContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          elevation: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 38,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _selectedFilters.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 8),
+                            itemBuilder: (context, index) {
+                              final tag = _selectedFilters[index];
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: theme.colorScheme.primary.withOpacity(0.5),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tag,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.primary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _filterLearn.removeWhere((f) => f['name'] == tag);
+                                          _filterKnown.removeWhere((f) => f['name'] == tag);
+                                          _filterInterests.removeWhere((f) => f['name'] == tag);
+                                        });
+                                        if (_hasActiveFilter) {
+                                          _loadAllUsers(lang: _currentLocale?.languageCode);
+                                        } else {
+                                          _loadMatchingUsers(lang: _currentLocale?.languageCode);
+                                        }
+                                      },
+                                      child: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              tag,
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _filterLearn.removeWhere((f) => f['name'] == tag);
-                                  _filterKnown.removeWhere((f) => f['name'] == tag);
-                                  _filterInterests.removeWhere((f) => f['name'] == tag);
-                                });
-
-                                if (_hasActiveFilter) {
-                                  _loadAllUsers(lang: _currentLocale?.languageCode);
-                                } else {
-                                  _loadMatchingUsers(lang: _currentLocale?.languageCode);
-                                }
-                              },
-                              child: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ),
+                  if (_isShowingMatching && !_hasActiveFilter) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      "Những người phù hợp với bạn",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
+            )
+                : const SizedBox.shrink(),
           ),
-
-          const SizedBox(height: 16),
-
-          if (_isShowingMatching && !_hasActiveFilter)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                "Những người phù hợp với bạn",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
 
           Expanded(
             child: MasonryGridView.count(
+              controller: _scrollController,
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,

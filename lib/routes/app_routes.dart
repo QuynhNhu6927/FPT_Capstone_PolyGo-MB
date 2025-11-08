@@ -48,36 +48,50 @@ class AppRoutes {
     switch (settings.name) {
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+
       case register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
+
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+
       case forgetPassword:
         return MaterialPageRoute(builder: (_) => const ForgetPasswordScreen());
+
       case userInfo:
         return MaterialPageRoute(builder: (_) => const UserInfoScreen());
+
       case profileSetup:
         return MaterialPageRoute(builder: (_) => const ProfileSetupScreen());
+
       case updateProfile:
         return MaterialPageRoute(builder: (_) => const UpdateProfileScreen());
+
       case allBadges:
         return MaterialPageRoute(builder: (_) => const AllBadgesScreen());
+
       case myEvents:
         return MaterialPageRoute(builder: (_) => const MyEventsScreen());
+
       case shop:
         return MaterialPageRoute(builder: (_) => const ShopScreen());
+
       case allGifts:
         return MaterialPageRoute(builder: (_) => const AllGiftsScreen());
+
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationScreen());
+
       case userProfile:
         final args = settings.arguments as Map<String, dynamic>?;
         final userId = args?['id'] as String?;
         return MaterialPageRoute(
           builder: (_) => UserProfileScreen(userId: userId),
         );
+
       case eventWaiting:
         final args = settings.arguments as Map<String, dynamic>?;
+        print('eventWaiting args: $args'); // <--- Debug: in ra toàn bộ arguments
 
         final eventId = args?['eventId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
@@ -86,20 +100,24 @@ class AppRoutes {
         final hostName = args?['hostName'] as String? ?? '';
         final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
 
+        print('Parsed eventWaiting -> eventId: $eventId, eventTitle: $eventTitle, hostId: $hostId, hostName: $hostName, startAt: $startAt, eventStatus: $eventStatus');
+
         return MaterialPageRoute(
           builder: (_) => WaitingRoomScreen(
             eventId: eventId,
             eventTitle: eventTitle,
             hostId: hostId,
             hostName: hostName,
-            eventStartAt: startAt,
+            startAt: startAt,
             eventStatus: eventStatus,
           ),
         );
 
+
       case eventRoom:
         final args = settings.arguments as Map<String, dynamic>?;
         final eventId = args?['eventId'] as String? ?? '';
+        final hostId = args?['hostId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
         final eventStatus = args?['eventStatus'] as String? ?? '';
         return MaterialPageRoute(
@@ -107,10 +125,13 @@ class AppRoutes {
             eventId: eventId,
             eventTitle: eventTitle,
             eventStatus: eventStatus,
+            hostId: hostId,
           ),
         );
+
       case friends:
         return MaterialPageRoute(builder: (_) => const FriendsScreen());
+
       case endMeeting:
         final args = settings.arguments as Map<String, dynamic>?;
         final eventId = args?['eventId'] as String? ?? '';
@@ -119,6 +140,7 @@ class AppRoutes {
             eventId: eventId,
           ),
         );
+
       case rating:
         final args = settings.arguments as Map<String, dynamic>?;
         final eventId = args?['eventId'] as String? ?? '';
@@ -135,27 +157,25 @@ class AppRoutes {
               eventId: eventId,
             )
         );
+
       case conversations:
         return MaterialPageRoute(builder: (_) => const ConversationListScreen());
+
       case conversation:
         final args = settings.arguments as Map<String, dynamic>?;
-        final eventId = args?['eventId'] as String? ?? '';
-        return MaterialPageRoute(
-          builder: (_) => EndMeetingScreen(
-            eventId: eventId,
-          ),
-        );
-      case rating:
-        final args = settings.arguments as Map<String, dynamic>?;
         final conversationId = args?['conversationId'] as String? ?? '';
+        final lastActiveAt = args?['lastActiveAt'] as String? ?? '';
         final userName = args?['userName'] as String? ?? '';
         final avatarHeader = args?['avatarHeader'] as String? ?? '';
+        final isOnline = args?['isOnline'] as bool? ?? false;
         return MaterialPageRoute(
-            builder: (_) => ConversationScreen(
-              conversationId: conversationId,
-              userName: userName,
-              avatarHeader: avatarHeader,
-            )
+          builder: (_) => ConversationScreen(
+            conversationId: conversationId,
+            userName: userName,
+            avatarHeader: avatarHeader,
+            lastActiveAt: lastActiveAt,
+            isOnline: isOnline,
+          ),
         );
       default:
         return MaterialPageRoute(builder: (_) => const LoginScreen());

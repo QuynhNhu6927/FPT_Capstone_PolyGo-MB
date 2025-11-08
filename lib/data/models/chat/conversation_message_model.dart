@@ -26,7 +26,7 @@ class ConversationMessage {
     return [];
   }
 
-  /// tách chuỗi image theo "keyword"
+  /// Tách chuỗi image theo "keyword"
   List<String> _parseImageContent(String content) {
     if (content.contains('<<~IMG~>>')) {
       return content.split('<<~IMG~>>');
@@ -63,10 +63,16 @@ class Sender {
   String name;
   String? avatarUrl;
 
+  // ✅ Thêm các biến còn thiếu từ swagger:
+  bool? isOnline;
+  String? lastActiveAt;
+
   Sender({
     required this.id,
     required this.name,
     this.avatarUrl,
+    this.isOnline,
+    this.lastActiveAt,
   });
 
   factory Sender.fromJson(Map<String, dynamic> json) {
@@ -74,6 +80,8 @@ class Sender {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       avatarUrl: json['avatarUrl'],
+      isOnline: json['isOnline'],
+      lastActiveAt: json['lastActiveAt'],
     );
   }
 
@@ -82,6 +90,8 @@ class Sender {
       'id': id,
       'name': name,
       'avatarUrl': avatarUrl,
+      'isOnline': isOnline,
+      'lastActiveAt': lastActiveAt,
     };
   }
 }
@@ -107,9 +117,8 @@ class ConversationMessageListResponse {
 
   factory ConversationMessageListResponse.fromJson(Map<String, dynamic> json) {
     var itemsJson = json['items'] as List? ?? [];
-    List<ConversationMessage> items = itemsJson
-        .map((item) => ConversationMessage.fromJson(item))
-        .toList();
+    List<ConversationMessage> items =
+    itemsJson.map((item) => ConversationMessage.fromJson(item)).toList();
 
     return ConversationMessageListResponse(
       items: items,

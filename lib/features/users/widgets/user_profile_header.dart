@@ -31,19 +31,17 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     _friendStatus = widget.user.friendStatus ?? "None";
   }
 
+  // ------------------- Friend handlers giữ nguyên -------------------
+
   Future<void> _handleSendFriendRequest() async {
     setState(() => _isLoading = true);
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final friendRepo = FriendRepository(FriendService(ApiClient()));
+      final repo = FriendRepository(FriendService(ApiClient()));
 
-      await friendRepo.sendFriendRequest(token, widget.user.id);
-      setState(() {
-        _friendStatus = "Sent";
-      });
-
+      await repo.sendFriendRequest(token, widget.user.id);
+      setState(() => _friendStatus = "Sent");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Friend request sent!')),
       );
@@ -58,17 +56,13 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
 
   Future<void> _handleCancelFriendRequest() async {
     setState(() => _isLoading = true);
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final friendRepo = FriendRepository(FriendService(ApiClient()));
+      final repo = FriendRepository(FriendService(ApiClient()));
 
-      await friendRepo.cancelFriendRequest(token, widget.user.id);
-      setState(() {
-        _friendStatus = "None";
-      });
-
+      await repo.cancelFriendRequest(token, widget.user.id);
+      setState(() => _friendStatus = "None");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Friend request cancelled!')),
       );
@@ -83,25 +77,16 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
 
   Future<void> _handleAcceptFriendRequest() async {
     setState(() => _isLoading = true);
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final friendRepo = FriendRepository(FriendService(ApiClient()));
+      final repo = FriendRepository(FriendService(ApiClient()));
 
-      final success = await friendRepo.acceptFriendRequest(token, widget.user.id);
-
+      final success = await repo.acceptFriendRequest(token, widget.user.id);
       if (success) {
-        setState(() {
-          _friendStatus = "Friends";
-        });
-
+        setState(() => _friendStatus = "Friends");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Friend request accepted!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to accept friend request.')),
         );
       }
     } catch (e) {
@@ -115,25 +100,16 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
 
   Future<void> _handleRejectFriendRequest() async {
     setState(() => _isLoading = true);
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final friendRepo = FriendRepository(FriendService(ApiClient()));
+      final repo = FriendRepository(FriendService(ApiClient()));
 
-      final success = await friendRepo.rejectFriendRequest(token, widget.user.id);
-
+      final success = await repo.rejectFriendRequest(token, widget.user.id);
       if (success) {
-        setState(() {
-          _friendStatus = "None";
-        });
-
+        setState(() => _friendStatus = "None");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Friend request rejected!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to rejected friend request.')),
         );
       }
     } catch (e) {
@@ -150,18 +126,13 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final friendRepo = FriendRepository(FriendService(ApiClient()));
+      final repo = FriendRepository(FriendService(ApiClient()));
 
-      final success = await friendRepo.unfriend(token, widget.user.id);
-
+      final success = await repo.unfriend(token, widget.user.id);
       if (success) {
-        setState(() { _friendStatus = "None"; });
+        setState(() => _friendStatus = "None");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Unfriended successfully!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to unfriend.')),
         );
       }
     } catch (e) {
@@ -173,14 +144,20 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     }
   }
 
+  // ------------------- Build UI -------------------
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final avatarUrl = widget.user.avatarUrl;
     final name = widget.user.name ?? "Unnamed";
     final experiencePoints = widget.user.experiencePoints;
-    final isDark = theme.brightness == Brightness.dark;
+    final introduction = widget.user.introduction ?? "";
+
+    const blue = Color(0xFF2563EB);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -202,7 +179,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar + name
+          // ---------------- Avatar + Name ----------------
           Row(
             children: [
               widget.user.planType == "Plus"
@@ -217,7 +194,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                     ? const Icon(Icons.person, color: Colors.white, size: 36)
                     : null,
               ),
-
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -237,9 +213,24 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               ),
             ],
           ),
-          const SizedBox(height: 25),
 
-          // Buttons
+          const SizedBox(height: 16),
+
+          // ---------------- Introduction ----------------
+          if (introduction.isNotEmpty) ...[
+            Text(
+              widget.loc.translate("introduction"),
+              style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              introduction,
+              style: t.bodyMedium?.copyWith(height: 1.4),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ---------------- Buttons ----------------
           Row(
             children: [
               Expanded(
@@ -257,40 +248,48 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               ),
               const SizedBox(width: 12),
 
-              // Gift Button
+              // Gift button
               Expanded(
-                child: OutlinedButton.icon(
+                child: ElevatedButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.card_giftcard,
-                      color: Color(0xFF2563EB), size: 22),
-                  label: const Text(""),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF2563EB)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: blue,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  child: const Icon(
+                    Icons.card_giftcard,
+                    color: Colors.white,
+                    size: 22,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
 
-              // Message Button
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.chat_bubble_outline,
-                      color: Color(0xFF2563EB), size: 22),
-                  label: const Text(""),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF2563EB)),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
+              // Chat button — chỉ hiện nếu là bạn bè
+              if (_friendStatus == "Friends") ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // TODO: mở màn hình chat
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                    ),
+                    child: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ],
@@ -298,4 +297,3 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     );
   }
 }
-

@@ -7,7 +7,7 @@ import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/event_service.dart';
-import '../../../data/services/webrtc_controller.dart';
+import '../../../data/services/signalr/webrtc_controller.dart';
 import '../../../routes/app_routes.dart';
 import '../widgets/roomCall/chat_panel.dart';
 import '../widgets/roomCall/meeting_controls.dart';
@@ -21,6 +21,7 @@ class MeetingRoomScreen extends StatefulWidget {
   final bool isHost;
   final bool initialMicOn;
   final bool initialCameraOn;
+  final String hostId;
 
   const MeetingRoomScreen({
     super.key,
@@ -30,6 +31,7 @@ class MeetingRoomScreen extends StatefulWidget {
     this.isHost = false,
     this.initialMicOn = true,
     this.initialCameraOn = true,
+    required this.hostId,
   });
 
   @override
@@ -126,6 +128,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isMicOn = _controller.localAudioEnabled;
       isCameraOn = _controller.localVideoEnabled;
       _localRenderer.srcObject = _controller.localStream;
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token != null && token.isNotEmpty) {
@@ -136,14 +139,20 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
           print("Failed to get user info: $e");
         }
       }
-      await _controller.joinRoom();
+
+      // Sử dụng widget.isHost để quyết định isHost khi joinRoom
+      final isUserHost = widget.isHost;
+
+      await _controller.joinRoom(
+        isHost: isUserHost,
+      );
 
       print("Controller hostId: ${_controller.hostId}");
       _controller.participants.forEach((k, v) {
         print("Participant: id=${v.id}, name=${v.name}, role=${v.role}");
       });
 
-      if (widget.isHost) {
+      if (isUserHost) {
         Future.delayed(const Duration(seconds: 1), () async {
           await _controller.startCall();
         });
@@ -262,18 +271,37 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 participants: _controller.participants.values
                     .where((p) => p.id != _controller.myConnectionId)
                     .toList(),
-                isHost: widget.isHost,
-              ),
+                controller: _controller,
+                widgetIsHost: widget.isHost,
+              )
+              ,
             ),
 
             // Participant list
             if (isParticipantsOpen)
-              ParticipantList(
-                participants: _controller.participants.values
-                    .where((p) => p.id != _controller.myConnectionId)
-                    .toList(),
-                isHost: widget.isHost,
-                onClose: () => setState(() => isParticipantsOpen = false),
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  return ParticipantList(
+                    participants: _controller.participants.values
+                        .where((p) => p.id != _controller.myConnectionId)
+                        .toList(),
+                    isHost: widget.isHost,
+                    onClose: () => setState(() => isParticipantsOpen = false),
+                    onMuteAll: () async {
+                      await _controller.muteAllParticipants();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Muted all participants")),
+                      );
+                    },
+                    onTurnOffAllCams: () async {
+                      await _controller.turnOffAllParticipantCameras();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Turned off all cameras")),
+                      );
+                    },
+                  );
+                },
               ),
 
             // Chat panel

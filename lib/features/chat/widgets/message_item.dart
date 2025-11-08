@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../../core/theme/date_separator.dart';
+import '../../../core/utils/date_separator.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
 import 'chat_bubble.dart';
 import 'conversation.dart' hide formatDateSeparator;
@@ -34,12 +34,36 @@ class MessageItem extends StatelessWidget {
     final currentDate = DateTime.tryParse(message.sentAt)?.toLocal();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (showDateSeparator && currentDate != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    formatDateSeparator(currentDate),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+              ],
+            ),
+          ),
+        // Tin nhắn
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment:
+            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
               if (!isMine)
                 CircleAvatar(
@@ -88,27 +112,6 @@ class MessageItem extends StatelessWidget {
             ],
           ).animate().fadeIn(duration: 250.ms).slideY(begin: 0.1, end: 0),
         ),
-        if (showDateSeparator && currentDate != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    formatDateSeparator(currentDate),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
-              ],
-            ),
-          ),
       ],
     );
   }

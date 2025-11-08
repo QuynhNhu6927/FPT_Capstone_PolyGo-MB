@@ -9,7 +9,7 @@ import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/conversation_repository.dart';
 import '../../../data/repositories/media_repository.dart';
 import '../../../data/services/auth_service.dart';
-import '../../../data/services/chat_signalr_service.dart';
+import '../../../data/services/signalr/chat_signalr_service.dart';
 import '../../../data/services/conversation_service.dart';
 import '../../../data/services/media_service.dart';
 import 'chat_input.dart';
@@ -21,12 +21,16 @@ class Conversation extends StatefulWidget {
   final String conversationId;
   final String userName;
   final String avatarHeader;
+  final String lastActiveAt;
+  final bool isOnline;
 
   const Conversation({
     super.key,
     required this.conversationId,
     required this.userName,
     required this.avatarHeader,
+    required this.lastActiveAt,
+    required this.isOnline,
   });
 
   @override
@@ -175,6 +179,9 @@ class _ConversationState extends State<Conversation> {
       orElse: () => Sender(id: senderId, name: senderName),
     );
 
+    final sentAtStr = data['sentAt'] ?? DateTime.now().toIso8601String();
+    final sentAt = DateTime.tryParse(sentAtStr)?.toLocal() ?? DateTime.now();
+
     setState(() {
       _messages.insert(
         0,
@@ -185,7 +192,7 @@ class _ConversationState extends State<Conversation> {
           sender: existingSender,
           content: data['content'] ?? '',
           images: images,
-          sentAt: data['sentAt'] ?? DateTime.now().toIso8601String(),
+          sentAt: sentAt.toIso8601String(),
         ),
       );
     });
@@ -254,6 +261,8 @@ class _ConversationState extends State<Conversation> {
       appBar: ConversationAppBar(
         userName: widget.userName,
         avatarHeader: widget.avatarHeader,
+        lastActiveAt: widget.lastActiveAt,
+        isOnline: widget.isOnline,
       ),
       body: Stack(
         children: [
@@ -278,15 +287,18 @@ class _ConversationState extends State<Conversation> {
                       }
 
                       bool showDateSeparator = false;
-                      final currentDate = DateTime.tryParse(
-                        msg.sentAt,
-                      )?.toLocal();
+                      final currentDate = DateTime.tryParse(msg.sentAt)?.toLocal();
                       if (currentDate != null) {
-                        if (nextDate == null ||
-                            currentDate.year != nextDate.year ||
-                            currentDate.month != nextDate.month ||
-                            currentDate.day != nextDate.day) {
+                        if (index == _messages.length - 1) {
                           showDateSeparator = true;
+                        } else {
+                          final nextDate = DateTime.tryParse(_messages[index + 1].sentAt)?.toLocal();
+                          if (nextDate != null &&
+                              (currentDate.year != nextDate.year ||
+                                  currentDate.month != nextDate.month ||
+                                  currentDate.day != nextDate.day)) {
+                            showDateSeparator = true;
+                          }
                         }
                       }
 

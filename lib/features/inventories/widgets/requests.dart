@@ -88,13 +88,16 @@ class _RequestsState extends State<Requests> {
     try {
       final success = await _repo.acceptFriendRequest(token, user.id);
       if (success) {
+        setState(() {
+          _requests.removeWhere((u) => u.id == user.id);
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đã chấp nhận yêu cầu kết bạn'),
             duration: Duration(seconds: 2),
           ),
         );
-        _loadRequests();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,13 +114,16 @@ class _RequestsState extends State<Requests> {
     try {
       final success = await _repo.rejectFriendRequest(token, user.id);
       if (success) {
+        setState(() {
+          _requests.removeWhere((u) => u.id == user.id);
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đã từ chối yêu cầu kết bạn'),
             duration: Duration(seconds: 2),
           ),
         );
-        _loadRequests();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

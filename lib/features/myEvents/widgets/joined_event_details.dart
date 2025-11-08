@@ -388,6 +388,8 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                 'eventStatus': widget.event.status,
                                 'isHost': widget.currentUserId == widget.event.host.id,
                                 'hostId': widget.event.host.id,
+                                'hostName': widget.event.host.name,
+                                'startAt': widget.event.startAt,
                                 'initialMic': true,
                               },
                             );
@@ -421,6 +423,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                               'eventStatus': widget.event.status,
                               'isHost': widget.currentUserId == widget.event.host.id,
                               'hostId': widget.event.host.id,
+                              'hostName': widget.event.host.name,
                               'initialMic': true,
                             },
                           );

@@ -1,23 +1,35 @@
+// participant_list.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:polygo_mobile/features/myEvents/widgets/roomCall/participant_controls_dialog.dart';
-import '../../../../data/services/webrtc_controller.dart';
+import '../../../../data/services/signalr/webrtc_controller.dart';
+import 'participant_controls_dialog.dart';
 
-class ParticipantList extends StatelessWidget {
+class ParticipantList extends StatefulWidget {
   final List<Participant> participants;
   final bool isHost;
   final VoidCallback onClose;
+  final Future<void> Function()? onMuteAll;
+  final Future<void> Function()? onTurnOffAllCams;
+  final WebRTCController? controller;
 
   const ParticipantList({
     super.key,
     required this.participants,
     required this.isHost,
     required this.onClose,
+    this.onMuteAll,
+    this.onTurnOffAllCams,
+    this.controller,
   });
 
   @override
+  State<ParticipantList> createState() => _ParticipantListState();
+}
+
+class _ParticipantListState extends State<ParticipantList> {
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 0.45;
+    final theme = Theme.of(context);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
@@ -28,7 +40,7 @@ class ParticipantList extends StatelessWidget {
       height: height,
       child: Material(
         elevation: 16,
-        color: const Color(0xFFF8F9FA),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: Column(
           children: [
@@ -36,98 +48,112 @@ class ParticipantList extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                color: Colors.white,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                color: theme.cardColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 4,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Participants",
-                    style: TextStyle(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.black87,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.black54),
-                    onPressed: onClose,
+                    icon: Icon(Icons.close, color: theme.iconTheme.color),
+                    onPressed: widget.onClose,
                   ),
                 ],
               ),
             ),
 
+            // Host controls
+            if (widget.isHost)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (widget.onMuteAll != null) await widget.onMuteAll!();
+                        setState(() {});
+                      },
+                      child: const Text("Mute All"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (widget.onTurnOffAllCams != null) await widget.onTurnOffAllCams!();
+                        setState(() {});
+                      },
+                      child: const Text("Turn Off All Cameras"),
+                    ),
+                  ],
+                ),
+              ),
+
             const Divider(height: 1),
 
+            // Participant list
             Expanded(
-              child: participants.isEmpty
-                  ? const Center(
+              child: widget.participants.isEmpty
+                  ? Center(
                 child: Text(
                   "No participants yet",
-                  style: TextStyle(color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               )
                   : ListView.builder(
-                itemCount: participants.length,
+                itemCount: widget.participants.length,
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemBuilder: (context, index) {
-                  final p = participants[index];
+                  final p = widget.participants[index];
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.grey.shade300,
+                      backgroundColor: theme.dividerColor,
                       child: const Icon(
                         Icons.person,
                         color: Colors.white70,
                       ),
                     ),
-                    title: Text(
-                      p.name,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    title: Row(
                       children: [
-                        if (!p.audioEnabled)
-                          const Icon(Icons.mic_off, color: Colors.red, size: 18),
-                        if (!p.videoEnabled)
-                          const Icon(Icons.videocam_off, color: Colors.red, size: 18),
-                        if (p.isHandRaised)
-                          const Icon(Icons.pan_tool, color: Colors.amber, size: 18),
-                        if (isHost)
-                          IconButton(
-                            icon: const Icon(Icons.more_vert, size: 20),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => ParticipantControlsDialog(
-                                  participant: p,
-                                  initialMicEnabled: p.audioEnabled,
-                                  initialCamEnabled: p.videoEnabled,
-                                ),
-                              );
-                            },
+                        Expanded(
+                          child: Text(
+                            p.name,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          p.audioEnabled ? Icons.mic : Icons.mic_off,
+                          color: p.audioEnabled ? Colors.green : Colors.red,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          p.videoEnabled ? Icons.videocam : Icons.videocam_off,
+                          color: p.videoEnabled ? Colors.green : Colors.red,
+                          size: 18,
+                        ),
                       ],
                     ),
                   );
                 },
               ),
             ),
-
             const SizedBox(height: 10),
           ],
         ),

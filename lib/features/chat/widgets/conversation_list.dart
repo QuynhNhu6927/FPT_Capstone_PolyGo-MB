@@ -6,10 +6,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/utils/conversation_time.dart';
 import '../../../data/models/chat/conversation_model.dart';
 import '../../../data/repositories/conversation_repository.dart';
-import '../../../data/services/chat_signalr_service.dart';
+import '../../../data/services/signalr/chat_signalr_service.dart';
 import '../../../data/services/conversation_service.dart';
+import '../../../data/services/signalr/user_presence.dart';
 
 class ConversationList extends StatefulWidget {
   const ConversationList({super.key});
@@ -22,6 +24,8 @@ class _ConversationListState extends State<ConversationList> {
   final TextEditingController _searchController = TextEditingController();
   late ChatSignalrService _chatSignalrService;
   String _userId = '';
+  late UserPresenceService _userPresenceService;
+  Map<String, bool> _onlineStatus = {};
 
   List<Conversation> _conversations = [];
   int _pageNumber = 1;
@@ -35,20 +39,33 @@ class _ConversationListState extends State<ConversationList> {
   @override
   void initState() {
     super.initState();
-
     _chatSignalrService = ChatSignalrService();
 
-    _loadConversations(loadMore: false).then((_) {
-      _chatSignalrService.initHub();
-    });
+    _initUserAndConversations();
+  }
 
+  Future<void> _initUserAndConversations() async {
+    final prefs = await SharedPreferences.getInstance();
+    _userId = prefs.getString('userId') ?? '';
+    debugPrint('Logged in userId: $_userId');
+    await _loadConversations(loadMore: false);
+
+    _chatSignalrService = ChatSignalrService();
+    await _chatSignalrService.initHub();
+
+    for (var conv in _conversations) {
+      await _chatSignalrService.joinConversation(conv.id);
+    }
+
+    // Listen message real-time
     _chatSignalrService.messageStream.listen((data) {
       final convId = data['conversationId'] as String;
-      final senderId = data['senderId'] as String;
       final content = data['content'] as String?;
       final sentAt = data['sentAt'] as String?;
       final type = data['type'] is int ? data['type'] as int : 0;
 
+      final isSentByYou = data['isSentByYou'] as bool? ?? false;
+      debugPrint('Logged in isSentByYou: $isSentByYou');
       if (!mounted) return;
 
       setState(() {
@@ -59,8 +76,9 @@ class _ConversationListState extends State<ConversationList> {
             type: type,
             content: content,
             sentAt: sentAt,
-            isSentByYou: senderId == _userId,
+            isSentByYou: isSentByYou,
           );
+          if (!isSentByYou) conv.hasSeen = false;
           _conversations.removeAt(index);
           _conversations.insert(0, conv);
         } else {
@@ -68,20 +86,48 @@ class _ConversationListState extends State<ConversationList> {
             0,
             Conversation(
               id: convId,
-              user: User(id: senderId, name: "Người dùng mới"),
+              hasSeen: isSentByYou,
+              user: User(id: data['senderId'] ?? '', name: "Người dùng mới"),
               lastMessage: LastMessage(
                 type: type,
                 content: content,
                 sentAt: sentAt,
-                isSentByYou: senderId == _userId,
+                isSentByYou: isSentByYou,
               ),
             ),
           );
         }
       });
     });
-  }
 
+    _userPresenceService = UserPresenceService();
+    await _userPresenceService.initHub();
+
+    _userPresenceService.statusStream.listen((data) {
+      if (!mounted) return;
+      final userId = data['userId'] as String?;
+      final isOnline = data['isOnline'] as bool? ?? false;
+      final lastActiveAt = data['lastActiveAt'] ?? '';
+
+      if (userId != null) {
+        debugPrint(
+            '[Presence] UserId: $userId | isOnline: $isOnline | lastActiveAt: $lastActiveAt'
+        );
+
+        setState(() {
+          _onlineStatus[userId] = isOnline;
+          final index = _conversations.indexWhere((c) => c.user.id == userId);
+          if (index != -1) {
+            _conversations[index].user.isOnline = isOnline;
+            debugPrint(
+                '[Presence] Updated conversation list: ${_conversations[index].user.name} isOnline=$isOnline'
+            );
+          }
+        });
+      }
+    });
+
+  }
 
   Future<void> _loadConversations({bool loadMore = false}) async {
     if (_isLoading) return;
@@ -126,6 +172,7 @@ class _ConversationListState extends State<ConversationList> {
   @override
   void dispose() {
     _chatSignalrService.stop();
+    _userPresenceService.stop();
     _searchController.dispose();
     super.dispose();
   }
@@ -217,18 +264,30 @@ class _ConversationListState extends State<ConversationList> {
                 ),
                 child: ListTile(
                   onTap: () async {
+                    if (!(conv.lastMessage.isSentByYou ?? false) && !conv.hasSeen) {
+                      await _chatSignalrService.markAsRead(
+                        conversationId: conv.id,
+                        userId: _userId,
+                      );
+                      setState(() {
+                        conv.hasSeen = true; // cập nhật đã đọc
+                      });
+                    }
+
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ConversationScreen(
                           conversationId: conv.id,
                           userName: conv.user.name,
+                          lastActiveAt: conv.user.lastActiveAt ?? '',
+                          isOnline: conv.user.isOnline,
                           avatarHeader: conv.user.avatarUrl ?? '',
                         ),
                       ),
                     );
-                    // _loadConversations(loadMore: false);
                   },
+
                   leading: Stack(
                     children: [
                       CircleAvatar(
@@ -243,8 +302,26 @@ class _ConversationListState extends State<ConversationList> {
                             ? const Icon(Icons.person, color: Colors.white, size: 28)
                             : null,
                       ),
+                      if (_onlineStatus[conv.user.id] ?? conv.user.isOnline)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
+
                   title: Text(
                     conv.user.name,
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -258,6 +335,9 @@ class _ConversationListState extends State<ConversationList> {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      fontWeight: (!(conv.lastMessage.isSentByYou ?? false) && !conv.hasSeen)
+                          ? FontWeight.w900
+                          : FontWeight.normal,
                     ),
                   ),
 
@@ -311,35 +391,3 @@ String _getLastMessageText(LastMessage lastMessage) {
       return isMe ? 'Bạn: $content' : content;
   }
 }
-
-
-String formatConversationTime(String? sentAt) {
-  if (sentAt == null || sentAt.isEmpty) return '';
-
-  final date = DateTime.tryParse(sentAt)?.toLocal();
-  if (date == null) return '';
-
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-
-  final messageDay = DateTime(date.year, date.month, date.day);
-
-  if (messageDay == today) {
-    return DateFormat('HH:mm').format(date);
-  } else {
-    // Thứ 2 = Monday = 1, Sunday = 7
-    const weekdays = [
-      '', // placeholder
-      'Thứ Hai',
-      'Thứ Ba',
-      'Thứ Tư',
-      'Thứ Năm',
-      'Thứ Sáu',
-      'Thứ Bảy',
-      'Chủ Nhật',
-    ];
-    return weekdays[date.weekday];
-  }
-}
-
-

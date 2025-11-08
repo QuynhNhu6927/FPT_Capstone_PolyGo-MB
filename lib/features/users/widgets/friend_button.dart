@@ -23,85 +23,59 @@ class FriendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const blue = Color(0xFF2563EB);
+
     switch (status) {
+      case "None":
+        return ElevatedButton.icon(
+          onPressed: onSendRequest,
+          icon: const Icon(Icons.person_add_alt_1, color: Colors.white, size: 22),
+          label: const SizedBox.shrink(),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: blue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: const EdgeInsets.all(12),
+          ),
+        );
+
       case "Sent":
         return ElevatedButton.icon(
           onPressed: onCancelRequest,
-          icon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.close, color: Colors.white, size: 20),
-              SizedBox(width: 4),
-              Icon(Icons.mail_outline, color: Colors.white, size: 20),
-            ],
-          ),
-          label: Text(
-            loc.translate(""),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ),
+          icon: const Icon(Icons.pending_outlined, color: Colors.white, size: 22),
+          label: const SizedBox.shrink(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: blue,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.all(12),
           ),
         );
 
       case "Received":
         return ElevatedButton.icon(
           onPressed: () => _showFriendRequestDialog(context),
-          icon: const Icon(Icons.mail_outline, color: Colors.black87),
-          label: Text(
-            loc.translate(""),
-            style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
-          ),
+          icon: const Icon(Icons.pending_outlined, color: Colors.white, size: 22),
+          label: const SizedBox.shrink(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
+            backgroundColor: blue,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.all(12),
           ),
         );
 
       case "Friends":
         return ElevatedButton.icon(
           onPressed: () => _showUnfriendDialog(context),
-          icon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.check_circle, color: Colors.black87, size: 20),
-              SizedBox(width: 4),
-              Icon(Icons.person, color: Colors.black87, size: 20),
-            ],
-          ),
-          label: Text(
-            loc.translate(""),
-            style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
-          ),
+          icon: const Icon(Icons.people_alt, color: Colors.white, size: 22),
+          label: const SizedBox.shrink(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
+            backgroundColor: blue,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.all(12),
           ),
         );
 
       default:
-        return OutlinedButton.icon(
-          onPressed: onSendRequest,
-          icon: const Icon(Icons.person_add, color: Color(0xFF2563EB)),
-          label: Text(
-            loc.translate(""),
-            style: const TextStyle(
-              color: Color(0xFF2563EB),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFF2563EB)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          ),
-        );
+        return const SizedBox.shrink();
     }
   }
 

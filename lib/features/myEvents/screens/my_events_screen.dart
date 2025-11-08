@@ -23,7 +23,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedTab = widget.initialTab; // khởi tạo theo tham số
+    _selectedTab = widget.initialTab;
   }
 
   void _onTabSelected(int index) {
