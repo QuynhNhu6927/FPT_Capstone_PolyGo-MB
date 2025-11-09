@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/auth_service.dart';
-import '../../../data/services/signalr/webrtc_controller.dart';
 import 'event_room_screen.dart';
 
 class WaitingRoomScreen extends StatefulWidget {
@@ -85,12 +84,6 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         'video': true,
       });
       _localRenderer.srcObject = stream;
-      WebRTCController controller = WebRTCController(
-        eventId: widget.eventId,
-        userName: 'Preview',
-        isHost: _isHost,
-      );
-      controller.localStream = stream;
       setState(() => isInitialized = true);
     } catch (_) {
       setState(() {
@@ -103,7 +96,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   void _toggleAudio() {
     final stream = _localRenderer.srcObject;
     if (stream != null) {
-      final track = stream.getAudioTracks().firstOrNull;
+      final track = stream.getAudioTracks().isNotEmpty ? stream.getAudioTracks().first : null;
       if (track != null) {
         track.enabled = !track.enabled;
         setState(() => isMicOn = track.enabled);
@@ -114,7 +107,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   void _toggleVideo() {
     final stream = _localRenderer.srcObject;
     if (stream != null) {
-      final track = stream.getVideoTracks().firstOrNull;
+      final track = stream.getVideoTracks().isNotEmpty ? stream.getVideoTracks().first : null;
       if (track != null) {
         track.enabled = !track.enabled;
         setState(() => isCameraOn = track.enabled);
@@ -138,6 +131,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -196,7 +190,6 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Column(
               children: [
-                // --- Tiêu đề ---
                 Text(
                   widget.eventTitle,
                   textAlign: TextAlign.center,
@@ -213,8 +206,6 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
                   style: TextStyle(color: subTextColor, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
-
-                // --- Camera preview ---
                 Expanded(
                   child: AspectRatio(
                     aspectRatio: 3 / 4,
@@ -251,9 +242,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 if (permissionError != null)
                   Padding(
                     padding: const EdgeInsets.all(8),
@@ -263,8 +252,6 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
                       style: const TextStyle(color: Colors.redAccent),
                     ),
                   ),
-
-                // --- Mic / Cam / Join ---
                 Container(
                   margin: const EdgeInsets.only(top: 8),
                   child: Row(
@@ -286,7 +273,6 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),
@@ -310,9 +296,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         active ? (isDark ? Colors.white24 : Colors.black12) : Colors.white10,
         child: Icon(
           icon,
-          color: active
-              ? (isDark ? Colors.white : Colors.black87)
-              : Colors.redAccent,
+          color: active ? (isDark ? Colors.white : Colors.black87) : Colors.redAccent,
           size: 30,
         ),
       ),
@@ -333,14 +317,10 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text(
-        _isHost
-            ? (_eventStarted ? "Bắt đầu" : "Chờ bắt đầu")
-            : "Tham gia",
+        _isHost ? (_eventStarted ? "Bắt đầu" : "Chờ bắt đầu") : "Tham gia",
         style: TextStyle(
           fontSize: 16,
-          color: canJoin
-              ? Colors.white
-              : (isDark ? Colors.white54 : Colors.black45),
+          color: canJoin ? Colors.white : (isDark ? Colors.white54 : Colors.black45),
         ),
       ),
     );

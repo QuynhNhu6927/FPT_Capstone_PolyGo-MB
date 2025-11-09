@@ -91,6 +91,39 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         }
       },
     );
+    _controller.onParticipantMuted = (participantId) {
+      final p = _controller.participants[participantId];
+      if (p != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${p.name} has been muted")),
+        );
+      }
+    };
+
+    _controller.onAllMuted = () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("All participants have been muted")),
+        );
+      }
+    };
+
+    _controller.onParticipantCameraOff = (participantId) {
+      final p = _controller.participants[participantId];
+      if (p != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${p.name}'s camera has been turned off")),
+        );
+      }
+    };
+
+    _controller.onAllCamsOff = () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("All participant cameras have been turned off")),
+        );
+      }
+    };
     _initMeeting();
   }
 
@@ -300,6 +333,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                         const SnackBar(content: Text("Turned off all cameras")),
                       );
                     },
+                    controller: _controller,
                   );
                 },
               ),
@@ -352,8 +386,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 opacity: (isChatOpen || isParticipantsOpen) ? 0 : 1,
                 child: MeetingControls(
                   isHost: widget.isHost,
-                  isCameraOn: isCameraOn,
-                  isMicOn: isMicOn,
+                  isCameraOn: _controller.isVideoEnabled,
+                  isMicOn: _controller.isAudioEnabled,
                   hasStartedEvent: hasStartedEvent,
                   onToggleCamera: _toggleVideo,
                   onToggleMic: _toggleAudio,

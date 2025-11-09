@@ -60,6 +60,12 @@ class WebRTCController extends ChangeNotifier {
   MediaStream? localStream;
   bool localAudioEnabled;
   bool localVideoEnabled;
+  bool get isAudioEnabled => localAudioEnabled;
+  bool get isVideoEnabled => localVideoEnabled;
+  ValueChanged<String>? onParticipantMuted;
+  ValueChanged<String>? onParticipantCameraOff;
+  VoidCallback? onAllMuted;
+  VoidCallback? onAllCamsOff;
 
   WebRTCController({
     required this.eventId,
@@ -86,17 +92,14 @@ class WebRTCController extends ChangeNotifier {
       };
 
       localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      localStream?.getAudioTracks().forEach((t) =>
-      t.enabled = localAudioEnabled);
-      localStream?.getVideoTracks().forEach((t) =>
-      t.enabled = localVideoEnabled);
+      localStream?.getAudioTracks().forEach((t) => t.enabled = localAudioEnabled);
+      localStream?.getVideoTracks().forEach((t) => t.enabled = localVideoEnabled);
       notifyListeners();
     } catch (e) {
       //
     }
   }
 
-  // --- Create PeerConnection ---
   Future<RTCPeerConnection> createPeer(String remoteId) async {
     if (_peerConnections.containsKey(remoteId)) {
       return _peerConnections[remoteId]!;
@@ -149,12 +152,11 @@ class WebRTCController extends ChangeNotifier {
         final stream = event.streams.first;
         participants.putIfAbsent(
           remoteId,
-              () =>
-              Participant(
-                id: remoteId,
-                name: "Guest-$remoteId",
-                role: "attendee",
-              ),
+              () => Participant(
+            id: remoteId,
+            name: "Guest-$remoteId",
+            role: "attendee",
+          ),
         );
         participants[remoteId]!.stream = stream;
         notifyListeners();
@@ -167,78 +169,103 @@ class WebRTCController extends ChangeNotifier {
 
   Future<void> initSignalR() async {
     final hubUrl = '${ApiConstants.baseUrl}/eventRoomHub';
-    print("[SignalR] 🔌 Connecting to $hubUrl ...");
     _hub = HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
 
-    _hub!.onclose((error) {
-      print("[SignalR] ❌ Disconnected: $error");
-    });
-    _hub!.onreconnecting((error) {
-      print("[SignalR] ⚠️ Reconnecting... cause=$error");
-    });
-    _hub!.onreconnected((connectionId) {
-      print("[SignalR] ✅ Reconnected with new connId=$connectionId");
-    });
+    _hub!.onclose((error) {});
+    _hub!.onreconnecting((error) {});
+    _hub!.onreconnected((connectionId) {});
 
-    _hub!.on('SetRole', (args) {
-      print("[SignalR] 📩 SetRole event: $args");
+    // trong WebRTCController
+    _hub!.on('SetRole', (args) async {
       myConnectionId = args?[1];
       hostId = args?[2];
 
-      if (hostId != null && participants.containsKey(hostId)) {
-        participants[hostId!]!.role = "host";
+      if (myConnectionId != null && localStream != null) {
+        // Broadcast trạng thái ban đầu khi đã có connectionId
+        try {
+          await _hub!.invoke("BroadcastMediaState", args: [
+            eventId,
+            myConnectionId,
+            "audio",
+            localAudioEnabled,
+          ]);
+          await _hub!.invoke("BroadcastMediaState", args: [
+            eventId,
+            myConnectionId,
+            "video",
+            localVideoEnabled,
+          ]);
+        } catch (e) {
+          if (kDebugMode) print("Failed to broadcast initial media state: $e");
+        }
       }
-      notifyListeners();
     });
 
+
     _hub!.on('UserJoined', (args) async {
-      print("[SignalR] 👋 UserJoined: $args");
       final name = args?[0] ?? "Unknown";
       final connId = args?[2];
 
+      // Giả lập trạng thái audio/video là false ban đầu
       participants[connId] = Participant(
         id: connId,
         name: name,
         role: connId == hostId ? "host" : "attendee",
+        audioEnabled: false, // default false
+        videoEnabled: false, // default false
       );
       notifyListeners();
 
+      // Log trạng thái ban đầu
       if (connId != myConnectionId) {
-        print("[SignalR] 🔄 Creating offer to $connId ...");
+        final p = participants[connId]!;
+        print(
+            "[Participant Joined] id=${p.id}, name=${p.name}, "
+                "audio=${p.audioEnabled}, video=${p.videoEnabled}, role=${p.role}"
+        );
+      }
+
+      if (connId != myConnectionId) {
         final pc = await createPeer(connId);
         final offer = await pc.createOffer();
         await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, 'offer'));
         await _hub?.invoke("SendOffer", args: [eventId, connId, offer.sdp]);
-        print("[SignalR] 📤 Sent offer to $connId");
       }
     });
 
+
     _hub!.on('ReceiveMediaState', (args) {
-      print("[SignalR] 🎧 ReceiveMediaState: $args");
       final fromConnId = args?[0];
       final type = args?[1];
       final enabled = args?[2];
 
       if (fromConnId != null && participants.containsKey(fromConnId)) {
         final p = participants[fromConnId]!;
+
         if (type == 'audio') {
           p.audioEnabled = enabled;
         } else if (type == 'video') {
           p.videoEnabled = enabled;
         }
+
+        // Log khi có update trạng thái audio/video
+        print(
+            "[Participant Update] id=${p.id}, name=${p.name}, "
+                "audio=${p.audioEnabled}, video=${p.videoEnabled}, role=${p.role}"
+        );
+
         notifyListeners();
       }
     });
 
+
     _hub!.on('UserLeft', (args) {
-      print("[SignalR] 👋 UserLeft: $args");
       final connId = args?[0];
       participants.remove(connId);
       notifyListeners();
     });
 
     _hub!.on('ReceiveChatMessage', (args) {
-      print("[SignalR] 💬 ReceiveChatMessage: $args");
       final sender = args?[0] ?? "Unknown";
       final message = args?[1] ?? "";
       final chatMessage = ChatMessage(sender: sender, message: message);
@@ -249,30 +276,26 @@ class WebRTCController extends ChangeNotifier {
       notifyListeners();
     });
 
-    _hub!.on('ToggleMicCommand', (args) {
-      print("[SignalR] 🎤 Received ToggleMicCommand: $args");
+    _hub!.on("ToggleMicCommand", (args) {
       final enabled = args?[0] ?? true;
-      localStream?.getAudioTracks().forEach((t) {
-        t.enabled = enabled;
-        print("[SignalR] 🎚 Audio track ${t.id} -> ${enabled ? 'ENABLED' : 'DISABLED'}");
-      });
+      print("🎤 Received ToggleMicCommand: $enabled");
+
+      localStream?.getAudioTracks().forEach((t) => t.enabled = enabled);
       localAudioEnabled = enabled;
       notifyListeners();
     });
 
-    _hub!.on('ToggleCamCommand', (args) {
-      print("[SignalR] 🎥 Received ToggleCamCommand: $args");
+    _hub!.on("ToggleCamCommand", (args) {
       final enabled = args?[0] ?? true;
-      localStream?.getVideoTracks().forEach((t) {
-        t.enabled = enabled;
-        print("[SignalR] 🎚 Video track ${t.id} -> ${enabled ? 'ENABLED' : 'DISABLED'}");
-      });
+      print("🎥 Received ToggleCamCommand: $enabled");
+
+      localStream?.getVideoTracks().forEach((t) => t.enabled = enabled);
       localVideoEnabled = enabled;
       notifyListeners();
     });
 
+
     _hub!.on('ReceiveOffer', (args) async {
-      print("[SignalR] 📩 ReceiveOffer: $args");
       final fromConnId = args?[0];
       final sdp = args?[1];
 
@@ -283,33 +306,24 @@ class WebRTCController extends ChangeNotifier {
       await pc.setLocalDescription(answer);
 
       await _hub?.invoke("SendAnswer", args: [eventId, fromConnId, answer.sdp]);
-      print("[SignalR] 📤 Sent Answer to $fromConnId");
     });
 
     _hub!.on('ReceiveAnswer', (args) async {
-      print("[SignalR] 📩 ReceiveAnswer: $args");
       final fromConnId = args?[0];
       final sdp = args?[1];
 
       final pc = _peerConnections[fromConnId];
-      if (pc == null) {
-        print("[SignalR] ⚠️ No peer for $fromConnId");
-        return;
-      }
+      if (pc == null) return;
 
       await pc.setRemoteDescription(RTCSessionDescription(sdp, 'answer'));
     });
 
     _hub!.on('RoomEnded', (args) async {
-      print("[SignalR] 🛑 RoomEnded event received");
       await leaveRoom();
-      if (onRoomEnded != null) {
-        onRoomEnded!();
-      }
+      if (onRoomEnded != null) onRoomEnded!();
     });
 
     _hub!.on('ReceiveIceCandidate', (args) async {
-      print("[SignalR] 🧊 ReceiveIceCandidate: $args");
       final fromConnId = args?[0];
       final candidateJson = args?[1];
       final data = jsonDecode(candidateJson);
@@ -326,23 +340,43 @@ class WebRTCController extends ChangeNotifier {
 
     await _hub!.start();
     isConnected = true;
-    print("[SignalR] ✅ Connected successfully!");
   }
 
   Future<void> joinRoom({required bool isHost}) async {
-    if (_hub == null || !isConnected) {
-      print("[SignalR] ❌ joinRoom() failed: hub not connected");
-      return;
-    }
+    if (_hub == null || !isConnected) return;
 
     String actualName = userName;
 
-    print("[SignalR] 🚪 Joining room $eventId as $actualName with isHost=$isHost...");
     await _hub!.invoke("JoinRoom", args: [eventId, actualName, isHost]);
+
+    if (localStream != null) {
+      localAudioEnabled = localStream!.getAudioTracks().isNotEmpty
+          ? localStream!.getAudioTracks().first.enabled
+          : localAudioEnabled;
+      localVideoEnabled = localStream!.getVideoTracks().isNotEmpty
+          ? localStream!.getVideoTracks().first.enabled
+          : localVideoEnabled;
+
+      try {
+        await _hub!.invoke("BroadcastMediaState", args: [
+          eventId,
+          myConnectionId,
+          "audio",
+          localAudioEnabled,
+        ]);
+        await _hub!.invoke("BroadcastMediaState", args: [
+          eventId,
+          myConnectionId,
+          "video",
+          localVideoEnabled,
+        ]);
+      } catch (e) {
+        if (kDebugMode) print("Failed to broadcast initial media state: $e");
+      }
+    }
 
     try {
       final result = await _hub!.invoke("GetParticipants", args: [eventId]);
-      print("[SignalR] 👥 GetParticipants result: $result");
       if (result is Map) {
         result.forEach((id, name) {
           if (id != myConnectionId) {
@@ -356,15 +390,12 @@ class WebRTCController extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      print("[SignalR] ⚠️ GetParticipants failed: $e");
+      if (kDebugMode) print("Failed to get participants: $e");
     }
   }
 
-  // --- Start Call ---
   Future<void> startCall() async {
-    if (participants.isEmpty) {
-      return;
-    }
+    if (participants.isEmpty) return;
 
     for (final remoteId in participants.keys) {
       if (remoteId == myConnectionId) continue;
@@ -378,56 +409,109 @@ class WebRTCController extends ChangeNotifier {
     }
   }
 
-  // --- Toggle Audio / Video với broadcast ---
-  Future<void> toggleAudio() async {
-    final audioTrack = localStream
-        ?.getAudioTracks()
-        .firstOrNull;
+  Future<void> toggleAudio({bool? initial}) async {
+    final audioTrack = localStream?.getAudioTracks().isNotEmpty == true
+        ? localStream!.getAudioTracks().first
+        : null;
     if (audioTrack == null) return;
 
-    audioTrack.enabled = !audioTrack.enabled;
+    if (initial != null) {
+      audioTrack.enabled = initial;
+    } else {
+      audioTrack.enabled = !audioTrack.enabled;
+    }
     localAudioEnabled = audioTrack.enabled;
 
-    // Gửi trạng thái cho server
-    if (_hub != null && isConnected) {
+    // Broadcast trạng thái audio mới
+    if (_hub != null && myConnectionId != null) {
       try {
         await _hub!.invoke("BroadcastMediaState", args: [
           eventId,
           myConnectionId,
           "audio",
-          localAudioEnabled,
+          localAudioEnabled
         ]);
-      } catch (e) {}
+      } catch (_) {}
     }
-
-    notifyListeners();
   }
 
-  Future<void> toggleVideo() async {
-    final videoTrack = localStream
-        ?.getVideoTracks()
-        .firstOrNull;
+  Future<void> toggleVideo({bool? initial}) async {
+    final videoTrack = localStream?.getVideoTracks().isNotEmpty == true
+        ? localStream!.getVideoTracks().first
+        : null;
     if (videoTrack == null) return;
 
-    videoTrack.enabled = !videoTrack.enabled;
+    if (initial != null) {
+      videoTrack.enabled = initial;
+    } else {
+      videoTrack.enabled = !videoTrack.enabled;
+    }
     localVideoEnabled = videoTrack.enabled;
 
-    // Gửi trạng thái cho server
-    if (_hub != null && isConnected) {
+    // Broadcast trạng thái video mới
+    if (_hub != null && myConnectionId != null) {
       try {
         await _hub!.invoke("BroadcastMediaState", args: [
           eventId,
           myConnectionId,
           "video",
-          localVideoEnabled,
+          localVideoEnabled
         ]);
-      } catch (e) {}
+      } catch (_) {}
     }
-
-    notifyListeners();
   }
 
-  // --- Leave Room ---
+  Future<void> toggleParticipantAudio(String participantId, bool enabled) async {
+    if (_hub == null) return;
+
+    try {
+      // 🔹 Cập nhật ngay trạng thái trong danh sách participant
+      if (participants.containsKey(participantId)) {
+        participants[participantId]!.audioEnabled = enabled;
+        notifyListeners(); // 🔸 Thông báo cho UI cập nhật icon
+      }
+
+      await _hub!.invoke("ToggleMic", args: [
+        eventId, // roomId
+        participantId, // targetConnId
+        enabled, // false để tắt mic
+      ]);
+      if (!enabled) {
+        onParticipantMuted?.call(participantId);
+      }
+
+      print("🎤 Sent ToggleMic to $participantId = $enabled");
+    } catch (e) {
+      print("Error toggling mic for $participantId: $e");
+    }
+  }
+
+  Future<void> toggleParticipantCamera(String participantId, bool enabled) async {
+    if (_hub == null) return;
+
+    try {
+
+      if (participants.containsKey(participantId)) {
+        participants[participantId]!.videoEnabled = enabled;
+        notifyListeners();
+      }
+
+      await _hub!.invoke("ToggleCam", args: [
+        eventId, // roomId
+        participantId, // targetConnId
+        enabled, // false để tắt cam
+      ]);
+      if (!enabled) {
+        onParticipantCameraOff?.call(participantId);
+      }
+
+      print("🎥 Sent ToggleCam to $participantId = $enabled");
+    } catch (e) {
+      print("Error toggling camera for $participantId: $e");
+    }
+  }
+
+
   Future<void> leaveRoom() async {
     try {
       await _hub?.invoke("LeaveRoom", args: [eventId]);
@@ -473,9 +557,7 @@ class WebRTCController extends ChangeNotifier {
     if (!isHost) return;
     try {
       await _hub?.invoke("EndRoom", args: [eventId]);
-    } catch (e) {
-      //
-    }
+    } catch (e) {}
   }
 
   Future<void> muteAllParticipants() async {
@@ -486,18 +568,13 @@ class WebRTCController extends ChangeNotifier {
     for (final id in participantIds) {
       try {
         await _hub!.invoke("ToggleMic", args: [eventId, id, false]);
-
         if (participants.containsKey(id)) {
           participants[id]!.audioEnabled = false;
         }
-      } catch (e) {
-        if (kDebugMode) {
-          print("[SignalR] ✗ Failed to mute $id: $e");
-        }
-      }
+      } catch (e) {}
     }
-
     notifyListeners();
+    onAllMuted?.call();
   }
 
   Future<void> turnOffAllParticipantCameras() async {
@@ -508,21 +585,14 @@ class WebRTCController extends ChangeNotifier {
     for (final id in participantIds) {
       try {
         await _hub!.invoke("ToggleCam", args: [eventId, id, false]);
-
-        // **Cập nhật trạng thái ngay lập tức**
         if (participants.containsKey(id)) {
           participants[id]!.videoEnabled = false;
         }
-      } catch (e) {
-        if (kDebugMode) {
-          print("[SignalR] ✗ Failed to turn off camera for $id: $e");
-        }
-      }
+      } catch (e) {}
     }
-
     notifyListeners();
+    onAllCamsOff?.call();
   }
-
 }
 
 String _preferH264(String sdp) {

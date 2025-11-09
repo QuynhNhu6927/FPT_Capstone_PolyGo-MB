@@ -79,6 +79,9 @@ class _EventsContentState extends State<EventsContent> {
   }
 
   @override
+  bool _isInitializing = false;
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context);
@@ -86,15 +89,26 @@ class _EventsContentState extends State<EventsContent> {
     if (!_initialized) {
       _initialized = true;
       _currentLocale = locale;
-      Future.microtask(() {
-        _loadMatchingEvents(reset: true, lang: locale.languageCode);
-      });
+      _initLoadEvents();
     } else if (_currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      Future.microtask(() {
-        _loadMatchingEvents(reset: true, lang: locale.languageCode);
-      });
+      _initLoadEvents();
     }
+  }
+
+  void _initLoadEvents() {
+    if (_isInitializing) return;
+    _isInitializing = true;
+
+    // Chạy async
+    Future.microtask(() async {
+      if (_hasActiveFilter) {
+        await _loadUpcomingEvents(lang: _currentLocale?.languageCode);
+      } else {
+        await _loadMatchingEvents(reset: true, lang: _currentLocale?.languageCode);
+      }
+      _isInitializing = false;
+    });
   }
 
   Future<void> _loadMatchingEvents({bool reset = false, String? lang}) async {

@@ -1,7 +1,5 @@
-// participant_list.dart
 import 'package:flutter/material.dart';
 import '../../../../data/services/signalr/webrtc_controller.dart';
-import 'participant_controls_dialog.dart';
 
 class ParticipantList extends StatefulWidget {
   final List<Participant> participants;
@@ -27,7 +25,25 @@ class ParticipantList extends StatefulWidget {
 
 class _ParticipantListState extends State<ParticipantList> {
   @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_onControllerUpdate);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onControllerUpdate);
+    super.dispose();
+  }
+
+  void _onControllerUpdate() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final participants =
+        widget.controller?.participants.values.toList() ?? widget.participants;
     final height = MediaQuery.of(context).size.height * 0.45;
     final theme = Theme.of(context);
 
@@ -49,13 +65,14 @@ class _ParticipantListState extends State<ParticipantList> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16)),
                 color: theme.cardColor,
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
@@ -79,21 +96,22 @@ class _ParticipantListState extends State<ParticipantList> {
             // Host controls
             if (widget.isHost)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
                       onPressed: () async {
                         if (widget.onMuteAll != null) await widget.onMuteAll!();
-                        setState(() {});
                       },
                       child: const Text("Mute All"),
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        if (widget.onTurnOffAllCams != null) await widget.onTurnOffAllCams!();
-                        setState(() {});
+                        if (widget.onTurnOffAllCams != null) {
+                          await widget.onTurnOffAllCams!();
+                        }
                       },
                       child: const Text("Turn Off All Cameras"),
                     ),
@@ -105,18 +123,19 @@ class _ParticipantListState extends State<ParticipantList> {
 
             // Participant list
             Expanded(
-              child: widget.participants.isEmpty
+              child: participants.isEmpty
                   ? Center(
                 child: Text(
                   "No participants yet",
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Colors.grey),
                 ),
               )
                   : ListView.builder(
-                itemCount: widget.participants.length,
+                itemCount: participants.length,
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemBuilder: (context, index) {
-                  final p = widget.participants[index];
+                  final p = participants[index];
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: theme.dividerColor,
@@ -131,23 +150,48 @@ class _ParticipantListState extends State<ParticipantList> {
                           child: Text(
                             p.name,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
+                                fontWeight: FontWeight.w500),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          p.audioEnabled ? Icons.mic : Icons.mic_off,
-                          color: p.audioEnabled ? Colors.green : Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          p.videoEnabled ? Icons.videocam : Icons.videocam_off,
-                          color: p.videoEnabled ? Colors.green : Colors.red,
-                          size: 18,
-                        ),
+
+                        if (widget.isHost) ...[
+                          const SizedBox(width: 16),
+
+                          GestureDetector(
+                            onTap: () async {
+                              if (p.audioEnabled) {
+                                await widget.controller?.toggleParticipantAudio(
+                                  p.id,
+                                  false,
+                                );
+                              }
+                            },
+                            child: Icon(
+                              p.audioEnabled ? Icons.mic : Icons.mic_off,
+                              color: p.audioEnabled ? Colors.green : Colors.red,
+                              size: 22,
+                            ),
+                          ),
+
+                          const SizedBox(width: 20),
+
+                          GestureDetector(
+                            onTap: () async {
+                              if (p.videoEnabled) {
+                                await widget.controller?.toggleParticipantCamera(
+                                  p.id,
+                                  false,
+                                );
+                              }
+                            },
+                            child: Icon(
+                              p.videoEnabled ? Icons.videocam : Icons.videocam_off,
+                              color: p.videoEnabled ? Colors.green : Colors.red,
+                              size: 22,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );
