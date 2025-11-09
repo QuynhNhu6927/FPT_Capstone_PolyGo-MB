@@ -4,7 +4,7 @@ import 'package:polygo_mobile/features/users/widgets/tag_list.dart';
 import 'package:polygo_mobile/features/users/widgets/user_profile_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../data/repositories/user_repository.dart';
-import '../../../../data/services/user_service.dart';
+import '../../../data/services/apis/user_service.dart';
 import '../../../../data/models/user/user_by_id_response.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';

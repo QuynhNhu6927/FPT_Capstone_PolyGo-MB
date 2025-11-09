@@ -8,7 +8,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/auth/login_request.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/signalr/user_presence.dart';
 import '../../../routes/app_routes.dart';
 import '../../../../core/utils/responsive.dart';
 
@@ -64,7 +65,14 @@ class _LoginFormState extends State<LoginForm> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
-
+      if (token.isNotEmpty) {
+        try {
+          await UserPresenceManager().init();
+          debugPrint("✅ UserPresenceManager initialized after login");
+        } catch (e) {
+          debugPrint("❌ Failed to init UserPresenceManager: $e");
+        }
+      }
       final decoded = JwtDecoder.decode(token);
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
 

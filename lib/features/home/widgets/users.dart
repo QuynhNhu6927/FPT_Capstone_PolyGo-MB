@@ -7,7 +7,7 @@ import '../../../core/api/api_client.dart';
 import '../../../data/models/user/user_all_response.dart';
 import '../../../data/models/user/user_matching_response.dart';
 import '../../../data/repositories/user_repository.dart';
-import '../../../data/services/user_service.dart';
+import '../../../data/services/apis/user_service.dart';
 import '../../../main.dart';
 import '../../../routes/app_routes.dart';
 import '../../shared/app_error_state.dart';

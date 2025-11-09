@@ -10,7 +10,7 @@ import '../../../core/utils/conversation_time.dart';
 import '../../../data/models/chat/conversation_model.dart';
 import '../../../data/repositories/conversation_repository.dart';
 import '../../../data/services/signalr/chat_signalr_service.dart';
-import '../../../data/services/conversation_service.dart';
+import '../../../data/services/apis/conversation_service.dart';
 import '../../../data/services/signalr/user_presence.dart';
 
 class ConversationList extends StatefulWidget {
@@ -25,7 +25,7 @@ class _ConversationListState extends State<ConversationList> {
   late ChatSignalrService _chatSignalrService;
   String _userId = '';
   late UserPresenceService _userPresenceService;
-  Map<String, bool> _onlineStatus = {};
+  Map<String, bool> _userOnlineStatus = {};
 
   List<Conversation> _conversations = [];
   int _pageNumber = 1;
@@ -55,6 +55,33 @@ class _ConversationListState extends State<ConversationList> {
 
     for (var conv in _conversations) {
       await _chatSignalrService.joinConversation(conv.id);
+    }
+
+    _userPresenceService = UserPresenceManager().service;
+
+    _userPresenceService.statusStream.listen((data) {
+      final userId = data['userId'] as String?;
+      final isOnline = data['isOnline'] as bool? ?? false;
+      if (userId != null && mounted) {
+        setState(() {
+          _userOnlineStatus[userId] = isOnline;
+        });
+      }
+    });
+    await _userPresenceService.initHub();
+
+    for (var conv in _conversations) {
+      _userOnlineStatus[conv.user.id] = conv.user.isOnline; // default
+    }
+
+    if (_conversations.isNotEmpty) {
+      final userIds = _conversations.map((e) => e.user.id).toList();
+      final onlineMap = await _userPresenceService.getOnlineStatus(userIds);
+      if (mounted) {
+        setState(() {
+          _userOnlineStatus.addAll(onlineMap);
+        });
+      }
     }
 
     // Listen message real-time
@@ -98,33 +125,6 @@ class _ConversationListState extends State<ConversationList> {
           );
         }
       });
-    });
-
-    _userPresenceService = UserPresenceService();
-    await _userPresenceService.initHub();
-
-    _userPresenceService.statusStream.listen((data) {
-      if (!mounted) return;
-      final userId = data['userId'] as String?;
-      final isOnline = data['isOnline'] as bool? ?? false;
-      final lastActiveAt = data['lastActiveAt'] ?? '';
-
-      if (userId != null) {
-        debugPrint(
-            '[Presence] UserId: $userId | isOnline: $isOnline | lastActiveAt: $lastActiveAt'
-        );
-
-        setState(() {
-          _onlineStatus[userId] = isOnline;
-          final index = _conversations.indexWhere((c) => c.user.id == userId);
-          if (index != -1) {
-            _conversations[index].user.isOnline = isOnline;
-            debugPrint(
-                '[Presence] Updated conversation list: ${_conversations[index].user.name} isOnline=$isOnline'
-            );
-          }
-        });
-      }
     });
 
   }
@@ -172,7 +172,6 @@ class _ConversationListState extends State<ConversationList> {
   @override
   void dispose() {
     _chatSignalrService.stop();
-    _userPresenceService.stop();
     _searchController.dispose();
     super.dispose();
   }
@@ -181,7 +180,6 @@ class _ConversationListState extends State<ConversationList> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    const colorPrimary = Color(0xFF2563EB);
 
     if (_isInit) return const Center(child: CircularProgressIndicator());
 
@@ -270,7 +268,7 @@ class _ConversationListState extends State<ConversationList> {
                         userId: _userId,
                       );
                       setState(() {
-                        conv.hasSeen = true; // cập nhật đã đọc
+                        conv.hasSeen = true;
                       });
                     }
 
@@ -302,7 +300,7 @@ class _ConversationListState extends State<ConversationList> {
                             ? const Icon(Icons.person, color: Colors.white, size: 28)
                             : null,
                       ),
-                      if (_onlineStatus[conv.user.id] ?? conv.user.isOnline)
+                      if ((_userOnlineStatus[conv.user.id] ?? false))
                         Positioned(
                           bottom: 0,
                           right: 0,

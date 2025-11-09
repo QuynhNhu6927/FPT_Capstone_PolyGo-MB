@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/auth/change_password_request.dart';
-import '../models/auth/me_response.dart';
-import '../models/auth/register_request.dart';
-import '../models/auth/login_request.dart';
-import '../models/api_response.dart';
-import '../models/auth/reset_password_request.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/auth/change_password_request.dart';
+import '../../models/auth/me_response.dart';
+import '../../models/auth/register_request.dart';
+import '../../models/auth/login_request.dart';
+import '../../models/api_response.dart';
+import '../../models/auth/reset_password_request.dart';
 
 class AuthService {
   final ApiClient apiClient;

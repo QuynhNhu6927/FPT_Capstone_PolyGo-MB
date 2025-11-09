@@ -1,16 +1,16 @@
 // services/gift_service.dart
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/gift/gift_accept_response.dart';
-import '../models/gift/gift_list_response.dart';
-import '../models/gift/gift_me_response.dart';
-import '../models/gift/gift_present_request.dart';
-import '../models/gift/gift_present_response.dart';
-import '../models/gift/gift_purchase_request.dart';
-import '../models/gift/gift_purchase_response.dart';
-import '../models/gift/gift_received_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/gift/gift_accept_response.dart';
+import '../../models/gift/gift_list_response.dart';
+import '../../models/gift/gift_me_response.dart';
+import '../../models/gift/gift_present_request.dart';
+import '../../models/gift/gift_present_response.dart';
+import '../../models/gift/gift_purchase_request.dart';
+import '../../models/gift/gift_purchase_response.dart';
+import '../../models/gift/gift_received_response.dart';
 
 class GiftService {
   final ApiClient apiClient;

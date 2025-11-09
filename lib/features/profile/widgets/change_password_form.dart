@@ -5,7 +5,7 @@ import '../../../../core/localization/app_localizations.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/auth/change_password_request.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/apis/auth_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../../core/utils/responsive.dart';
 

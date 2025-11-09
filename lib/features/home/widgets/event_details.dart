@@ -9,8 +9,8 @@ import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/apis/event_service.dart';
 
 class EventDetail extends StatefulWidget {
   final EventModel event;

@@ -7,7 +7,7 @@ import '../models/gift/gift_present_response.dart';
 import '../models/gift/gift_purchase_request.dart';
 import '../models/gift/gift_purchase_response.dart';
 import '../models/gift/gift_received_response.dart';
-import '../services/gift_service.dart';
+import '../services/apis/gift_service.dart';
 
 class GiftRepository {
   final GiftService _service;

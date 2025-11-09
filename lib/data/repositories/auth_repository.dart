@@ -2,7 +2,7 @@ import '../models/auth/change_password_request.dart';
 import '../models/auth/me_response.dart';
 import '../models/auth/register_request.dart';
 import '../models/auth/login_request.dart';
-import '../services/auth_service.dart';
+import '../services/apis/auth_service.dart';
 import '../models/auth/reset_password_request.dart';
 
 class AuthRepository {

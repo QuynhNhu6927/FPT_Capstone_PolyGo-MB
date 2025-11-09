@@ -19,7 +19,7 @@ import '../models/events/hosted_event_model.dart';
 import '../models/events/joined_event_model.dart';
 import '../models/events/update_event_status_request.dart';
 import '../models/events/update_event_status_response.dart';
-import '../services/event_service.dart';
+import '../services/apis/event_service.dart';
 
 class EventRepository {
   final EventService _service;

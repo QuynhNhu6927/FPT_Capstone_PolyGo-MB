@@ -2,7 +2,7 @@ import '../models/languages/language_model.dart';
 import '../models/languages/language_list_response.dart';
 import '../models/languages/learn_language_model.dart';
 import '../models/languages/speak_language_model.dart';
-import '../services/language_service.dart';
+import '../services/apis/language_service.dart';
 
 class LanguageRepository {
   final LanguageService _service;

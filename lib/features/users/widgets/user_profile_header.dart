@@ -3,8 +3,11 @@ import 'package:polygo_mobile/features/users/widgets/plus_frame.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/repositories/friend_repository.dart';
-import '../../../../data/services/friend_service.dart';
+import '../../../data/repositories/conversation_repository.dart';
+import '../../../data/services/apis/conversation_service.dart';
+import '../../../data/services/apis/friend_service.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../routes/app_routes.dart';
 import 'friend_button.dart';
 
 class UserProfileHeader extends StatefulWidget {
@@ -24,6 +27,7 @@ class UserProfileHeader extends StatefulWidget {
 class _UserProfileHeaderState extends State<UserProfileHeader> {
   late String _friendStatus;
   bool _isLoading = false;
+  bool _isChatLoading = false;
 
   @override
   void initState() {
@@ -267,14 +271,51 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                 ),
               ),
 
-              // Chat button — chỉ hiện nếu là bạn bè
+              // Chat button
               if (_friendStatus == "Friends") ...[
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: mở màn hình chat
+                    onPressed: () async {
+                      setState(() => _isChatLoading = true);
+                      try {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('token') ?? '';
+                        final repo = ConversationRepository(ConversationService(ApiClient()));
+
+                        final conversation = await repo.getConversationByUser(
+                          token: token,
+                          userId: widget.user.id,
+                        );
+                        if (!mounted) return;
+
+                        if (conversation != null) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.conversation,
+                            arguments: {
+                              'conversationId': conversation.id,
+                              'userName': conversation.user.name,
+                              'avatarHeader': conversation.user.avatarUrl ?? '',
+                              'lastActiveAt': conversation.user.lastActiveAt ?? '',
+                              'isOnline': conversation.user.isOnline,
+                            },
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Không thể mở đoạn chat.")),
+                          );
+                        }
+                      } catch (e, s) {
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Lỗi: $e")),
+                        );
+                      } finally {
+                        setState(() => _isLoading = false);
+                      }
                     },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: blue,
                       shape: RoundedRectangleBorder(

@@ -4,7 +4,7 @@ import '../models/user/update_userinfo_request.dart';
 import '../models/user/user_all_response.dart';
 import '../models/user/user_by_id_response.dart';
 import '../models/user/user_matching_response.dart';
-import '../services/user_service.dart';
+import '../services/apis/user_service.dart';
 
 class UserRepository {
   final UserService _service;

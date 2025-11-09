@@ -1,25 +1,25 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/events/coming_event_list_response.dart';
-import '../models/events/event_cancel_request.dart';
-import '../models/events/event_cancel_response.dart';
-import '../models/events/event_details_response.dart';
-import '../models/events/event_kick_request.dart';
-import '../models/events/event_list_response.dart';
-import '../models/events/event_model.dart';
-import '../models/events/event_my_rating_response.dart';
-import '../models/events/event_rating_item.dart';
-import '../models/events/event_rating_request.dart';
-import '../models/events/event_rating_response.dart';
-import '../models/events/event_register_request.dart';
-import '../models/events/event_update_rating_request.dart';
-import '../models/events/hosted_event_model.dart';
-import '../models/events/joined_event_list_response.dart';
-import '../models/events/update_event_status_request.dart';
-import '../models/events/update_event_status_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/events/coming_event_list_response.dart';
+import '../../models/events/event_cancel_request.dart';
+import '../../models/events/event_cancel_response.dart';
+import '../../models/events/event_details_response.dart';
+import '../../models/events/event_kick_request.dart';
+import '../../models/events/event_list_response.dart';
+import '../../models/events/event_model.dart';
+import '../../models/events/event_my_rating_response.dart';
+import '../../models/events/event_rating_item.dart';
+import '../../models/events/event_rating_request.dart';
+import '../../models/events/event_rating_response.dart';
+import '../../models/events/event_register_request.dart';
+import '../../models/events/event_update_rating_request.dart';
+import '../../models/events/hosted_event_model.dart';
+import '../../models/events/joined_event_list_response.dart';
+import '../../models/events/update_event_status_request.dart';
+import '../../models/events/update_event_status_response.dart';
 
 class EventService {
   final ApiClient apiClient;
@@ -291,7 +291,7 @@ class EventService {
   }) async {
     try {
       final response = await apiClient.put(
-        ApiConstants.updateStatusAdmin, // endpoint
+        ApiConstants.updateStatusAdmin,
         data: request.toJson(),
         headers: {
           ApiConstants.headerAuthorization: 'Bearer $token',
@@ -342,7 +342,7 @@ class EventService {
       headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
     );
 
-    final json = response.data as Map<String, dynamic>?; // cho an toàn
+    final json = response.data as Map<String, dynamic>?;
 
     if (json == null) {
       return ApiResponse<EventMyRatingModel>(
@@ -351,7 +351,7 @@ class EventService {
       );
     }
 
-    final dataMap = json['data'] as Map<String, dynamic>?; // ép kiểu an toàn
+    final dataMap = json['data'] as Map<String, dynamic>?;
     final model = dataMap != null ? EventMyRatingModel.fromJson(dataMap) : null;
 
     return ApiResponse<EventMyRatingModel>(

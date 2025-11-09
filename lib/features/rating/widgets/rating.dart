@@ -6,7 +6,7 @@ import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/event_service.dart';
 import '../../myEvents/screens/my_events_screen.dart';
 
 class RatingWidget extends StatefulWidget {

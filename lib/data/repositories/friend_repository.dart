@@ -1,6 +1,6 @@
 import '../models/friends/friend_model.dart';
 import '../models/friends/friend_request_model.dart';
-import '../services/friend_service.dart';
+import '../services/apis/friend_service.dart';
 
 class FriendRepository {
   final FriendService _service;

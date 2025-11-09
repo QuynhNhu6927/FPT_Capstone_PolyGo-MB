@@ -8,7 +8,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/events/hosted_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/event_service.dart';
 import '../../shared/app_error_state.dart';
 import 'hosted_event_details.dart';
 import 'hosted_filter.dart';

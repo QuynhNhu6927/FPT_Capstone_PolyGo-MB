@@ -6,8 +6,8 @@ import '../../../data/models/languages/language_model.dart';
 import '../../../data/models/interests/interest_model.dart';
 import '../../../data/repositories/language_repository.dart';
 import '../../../data/repositories/interest_repository.dart';
-import '../../../data/services/language_service.dart';
-import '../../../data/services/interest_service.dart';
+import '../../../data/services/apis/language_service.dart';
+import '../../../data/services/apis/interest_service.dart';
 import '../../shared/app_error_state.dart';
 
 class EventFilter extends StatefulWidget {

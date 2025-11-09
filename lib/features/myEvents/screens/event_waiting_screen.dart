@@ -3,7 +3,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/apis/auth_service.dart';
 import 'event_room_screen.dart';
 
 class WaitingRoomScreen extends StatefulWidget {

@@ -8,7 +8,7 @@ import 'dart:async';
 import '../../../core/api/api_client.dart';
 import '../../../core/config/api_constants.dart';
 import '../../repositories/auth_repository.dart';
-import '../auth_service.dart';
+import '../apis/auth_service.dart';
 
 class Participant {
   final String id;

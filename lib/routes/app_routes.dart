@@ -91,7 +91,6 @@ class AppRoutes {
 
       case eventWaiting:
         final args = settings.arguments as Map<String, dynamic>?;
-        print('eventWaiting args: $args'); // <--- Debug: in ra toàn bộ arguments
 
         final eventId = args?['eventId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
@@ -99,8 +98,6 @@ class AppRoutes {
         final hostId = args?['hostId'] as String? ?? '';
         final hostName = args?['hostName'] as String? ?? '';
         final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
-
-        print('Parsed eventWaiting -> eventId: $eventId, eventTitle: $eventTitle, hostId: $hostId, hostName: $hostName, startAt: $startAt, eventStatus: $eventStatus');
 
         return MaterialPageRoute(
           builder: (_) => WaitingRoomScreen(

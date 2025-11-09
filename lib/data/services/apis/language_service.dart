@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/languages/language_model.dart';
-import '../models/languages/language_list_response.dart';
-import '../models/languages/learn_language_list_response.dart';
-import '../models/languages/speak_language_list_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/languages/language_model.dart';
+import '../../models/languages/language_list_response.dart';
+import '../../models/languages/learn_language_list_response.dart';
+import '../../models/languages/speak_language_list_response.dart';
 
 class LanguageService {
   final ApiClient apiClient;

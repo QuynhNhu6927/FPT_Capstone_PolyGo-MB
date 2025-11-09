@@ -7,8 +7,8 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/transaction/wallet_transaction_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/subscription_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../data/services/subscription_service.dart';
+import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/apis/subscription_service.dart';
 import '../../shared/app_error_state.dart';
 
 class Wallet extends StatefulWidget {
