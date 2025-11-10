@@ -23,6 +23,7 @@ import '../../../data/services/apis/interest_service.dart';
 import '../../../data/services/apis/language_service.dart';
 import '../../../data/services/apis/media_service.dart';
 import '../../../data/services/apis/user_service.dart';
+import '../../../data/services/signalr/user_presence.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
 
@@ -247,8 +248,14 @@ class _UserInfoState extends State<UserInfo> {
   }
 
   Future<void> _logout(BuildContext context) async {
+    // 1️⃣ Disconnect hub → backend nhận disconnect → update offline
+    await UserPresenceManager().stop();
+    debugPrint("Hub state after stop: ${UserPresenceManager().service.connection?.state}");
+    // 2️⃣ Remove token
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+
+    // 3️⃣ Navigate to login
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
   }

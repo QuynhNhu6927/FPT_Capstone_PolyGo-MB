@@ -1,143 +1,214 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/api_constants.dart';
 import '../../../routes/app_routes.dart';
 
-typedef UserStatusChangedCallback = void Function(Map<String, dynamic> data);
+typedef OnUserStatusChanged = void Function(Map<String, dynamic> data);
 
 class UserPresenceService {
-  final UserStatusChangedCallback? onUserStatusChanged;
-  final String hubUrl = "${ApiConstants.baseUrl}/UserPresenceHub";
+  // === Callbacks ===
+  final OnUserStatusChanged? onUserStatusChanged;
 
-  HubConnection? _connection;
-  bool _isConnected = false;
+  // === Hub URL giống React
+  final String hubUrl = "${ApiConstants.baseUrl}/userPresenceHub";
+
+  // === Trạng thái kết nối ===
+  HubConnection? connection;
+  bool isConnected = false;
+  String? error;
   String? currentUserId;
 
+  // === Luồng stream để truyền sự kiện ra ngoài (tùy chọn) ===
   final StreamController<Map<String, dynamic>> _statusStreamController =
   StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get statusStream =>
       _statusStreamController.stream;
 
-  UserPresenceService({
-    this.onUserStatusChanged,
-  });
+  UserPresenceService({this.onUserStatusChanged});
 
-  bool get isConnected => _isConnected;
-
+  // ============================================================
+  //                      INIT CONNECTION
+  // ============================================================
   Future<void> initHub() async {
+    debugPrint("🚀 [UserPresenceHub] Initializing connection...");
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     if (token == null) {
       debugPrint("❌ [UserPresenceHub] No authentication token found");
+      error = "No authentication token found";
       return;
     }
 
+    // Parse token để lấy userId
     try {
       final payload = _parseJwt(token);
       currentUserId = payload['userId'] ?? payload['sub'] ?? payload['Id'];
-      debugPrint("🔑 [UserPresenceHub] Current userId: $currentUserId");
+      debugPrint("🔑 [UserPresenceHub] Token payload: $payload");
+      debugPrint("👤 [UserPresenceHub] Current user ID: $currentUserId");
     } catch (e) {
       debugPrint("❌ [UserPresenceHub] Failed to parse token: $e");
     }
 
-    _connection = HubConnectionBuilder()
-        .withUrl(hubUrl, HttpConnectionOptions(
-      accessTokenFactory: () async => token,
-    ))
-        .withAutomaticReconnect()
+    // Khởi tạo connection
+    final hubConnection = HubConnectionBuilder()
+        .withUrl(
+      hubUrl,
+      HttpConnectionOptions(accessTokenFactory: () async => token),
+    )
         .build();
 
-    _connection!.onclose((error) {
-      debugPrint("🔴 [UserPresenceHub] Connection closed: $error");
-      _isConnected = false;
-    });
+    connection = hubConnection;
 
-    _connection!.onreconnecting((error) {
+    debugPrint("🔗 [UserPresenceHub] Hub URL: $hubUrl");
+
+    // ============================================================
+    //                        HANDLERS
+    // ============================================================
+
+    // Khi reconnecting
+    hubConnection.onreconnecting((error) {
       debugPrint("🔄 [UserPresenceHub] Reconnecting... $error");
-      _isConnected = false;
+      isConnected = false;
     });
 
-    _connection!.onreconnected((connectionId) async {
+    // Khi reconnected
+    hubConnection.onreconnected((connectionId) async {
       debugPrint("✅ [UserPresenceHub] Reconnected: $connectionId");
-      _isConnected = true;
+      isConnected = true;
+      error = null;
+
       if (currentUserId != null) {
-        await updateOnlineStatus(currentUserId!);
+        try {
+          await updateOnlineStatus(currentUserId!);
+        } catch (e) {
+          debugPrint("❌ Error updating online status after reconnect: $e");
+        }
       }
     });
 
-    // Listen sự kiện từ server
-    _connection!.on("UserStatusChanged", (args) {
+    // Khi close
+    hubConnection.onclose((error) {
+      debugPrint("🔴 [UserPresenceHub] Connection closed: $error");
+      isConnected = false;
+      if (error != null && !error.toString().contains("negotiation")) {
+        this.error = error.toString();
+      }
+    });
+
+    // Khi nhận sự kiện từ server
+    hubConnection.on("UserStatusChanged", (args) {
       if (args != null && args.isNotEmpty) {
         final data = Map<String, dynamic>.from(args[0] as Map);
         debugPrint("👤 [UserPresenceHub] UserStatusChanged: $data");
         _statusStreamController.add(data);
-        if (onUserStatusChanged != null) onUserStatusChanged!(data);
+        onUserStatusChanged?.call(data);
       }
     });
 
+    // ============================================================
+    //                        START CONNECTION
+    // ============================================================
     try {
-      await _connection!.start();
+      await hubConnection.start();
       debugPrint("✅ [UserPresenceHub] Connected successfully");
-      _isConnected = true;
+      isConnected = true;
+      error = null;
+
+      // Gửi trạng thái online ngay sau khi kết nối
       if (currentUserId != null) {
         await updateOnlineStatus(currentUserId!);
+      } else {
+        debugPrint("⚠️ [UserPresenceHub] No current user ID found");
       }
     } catch (e) {
       debugPrint("❌ [UserPresenceHub] Error connecting: $e");
+      if (!e.toString().contains("negotiation")) {
+        error = e.toString();
+      }
     }
   }
 
-  /// Cập nhật online/offline status cho 1 user
+  // ============================================================
+  //                   UPDATE ONLINE STATUS
+  // ============================================================
   Future<void> updateOnlineStatus(String userId) async {
-    if (_connection == null || !_isConnected) {
+    if (connection == null || !isConnected) {
       throw Exception("Not connected to UserPresenceHub");
     }
+
     try {
-      await _connection!.invoke("UpdateUserOnlineStatus", args: [userId]);
-      debugPrint("✅ Online status updated for user: $userId");
+      await connection!.invoke("UpdateUserOnlineStatus", args: [userId]);
+      debugPrint("✅ [UserPresenceHub] Online status updated for user: $userId");
     } catch (e) {
-      debugPrint("❌ Error updating online status: $e");
+      debugPrint("❌ [UserPresenceHub] Error updating online status: $e");
       rethrow;
     }
   }
 
-  /// Lấy online status cho nhiều user
+  // ============================================================
+  //                   GET MULTIPLE USER STATUS
+  // ============================================================
   Future<Map<String, bool>> getOnlineStatus(List<String> userIds) async {
-    if (_connection == null || !_isConnected) {
+    if (connection == null || !isConnected) {
       throw Exception("Not connected to UserPresenceHub");
     }
-    try {
-      final result = await _connection!.invoke("GetOnlineStatus", args: [userIds]);
-      debugPrint("✅ Retrieved online status: $result");
 
-      // Parse dynamic -> Map<String, bool>
-      if (result is Map) {
-        return result.map((key, value) => MapEntry(key.toString(), value as bool));
+    try {
+      final result =
+      await connection!.invoke("GetOnlineStatus", args: [userIds]);
+
+      debugPrint("✅ [UserPresenceHub] Retrieved online status: $result");
+
+      if (result != null) {
+        return result.map<String, bool>((key, value) {
+          final boolVal = (value is bool) ? value : (value.toString().toLowerCase() == 'true');
+          return MapEntry(key.toString(), boolVal);
+        });
       }
       return {};
     } catch (e) {
-      debugPrint("❌ Error getting online status: $e");
+      debugPrint("❌ [UserPresenceHub] Error getting online status: $e");
       rethrow;
     }
   }
 
-
-  /// Dừng kết nối
+  // ============================================================
+  //                      STOP CONNECTION
+  // ============================================================
   Future<void> stop() async {
-    if (_connection != null) {
-      await _connection!.stop();
-      debugPrint("🔌 [UserPresenceHub] Connection stopped");
-    }
-    _isConnected = false;
-  }
+    if (connection != null) {
+      try {
+        debugPrint("⏹ [UserPresenceHub] Stopping connection...");
 
-  /// Hàm parse payload JWT
+        // 1️⃣ Tạm dừng handler reconnect để không reconnect lại
+        connection!.onreconnecting((_) {});
+        connection!.onreconnected((_) {});
+
+        // 2️⃣ Nếu hub đang kết nối, stop và đợi cho đến khi state thành disconnected
+        if (connection!.state != HubConnectionState.disconnected) {
+          await connection!.stop();
+          // optional: đợi thêm chút thời gian để server kịp nhận disconnect
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+
+        debugPrint("🔌 [UserPresenceHub] Connection stopped successfully");
+      } catch (e) {
+        debugPrint("❌ [UserPresenceHub] Error stopping connection: $e");
+      } finally {
+        isConnected = false;
+      }
+    }
+  }
+  // ============================================================
+  //                       JWT PARSER
+  // ============================================================
   Map<String, dynamic> _parseJwt(String token) {
     final parts = token.split('.');
     if (parts.length != 3) {
@@ -150,6 +221,10 @@ class UserPresenceService {
   }
 }
 
+// ============================================================
+//                   SINGLETON MANAGER (GIỐNG HOOK)
+// ============================================================
+
 class UserPresenceManager {
   static final UserPresenceManager _instance = UserPresenceManager._internal();
   factory UserPresenceManager() => _instance;
@@ -157,11 +232,19 @@ class UserPresenceManager {
 
   late UserPresenceService service;
 
-  Future<void> init() async {
-    service = UserPresenceService();
+  Future<void> init({OnUserStatusChanged? onUserStatusChanged}) async {
+    service = UserPresenceService(onUserStatusChanged: onUserStatusChanged);
     await service.initHub();
   }
+
+  Future<void> stop() async {
+    await service.stop();
+  }
 }
+
+// ============================================================
+//                 HUB MANAGER WIDGET (GIỐNG PROVIDER)
+// ============================================================
 
 class HubManager extends StatefulWidget {
   final Widget child;
@@ -183,7 +266,12 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.paused) {
+      if (UserPresenceManager().service.isConnected) {
+        UserPresenceManager().service.connection?.stop();
+        UserPresenceManager().service.isConnected = false;
+      }
+    } else if (state == AppLifecycleState.resumed) {
       _checkAndStartHub();
     }
   }
@@ -192,32 +280,31 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    if (token != null && !_hubStarted) {
-      final currentRoute = ModalRoute.of(context)?.settings.name;
-      if (currentRoute != AppRoutes.login) {
-        await UserPresenceManager().init();
-        _hubStarted = true;
-        debugPrint("✅ UserPresenceManager initialized in HubManager");
-      }
-    }
-  }
-
-  Future<void> _stopHubIfNeeded() async {
+    // Nếu hub đang chạy mà login lại
     if (_hubStarted) {
-      await UserPresenceManager().service.stop();
+      await UserPresenceManager().service.connection?.stop();
+      UserPresenceManager().service.isConnected = false;
       _hubStarted = false;
-      debugPrint("🔌 UserPresenceManager stopped in HubManager");
+      await Future.delayed(Duration(milliseconds: 300));
+    }
+
+    if (token != null && !_hubStarted) {
+      await UserPresenceManager().init();
+      _hubStarted = true;
     }
   }
 
   @override
   void dispose() {
-    _stopHubIfNeeded();
     WidgetsBinding.instance.removeObserver(this);
+
+    if (UserPresenceManager().service.isConnected) {
+      UserPresenceManager().service.connection?.stop();
+      UserPresenceManager().service.isConnected = false;
+    }
+
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) => widget.child;
 }
-

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_screen.dart';
@@ -48,17 +47,18 @@ class _ConversationListState extends State<ConversationList> {
     final prefs = await SharedPreferences.getInstance();
     _userId = prefs.getString('userId') ?? '';
     debugPrint('Logged in userId: $_userId');
-    await _loadConversations(loadMore: false);
 
-    _chatSignalrService = ChatSignalrService();
-    await _chatSignalrService.initHub();
-
-    for (var conv in _conversations) {
-      await _chatSignalrService.joinConversation(conv.id);
-    }
-
+    // ✅ KHÔNG gọi lại initHub — chỉ lấy instance đang chạy sẵn
     _userPresenceService = UserPresenceManager().service;
 
+    // Nếu hub chưa sẵn sàng thì chờ 1 chút (tránh null)
+    int retry = 0;
+    while ((_userPresenceService.connection == null || !_userPresenceService.isConnected) && retry < 10) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      retry++;
+    }
+
+    // ✅ Lắng nghe thay đổi online/offline
     _userPresenceService.statusStream.listen((data) {
       final userId = data['userId'] as String?;
       final isOnline = data['isOnline'] as bool? ?? false;
@@ -68,31 +68,39 @@ class _ConversationListState extends State<ConversationList> {
         });
       }
     });
-    await _userPresenceService.initHub();
 
-    for (var conv in _conversations) {
-      _userOnlineStatus[conv.user.id] = conv.user.isOnline; // default
-    }
+    // 2️⃣ Load danh sách hội thoại
+    await _loadConversations(loadMore: false);
 
+    // 3️⃣ Lấy trạng thái online hiện tại
     if (_conversations.isNotEmpty) {
       final userIds = _conversations.map((e) => e.user.id).toList();
-      final onlineMap = await _userPresenceService.getOnlineStatus(userIds);
-      if (mounted) {
-        setState(() {
-          _userOnlineStatus.addAll(onlineMap);
-        });
+      try {
+        final onlineMap = await _userPresenceService.getOnlineStatus(userIds);
+        if (mounted) {
+          setState(() {
+            _userOnlineStatus.addAll(onlineMap);
+          });
+        }
+      } catch (e) {
+        debugPrint("⚠️ getOnlineStatus error: $e");
       }
     }
 
-    // Listen message real-time
+    // 4️⃣ Kết nối ChatSignalr
+    await _chatSignalrService.initHub();
+    for (var conv in _conversations) {
+      await _chatSignalrService.joinConversation(conv.id);
+    }
+
+    // 5️⃣ Lắng nghe tin nhắn realtime
     _chatSignalrService.messageStream.listen((data) {
       final convId = data['conversationId'] as String;
       final content = data['content'] as String?;
       final sentAt = data['sentAt'] as String?;
       final type = data['type'] is int ? data['type'] as int : 0;
-
       final isSentByYou = data['isSentByYou'] as bool? ?? false;
-      debugPrint('Logged in isSentByYou: $isSentByYou');
+
       if (!mounted) return;
 
       setState(() {
@@ -126,7 +134,6 @@ class _ConversationListState extends State<ConversationList> {
         }
       });
     });
-
   }
 
   Future<void> _loadConversations({bool loadMore = false}) async {

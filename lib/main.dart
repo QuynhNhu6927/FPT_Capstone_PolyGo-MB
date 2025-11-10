@@ -74,6 +74,7 @@ class _MyAppState extends State<MyApp> {
     SizeConfig.init(context);
 
     final initialRoute = _token != null ? AppRoutes.home : AppRoutes.login;
+
     return HubManager(
       child: MaterialApp(
         title: 'PolyGo App',

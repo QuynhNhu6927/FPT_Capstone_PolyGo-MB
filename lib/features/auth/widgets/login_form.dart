@@ -65,14 +65,7 @@ class _LoginFormState extends State<LoginForm> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
-      if (token.isNotEmpty) {
-        try {
-          await UserPresenceManager().init();
-          debugPrint("✅ UserPresenceManager initialized after login");
-        } catch (e) {
-          debugPrint("❌ Failed to init UserPresenceManager: $e");
-        }
-      }
+      await UserPresenceManager().init();
       final decoded = JwtDecoder.decode(token);
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
 
