@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/features/users/widgets/plus_frame.dart';
+import 'package:polygo_mobile/features/users/widgets/sent_gifts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/repositories/friend_repository.dart';
@@ -255,7 +256,12 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               // Gift button
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => SentGiftsDialog(receiverId: widget.user.id),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: blue,
                     shape: RoundedRectangleBorder(

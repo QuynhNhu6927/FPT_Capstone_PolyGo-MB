@@ -175,7 +175,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 const SizedBox(width: 12),
 
-                // --- NEW: Chat icon ---
+                // Chat icon
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -211,7 +211,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 const SizedBox(width: 8),
 
-                // Notification icon (existing)
+                // Notification icon
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 250),
                   opacity: _isSearching ? 0.0 : 1.0,
@@ -245,12 +245,12 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                   ),
                 ),
               ],
-            )
-
+            ),
           ),
 
           const SizedBox(height: 8),
 
+          // --- Menu Icons ---
           Padding(
             padding: const EdgeInsets.only(bottom: 6, top: 2),
             child: Row(
@@ -261,17 +261,25 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
                 return GestureDetector(
                   onTap: () => _onItemTapped(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: paddingH,
-                      vertical: paddingV,
-                    ),
-                    child: Icon(
-                      item['icon'] as IconData,
-                      color: selected ? colorActive : colorInactive,
-                      size: iconSize,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        item['icon'] as IconData,
+                        color: selected ? colorActive : colorInactive,
+                        size: iconSize,
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        height: 3,
+                        width: 18,
+                        decoration: BoxDecoration(
+                          color: selected ? colorActive : Colors.transparent,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }),

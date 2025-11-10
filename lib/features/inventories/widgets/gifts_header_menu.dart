@@ -20,9 +20,9 @@ class _GiftsHeaderMenuState extends State<GiftsHeaderMenu> {
   late int _selectedIndex;
 
   final _items = const [
-    {'icon': Icons.inbox_rounded, 'label': 'unreceived'},
-    {'icon': Icons.done_all_rounded, 'label': 'received'},
-    {'icon': Icons.card_giftcard_rounded, 'label': 'my_gifts'},
+    {'icon': Icons.inbox_rounded},
+    {'icon': Icons.done_all_rounded},
+    {'icon': Icons.card_giftcard_rounded},
   ];
 
   @override
@@ -38,7 +38,6 @@ class _GiftsHeaderMenuState extends State<GiftsHeaderMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final colorActive = const Color(0xFF2563EB);
@@ -52,59 +51,57 @@ class _GiftsHeaderMenuState extends State<GiftsHeaderMenu> {
         ? 1.2
         : 1.5;
 
-    final iconSize = 26 * scale;
-    final fontSize = 15 * scale;
-    final paddingV = 12 * scale;
+    final iconSize = 28 * scale;
+    final paddingV = 10 * scale;
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: paddingV / 2),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: paddingV),
       decoration: BoxDecoration(
         color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 5,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
-        children: List.generate(_items.length, (index) {
-          final item = _items[index];
-          final selected = _selectedIndex == index;
-          final iconColor = selected ? colorActive : colorInactive;
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_items.length, (index) {
+              final item = _items[index];
+              final selected = _selectedIndex == index;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => _onItemTapped(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: EdgeInsets.symmetric(vertical: paddingV),
-                color: selected
-                    ? colorActive.withOpacity(0.08)
-                    : Colors.transparent,
+              return GestureDetector(
+                onTap: () => _onItemTapped(index),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(item['icon'] as IconData,
-                        color: iconColor, size: iconSize),
-                    const SizedBox(height: 6),
-                    Text(
-                      loc.translate(item['label'] as String) ??
-                          (item['label'] as String),
-                      style: TextStyle(
-                        color: selected ? colorActive : colorInactive,
-                        fontSize: fontSize,
-                        fontWeight:
-                        selected ? FontWeight.w600 : FontWeight.w500,
+                    Icon(
+                      item['icon'] as IconData,
+                      color: selected ? colorActive : colorInactive,
+                      size: iconSize,
+                    ),
+                    const SizedBox(height: 4),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      height: 3,
+                      width: 18,
+                      decoration: BoxDecoration(
+                        color: selected ? colorActive : Colors.transparent,
+                        borderRadius: BorderRadius.circular(3),
                       ),
-                    ).animate().fadeIn(duration: 250.ms),
+                    ),
                   ],
                 ),
-              ),
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ],
       ),
     ).animate().fadeIn(duration: 300.ms);
   }

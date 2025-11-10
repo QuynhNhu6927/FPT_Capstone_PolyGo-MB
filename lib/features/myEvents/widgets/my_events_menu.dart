@@ -16,7 +16,8 @@ class MyEventsMenu extends StatefulWidget {
   State<MyEventsMenu> createState() => _MyEventsMenuState();
 }
 
-class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderStateMixin {
+class _MyEventsMenuState extends State<MyEventsMenu>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isSearching = false;
@@ -57,11 +58,13 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
 
     const colorPrimary = Color(0xFF2563EB);
     final colorActive = colorPrimary;
-    final colorInactive = theme.iconTheme.color?.withOpacity(0.6) ?? Colors.grey;
+    final colorInactive =
+        theme.iconTheme.color?.withOpacity(0.6) ?? Colors.grey;
 
     final bgColor = isDark ? Colors.black : Colors.white;
-    final shadowColor = isDark ? Colors.grey.withOpacity(0.1) : Colors.black.withOpacity(0.08);
-    final searchBgColor = isDark ? Color(0xFF2C2C2C) : Color(0xFFF3F4F6);
+    final shadowColor =
+    isDark ? Colors.grey.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final searchBgColor = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F4F6);
     final searchTextColor = isDark ? Colors.white : Colors.black87;
     final searchHintColor = isDark ? Colors.grey : Colors.grey[600];
 
@@ -73,7 +76,6 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
         : 1.5;
 
     final iconSize = 28 * scale;
-    final fontSize = 14 * scale;
     final paddingV = 10 * scale;
     final paddingH = 8 * scale;
 
@@ -103,17 +105,25 @@ class _MyEventsMenuState extends State<MyEventsMenu> with SingleTickerProviderSt
 
                 return GestureDetector(
                   onTap: () => _onItemTapped(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: paddingH,
-                      vertical: paddingV / 2,
-                    ),
-                    child: Icon(
-                      item['icon'] as IconData,
-                      color: selected ? colorActive : colorInactive,
-                      size: iconSize,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        item['icon'] as IconData,
+                        color: selected ? colorActive : colorInactive,
+                        size: iconSize,
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        height: 3,
+                        width: 18,
+                        decoration: BoxDecoration(
+                          color: selected ? colorActive : Colors.transparent,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }),
