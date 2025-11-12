@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
 import '../../../routes/app_routes.dart';

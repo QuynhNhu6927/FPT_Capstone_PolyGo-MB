@@ -12,8 +12,8 @@ import '../../../data/models/subscription/subscription_request.dart';
 import '../../../data/models/subscription/subscription_response.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/subscription_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../data/services/subscription_service.dart';
+import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/apis/subscription_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
@@ -21,6 +21,7 @@ import '../../shared/app_error_state.dart';
 class Subscriptions extends StatefulWidget {
   final bool isRetrying;
   final VoidCallback? onError;
+
   const Subscriptions({super.key, required this.isRetrying, this.onError});
 
   @override
@@ -81,11 +82,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          loc.translate("enable_auto_renew"),
-                        ),
-                      ),
+                      Expanded(child: Text(loc.translate("enable_auto_renew"))),
                       Switch(
                         value: autoRenew,
                         activeColor: Theme.of(context).colorScheme.primary,
@@ -118,7 +115,10 @@ class _SubscriptionsState extends State<Subscriptions> {
     if (token == null || token.isEmpty) return;
 
     try {
-      final res = await _repo.updateAutoRenew(token: token, autoRenew: autoRenew);
+      final res = await _repo.updateAutoRenew(
+        token: token,
+        autoRenew: autoRenew,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,9 +180,9 @@ class _SubscriptionsState extends State<Subscriptions> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              '${loc.translate("not_enough_buy")} '
-                  '${plan.name} '
-                  '${loc.translate("please_add_money")} '
+            '${loc.translate("not_enough_buy")} '
+            '${plan.name} '
+            '${loc.translate("please_add_money")} ',
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -241,8 +241,10 @@ class _SubscriptionsState extends State<Subscriptions> {
         autoRenew: autoRenew,
       );
 
-      final ApiResponse<SubscriptionResponse> res =
-      await repo.subscribe(token: token, request: request);
+      final ApiResponse<SubscriptionResponse> res = await repo.subscribe(
+        token: token,
+        request: request,
+      );
 
       if (!mounted) return;
 
@@ -265,7 +267,6 @@ class _SubscriptionsState extends State<Subscriptions> {
           duration: const Duration(seconds: 2),
         ),
       );
-
     }
   }
 
@@ -274,7 +275,6 @@ class _SubscriptionsState extends State<Subscriptions> {
     final token = prefs.getString('token');
 
     if (token == null || token.isEmpty || _currentSubscription == null) {
-
       return;
     }
 
@@ -335,13 +335,18 @@ class _SubscriptionsState extends State<Subscriptions> {
 
       final request = SubscriptionCancelRequest(reason: reason);
 
-      final res = await _repo.cancelSubscription(token: token, request: request);
+      final res = await _repo.cancelSubscription(
+        token: token,
+        request: request,
+      );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).translate("cancel_success")),
+          content: Text(
+            AppLocalizations.of(context).translate("cancel_success"),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -349,11 +354,12 @@ class _SubscriptionsState extends State<Subscriptions> {
       await _loadCurrentSubscription();
       await _fetchPlans(lang: _currentLocale?.languageCode);
     } catch (e, st) {
-
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).translate("cancel_failed")),
+          content: Text(
+            AppLocalizations.of(context).translate("cancel_failed"),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -425,10 +431,10 @@ class _SubscriptionsState extends State<Subscriptions> {
       decoration: BoxDecoration(
         gradient: isDark
             ? LinearGradient(
-          colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        )
+                colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
             : LinearGradient(colors: [Colors.white, Colors.white]),
         borderRadius: BorderRadius.circular(sw(context, 16)),
         boxShadow: [
@@ -441,8 +447,8 @@ class _SubscriptionsState extends State<Subscriptions> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Title section
           Text(
             loc.translate("current_subscription"),
             style: t.titleLarge?.copyWith(
@@ -452,7 +458,6 @@ class _SubscriptionsState extends State<Subscriptions> {
             ),
           ),
           SizedBox(height: sh(context, 12)),
-
           Container(
             padding: EdgeInsets.all(sw(context, 16)),
             decoration: BoxDecoration(
@@ -465,17 +470,10 @@ class _SubscriptionsState extends State<Subscriptions> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      _currentSubscription!.planType.toLowerCase() == "premium"
-                          ? Icons.workspace_premium_rounded
-                          : Icons.star_outline_rounded,
-                      color: Colors.white,
-                      size: sw(context, 28),
-                    ),
-                    SizedBox(width: sw(context, 10)),
                     Expanded(
                       child: Text(
                         _currentSubscription!.planName,
@@ -501,7 +499,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                   style: t.bodySmall?.copyWith(color: Colors.white70),
                 ),
                 SizedBox(height: sh(context, 16)),
-
                 Row(
                   children: [
                     Expanded(
@@ -541,10 +538,11 @@ class _SubscriptionsState extends State<Subscriptions> {
     ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.2, end: 0);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+    final isWideScreen =
+        MediaQuery.of(context).size.width >= 600;
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -568,200 +566,220 @@ class _SubscriptionsState extends State<Subscriptions> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await Future.wait([
-          _fetchPlans(lang: _currentLocale?.languageCode),
-          _loadCurrentSubscription(),
-        ]);
-      },
-      child: ListView.separated(
+    final currentSection = _buildCurrentSubscriptionSection();
+
+    if (isWideScreen && currentSection != null) {
+      // Tablet: show side by side
+      return Padding(
         padding: EdgeInsets.symmetric(
           horizontal: sw(context, 16),
           vertical: sh(context, 16),
         ),
-        itemCount: _plans.length +
-            (_currentSubscription != null &&
-                _currentSubscription!.planType.toLowerCase() != "free"
-                ? 1
-                : 0),
-        separatorBuilder: (_, __) => SizedBox(height: sh(context, 16)),
-        itemBuilder: (context, index) {
-          final showCurrentSection = _currentSubscription != null &&
-              _currentSubscription!.planType.toLowerCase() != "free";
-
-          if (showCurrentSection && index == 0) {
-            final section = _buildCurrentSubscriptionSection();
-            if (section != null) return section;
-          }
-
-          final planIndex = index - (showCurrentSection ? 1 : 0);
-          final plan = _plans[planIndex];
-
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final colorPrimary = const Color(0xFF2563EB);
-          final t = Theme.of(context).textTheme;
-
-          final formattedPrice = plan.price < 1000
-              ? NumberFormat("#,##0.##", "vi_VN").format(plan.price)
-              : NumberFormat("#,##0", "vi_VN").format(plan.price);
-
-          return Container(
-            padding: EdgeInsets.all(sw(context, 20)),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
-                    : [Colors.white, Colors.white],
-              ),
-              borderRadius: BorderRadius.circular(sw(context, 16)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: currentSection,
             ),
-            child: Column(
+            SizedBox(width: sw(context, 16)),
+            // Plans list (hẹp hơn)
+            Expanded(
+              flex: 3,
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: _plans.length,
+                separatorBuilder: (_, __) => SizedBox(height: sh(context, 16)),
+                itemBuilder: (context, index) {
+                  final plan = _plans[index];
+                  return _buildPlanCard(plan);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Mobile: show vertically
+      return RefreshIndicator(
+        onRefresh: () async {
+          await Future.wait([
+            _fetchPlans(lang: _currentLocale?.languageCode),
+            _loadCurrentSubscription(),
+          ]);
+        },
+        child: ListView.separated(
+          padding: EdgeInsets.symmetric(
+            horizontal: sw(context, 16),
+            vertical: sh(context, 16),
+          ),
+          itemCount: _plans.length + (currentSection != null ? 1 : 0),
+          separatorBuilder: (_, __) => SizedBox(height: sh(context, 16)),
+          itemBuilder: (context, index) {
+            if (currentSection != null && index == 0) return currentSection;
+
+            final planIndex = index - (currentSection != null ? 1 : 0);
+            final plan = _plans[planIndex];
+            return _buildPlanCard(plan);
+          },
+        ),
+      );
+    }
+  }
+
+  // Tách riêng widget plan card để dùng cho cả mobile và tablet
+  Widget _buildPlanCard(SubscriptionPlan plan) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorPrimary = const Color(0xFF2563EB);
+    final t = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context);
+
+    final formattedPrice = plan.price < 1000
+        ? NumberFormat("#,##0.##", "vi_VN").format(plan.price)
+        : NumberFormat("#,##0", "vi_VN").format(plan.price);
+
+    return Container(
+      padding: EdgeInsets.all(sw(context, 20)),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+              : [Colors.white, Colors.white],
+        ),
+        borderRadius: BorderRadius.circular(sw(context, 16)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: icon + name
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  plan.name,
+                  style: t.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: st(context, 20),
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: sh(context, 8)),
+          // Description
+          Text(
+            plan.description,
+            style: t.bodyMedium?.copyWith(
+              color: isDark ? Colors.grey[300] : Colors.grey[700],
+              fontSize: st(context, 14),
+            ),
+          ),
+          SizedBox(height: sh(context, 16)),
+          // Price & Duration
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "$formattedPriceđ",
+                style: t.headlineSmall?.copyWith(
+                  color: colorPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: st(context, 22),
+                ),
+              ),
+              Text(
+                "${plan.durationInDays} ${loc.translate("days")}",
+                style: t.bodyMedium?.copyWith(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: sh(context, 16)),
+          // Features
+          if (plan.features.isNotEmpty &&
+              plan.features.any((f) => f.isEnabled)) ...[
+            Text(
+              loc.translate("features"),
+              style: t.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: st(context, 16),
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            SizedBox(height: sh(context, 8)),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: icon + name
-                Row(
-                  children: [
-                    Icon(
-                      plan.planType.toLowerCase() == "premium"
-                          ? Icons.workspace_premium_rounded
-                          : Icons.star_outline_rounded,
-                      color: colorPrimary,
-                      size: sw(context, 28),
-                    ),
-                    SizedBox(width: sw(context, 10)),
-                    Expanded(
-                      child: Text(
-                        plan.name,
-                        style: t.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: st(context, 20),
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: sh(context, 8)),
-
-                // Description
-                Text(
-                  plan.description,
-                  style: t.bodyMedium?.copyWith(
-                    color: isDark ? Colors.grey[300] : Colors.grey[700],
-                    fontSize: st(context, 14),
-                  ),
-                ),
-                SizedBox(height: sh(context, 16)),
-
-                // Price & Duration
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "$formattedPriceđ",
-                      style: t.headlineSmall?.copyWith(
-                        color: colorPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: st(context, 22),
-                      ),
-                    ),
-                    Text(
-                      "${plan.durationInDays} ${loc.translate("days")}",
-                      style: t.bodyMedium?.copyWith(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: sh(context, 16)),
-
-                // Features
-                if (plan.features.isNotEmpty &&
-                    plan.features.any((f) => f.isEnabled)) ...[
-                  Text(
-                    loc.translate("features"),
-                    style: t.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: st(context, 16),
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  SizedBox(height: sh(context, 8)),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: plan.features
-                        .where((f) => f.isEnabled)
-                        .map(
-                          (f) => Padding(
-                        padding: EdgeInsets.symmetric(vertical: sh(context, 4)),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: colorPrimary,
-                              size: sw(context, 18),
-                            ),
-                            SizedBox(width: sw(context, 8)),
-                            Expanded(
-                              child: Text(
-                                f.featureName +
-                                    (f.limitValue > 0
-                                        ? " (${f.limitValue} ${f.limitType})"
-                                        : ""),
-                                style: t.bodyMedium?.copyWith(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: st(context, 14),
-                                ),
+              children: plan.features
+                  .where((f) => f.isEnabled)
+                  .map(
+                    (f) => Padding(
+                      padding: EdgeInsets.symmetric(vertical: sh(context, 4)),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline_rounded,
+                            color: colorPrimary,
+                            size: sw(context, 18),
+                          ),
+                          SizedBox(width: sw(context, 8)),
+                          Expanded(
+                            child: Text(
+                              f.featureName +
+                                  (f.limitValue > 0
+                                      ? " (${f.limitValue} ${f.limitType})"
+                                      : ""),
+                              style: t.bodyMedium?.copyWith(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: st(context, 14),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    )
-                        .toList(),
-                  ),
-                  SizedBox(height: sh(context, 20)),
-                ],
-
-                // Subscribe button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _subscribePlan(plan),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorPrimary,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: sh(context, 12)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(sw(context, 10)),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      loc.translate("subscribe"),
-                      style: TextStyle(
-                        fontSize: st(context, 16),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  )
+                  .toList(),
             ),
-          ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.2, end: 0);
-        },
+            SizedBox(height: sh(context, 20)),
+          ],
+          // Subscribe button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _subscribePlan(plan),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorPrimary,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: sh(context, 12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(sw(context, 10)),
+                ),
+              ),
+              child: Text(
+                loc.translate("subscribe"),
+                style: TextStyle(
+                  fontSize: st(context, 16),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-    );
+    ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.2, end: 0);
   }
 }

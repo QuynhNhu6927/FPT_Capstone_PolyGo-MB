@@ -114,6 +114,30 @@ class ChatSignalrService {
     }
   }
 
+  Future<void> deleteMessage({
+    required String messageId,
+  }) async {
+    if (_hubConnection == null || _hubConnection!.state != HubConnectionState.connected) {
+      debugPrint('[SignalR] Hub chưa kết nối, không thể xóa message');
+      return;
+    }
+
+    try {
+      // Gọi backend DeleteMessage
+      await _hubConnection!.invoke('DeleteMessage', args: [messageId]);
+      debugPrint('[SignalR] Yêu cầu xóa message thành công: $messageId');
+
+      // Phát event cho các widget lắng nghe (Stream)
+      _messageController.add({
+        'type': 'deleted',
+        'messageId': messageId,
+      });
+    } catch (e) {
+      debugPrint('[SignalR] Lỗi khi xóa message: $e');
+    }
+  }
+
+
   Future<void> sendImageMessage({
     required String conversationId,
     required String senderId,
@@ -159,4 +183,65 @@ class ChatSignalrService {
   }
 
   bool get isConnected => _isConnected;
+}
+
+class ChatHubManager extends StatefulWidget {
+  final Widget child;
+  const ChatHubManager({required this.child, super.key});
+
+  @override
+  State<ChatHubManager> createState() => _ChatHubManagerState();
+}
+
+class _ChatHubManagerState extends State<ChatHubManager> with WidgetsBindingObserver {
+  bool _hubStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkAndStartHub();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      if (ChatSignalrService().isConnected) {
+        ChatSignalrService().stop();
+        _hubStarted = false;
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      _checkAndStartHub();
+    }
+  }
+
+  Future<void> _checkAndStartHub() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    // Nếu hub đang chạy mà login lại
+    if (_hubStarted) {
+      await ChatSignalrService().stop();
+      _hubStarted = false;
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+
+    if (token != null && !_hubStarted) {
+      await ChatSignalrService().initHub();
+      _hubStarted = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (ChatSignalrService().isConnected) {
+      ChatSignalrService().stop();
+      _hubStarted = false;
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

@@ -20,9 +20,10 @@ class EventListResponse {
   });
 
   factory EventListResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['items'] as List<dynamic>? ?? [];
     return EventListResponse(
-      items: data.map((e) => EventModel.fromJson(e)).toList(),
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((e) => EventModel.fromJson(e))
+          .toList(),
       totalItems: json['totalItems'] ?? 0,
       currentPage: json['currentPage'] ?? 1,
       totalPages: json['totalPages'] ?? 1,

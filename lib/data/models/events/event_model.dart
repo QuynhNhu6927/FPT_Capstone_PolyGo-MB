@@ -8,7 +8,7 @@ class EventModel {
   final DateTime registerDeadline;
   final bool allowLateRegister;
   final int capacity;
-  final int fee;
+  final double fee;
   final String bannerUrl;
   final bool isPublic;
   final int numberOfParticipants;
@@ -50,7 +50,7 @@ class EventModel {
       registerDeadline: DateTime.tryParse(json['registerDeadline'] ?? '') ?? DateTime.now(),
       allowLateRegister: json['allowLateRegister'] ?? false,
       capacity: json['capacity'] ?? 0,
-      fee: json['fee'] ?? 0,
+      fee: (json['fee'] as num).toDouble(),
       bannerUrl: json['bannerUrl'] ?? '',
       isPublic: json['isPublic'] ?? false,
       numberOfParticipants: json['numberOfParticipants'] ?? 0,
@@ -123,3 +123,4 @@ class CategoryModel {
     );
   }
 }
+

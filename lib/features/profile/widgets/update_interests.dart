@@ -7,7 +7,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/interests/me_interests_model.dart';
 import '../../../data/repositories/interest_repository.dart';
-import '../../../data/services/interest_service.dart';
+import '../../../data/services/apis/interest_service.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
 

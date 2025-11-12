@@ -29,13 +29,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     });
   }
 
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
-  }
-
   void _onChildError() {
     if (!_hasError) {
       setState(() {

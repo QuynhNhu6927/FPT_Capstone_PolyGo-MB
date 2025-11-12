@@ -85,6 +85,16 @@ class _FriendsMenuBarState extends State<FriendsMenuBar> {
                       color: selected ? colorActive : colorInactive,
                       size: iconSize,
                     ),
+                    const SizedBox(height: 4),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      height: 3,
+                      width: 18,
+                      decoration: BoxDecoration(
+                        color: selected ? colorActive : Colors.transparent,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
                   ],
                 ),
               );

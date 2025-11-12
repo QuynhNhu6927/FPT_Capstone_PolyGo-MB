@@ -3,7 +3,7 @@ class MeResponse {
   final String name;
   final String mail;
   final String? avatarUrl;
-  final String meritLevel;
+  final int merit;
   final String introduction;
   final String gender;
   final int experiencePoints;
@@ -20,7 +20,7 @@ class MeResponse {
     required this.name,
     required this.mail,
     this.avatarUrl,
-    required this.meritLevel,
+    required this.merit,
     required this.introduction,
     required this.gender,
     required this.experiencePoints,
@@ -39,7 +39,9 @@ class MeResponse {
       name: json['name']?.toString() ?? '',
       mail: json['mail']?.toString() ?? '',
       avatarUrl: json['avatarUrl']?.toString(),
-      meritLevel: json['meritLevel']?.toString() ?? '',
+      merit: (json['merit'] is int)
+          ? json['merit'] as int
+          : int.tryParse(json['experiencePoints']?.toString() ?? '0') ?? 0,
       introduction: json['introduction']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
       experiencePoints: (json['experiencePoints'] is int)

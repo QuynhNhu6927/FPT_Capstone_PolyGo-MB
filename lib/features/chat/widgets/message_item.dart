@@ -7,7 +7,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/utils/date_separator.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
 import 'chat_bubble.dart';
-import 'conversation.dart' hide formatDateSeparator;
 
 class MessageItem extends StatelessWidget {
   final ConversationMessage message;
@@ -17,6 +16,7 @@ class MessageItem extends StatelessWidget {
   final String? activeMessageId;
   final VoidCallback onTap;
   final bool showDateSeparator;
+  final Function(String messageId)? onDelete;
 
   const MessageItem({
     super.key,
@@ -27,6 +27,7 @@ class MessageItem extends StatelessWidget {
     this.activeMessageId,
     required this.onTap,
     required this.showDateSeparator,
+    this.onDelete,
   });
 
   @override
@@ -83,15 +84,42 @@ class MessageItem extends StatelessWidget {
                 ),
               if (!isMine) const SizedBox(width: 8),
               Flexible(
-                child: ChatBubble(
-                  message: message,
-                  isMine: isMine,
-                  isDark: isDark,
-                  colorPrimary: colorPrimary,
-                  activeMessageId: activeMessageId,
+                child: GestureDetector(
                   onTap: onTap,
+                  onLongPress: () {
+                    if (isMine && onDelete != null) {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Xóa tin nhắn?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Hủy'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onDelete!(message.id);
+                              },
+                              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                  child: ChatBubble(
+                    message: message,
+                    isMine: isMine,
+                    isDark: isDark,
+                    colorPrimary: colorPrimary,
+                    activeMessageId: activeMessageId,
+                    onTap: onTap,
+                  ),
                 ),
               ),
+
               if (isMine) const SizedBox(width: 8),
               if (isMine)
                 CircleAvatar(

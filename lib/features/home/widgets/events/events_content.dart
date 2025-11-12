@@ -3,13 +3,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/api/api_client.dart';
-import '../../../core/localization/app_localizations.dart';
-import '../../../data/models/events/coming_event_model.dart';
-import '../../../data/models/events/event_model.dart';
-import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
-import '../../shared/app_error_state.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../data/models/events/coming_event_model.dart';
+import '../../../../data/models/events/event_model.dart';
+import '../../../../data/repositories/event_repository.dart';
+import '../../../../data/services/apis/event_service.dart';
+import '../../../shared/app_error_state.dart';
 import 'event_card.dart';
 import 'event_filter.dart';
 import 'event_filter_bar.dart';
@@ -34,7 +34,7 @@ class _EventsContentState extends State<EventsContent> {
   int _totalPages = 1;
   int _pageSize = 8;
 
-  List<ComingEventModel> _filteredUpcomingEvents = [];
+  List<EventModel> _filteredUpcomingEvents = [];
 
   List<Map<String, String>> _filterLanguages = [];
   List<Map<String, String>> _filterInterests = [];
@@ -213,6 +213,7 @@ class _EventsContentState extends State<EventsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 2 : width < 1000 ? 3 : 4;
     final loc = AppLocalizations.of(context);
@@ -253,8 +254,11 @@ class _EventsContentState extends State<EventsContent> {
             child: _showFilterBar
                 ? Container(
               key: const ValueKey('filterBar'),
-              margin: const EdgeInsets.only(bottom: 16),
-              child: EventFilterBar(
+              margin: const EdgeInsets.only(bottom: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                EventFilterBar(
                 selectedFilters: _selectedFilters,
                 onOpenFilter: () async {
                   final result = await Navigator.push(
@@ -292,6 +296,18 @@ class _EventsContentState extends State<EventsContent> {
                       reset: true,
                       lang: _currentLocale?.languageCode);
                 },
+                ),
+                  if (!_hasActiveFilter) ...[
+                    const SizedBox(height: 14),
+                    Text(
+                      "Những sự kiện phù hợp với bạn",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             )
                 : const SizedBox.shrink(),

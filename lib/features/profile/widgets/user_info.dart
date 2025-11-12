@@ -12,17 +12,18 @@ import '../../../../core/utils/responsive.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../data/models/auth/me_response.dart';
 import '../../../../data/repositories/auth_repository.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/apis/auth_service.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../data/models/user/update_userinfo_request.dart';
 import '../../../data/repositories/interest_repository.dart';
 import '../../../data/repositories/language_repository.dart';
 import '../../../data/repositories/media_repository.dart';
 import '../../../data/repositories/user_repository.dart';
-import '../../../data/services/interest_service.dart';
-import '../../../data/services/language_service.dart';
-import '../../../data/services/media_service.dart';
-import '../../../data/services/user_service.dart';
+import '../../../data/services/apis/interest_service.dart';
+import '../../../data/services/apis/language_service.dart';
+import '../../../data/services/apis/media_service.dart';
+import '../../../data/services/apis/user_service.dart';
+import '../../../data/services/signalr/user_presence.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
 
@@ -47,10 +48,13 @@ class _UserInfoState extends State<UserInfo> {
   bool _hasError = false;
 
   List<String> _learningLangs = [];
+  List<String> _learningIcons = [];
   bool _loadingLearning = true;
   List<String> _nativeLangs = [];
+  List<String> _nativeIcons = [];
   bool _loadingNative = true;
   List<String> _interests = [];
+  List<String> _interestIcons = [];
   bool _loadingInterests = true;
 
   @override
@@ -145,6 +149,7 @@ class _UserInfoState extends State<UserInfo> {
       if (!mounted) return;
       setState(() {
         _interests = interests.map((e) => e.name).toList();
+        _interestIcons = interests.map((e) => e.iconUrl).toList();
         _loadingInterests = false;
       });
     } catch (e) {
@@ -167,6 +172,7 @@ class _UserInfoState extends State<UserInfo> {
       if (!mounted) return;
       setState(() {
         _learningLangs = langs.map((e) => e.name).toList();
+        _learningIcons = langs.map((e) => e.iconUrl).toList();
         _loadingLearning = false;
       });
     } catch (e) {
@@ -188,6 +194,7 @@ class _UserInfoState extends State<UserInfo> {
       if (!mounted) return;
       setState(() {
         _nativeLangs = langs.map((e) => e.name).toList();
+        _nativeIcons = langs.map((e) => e.iconUrl).toList();
         _loadingNative = false;
       });
     } catch (e) {
@@ -247,6 +254,8 @@ class _UserInfoState extends State<UserInfo> {
   }
 
   Future<void> _logout(BuildContext context) async {
+    await UserPresenceManager().stop();
+    debugPrint("Hub state after stop: ${UserPresenceManager().service.connection?.state}");
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     if (!mounted) return;
@@ -478,41 +487,71 @@ class _UserInfoState extends State<UserInfo> {
                 else
                   ...[
                     if (_nativeLangs.isNotEmpty) ...[
-                      Text(
-                        loc.translate("native_language"),
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: st(context, 15),
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("native_language")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 15),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                            child: TagListWidget(
+                                tags: _nativeLangs,
+                                iconUrls: _nativeIcons,
+                                color: Colors.green[100]),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: sh(context, 8)),
-                      TagListWidget(
-                          tags: _nativeLangs, color: Colors.green[100]),
-                      SizedBox(height: sh(context, 16)),
-                    ],
+                      SizedBox(height: sh(context, 12)),
+                  ],
                     if (_learningLangs.isNotEmpty) ...[
-                      Text(
-                        loc.translate("learning"),
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: st(context, 15),
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("learning")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 16),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                            child: TagListWidget(
+                              tags: _learningLangs,
+                              iconUrls: _learningIcons,
+                              color: Colors.blue[100],
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: sh(context, 8)),
-                      TagListWidget(
-                          tags: _learningLangs, color: Colors.blue[100]),
-                      SizedBox(height: sh(context, 20)),
+                      SizedBox(height: sh(context, 12)),
                     ],
+
                     if (_interests.isNotEmpty) ...[
-                      Text(
-                        loc.translate("interests"),
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: st(context, 16),
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("interests")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 16),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                            child: TagListWidget(
+                              tags: _interests,
+                              iconUrls: _interestIcons,
+                            )
+                          ),
+                        ],
                       ),
-                      SizedBox(height: sh(context, 8)),
-                      TagListWidget(tags: _interests),
                     ],
                   ],
               ],
@@ -533,7 +572,7 @@ extension MeResponseCopy on MeResponse {
     int? experiencePoints,
     String? role,
     String? mail,
-    String? meritLevel,
+    int? merit,
     double? balance,
     int? streakDays,
     bool? autoRenewSubscription,
@@ -545,7 +584,7 @@ extension MeResponseCopy on MeResponse {
       name: name ?? this.name,
       mail: mail ?? this.mail,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      meritLevel: meritLevel ?? this.meritLevel,
+      merit: merit ?? this.merit,
       introduction: introduction ?? this.introduction,
       gender: gender ?? this.gender,
       experiencePoints: experiencePoints ?? this.experiencePoints,

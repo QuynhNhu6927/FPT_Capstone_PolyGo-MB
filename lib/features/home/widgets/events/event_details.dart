@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/localization/app_localizations.dart';
-import '../../../../core/utils/responsive.dart';
-import '../../../core/api/api_client.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../data/models/events/event_model.dart';
-import '../../../data/repositories/auth_repository.dart';
-import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../data/services/event_service.dart';
+import '../../../../../core/localization/app_localizations.dart';
+import '../../../../../core/utils/responsive.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../data/models/events/event_model.dart';
+import '../../../../data/repositories/auth_repository.dart';
+import '../../../../data/repositories/event_repository.dart';
+import '../../../../data/services/apis/auth_service.dart';
+import '../../../../data/services/apis/event_service.dart';
+import '../../../../routes/app_routes.dart';
 
 class EventDetail extends StatefulWidget {
   final EventModel event;
-
-  const EventDetail({super.key, required this.event});
+  final ValueChanged<EventModel>? onEventUpdated;
+  const EventDetail({super.key, required this.event, this.onEventUpdated});
 
   @override
   State<EventDetail> createState() => _EventDetailState();
@@ -186,42 +187,54 @@ class _EventDetailState extends State<EventDetail> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: sw(context, 28),
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: event.host.avatarUrl != null &&
-                        event.host.avatarUrl!.isNotEmpty
-                        ? NetworkImage(event.host.avatarUrl!)
-                        : null,
-                    child: (event.host.avatarUrl == null ||
-                        event.host.avatarUrl!.isEmpty)
-                        ? const Icon(Icons.person, size: 36, color: Colors.white70)
-                        : null,
-                  ),
-                  SizedBox(width: sw(context, 12)),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        event.host.name,
-                        style: t.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: st(context, 15),
-                          color: textColor,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.userProfile,
+                        arguments: {'id': event.host.id},
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: sw(context, 28),
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage: event.host.avatarUrl != null &&
+                              event.host.avatarUrl!.isNotEmpty
+                              ? NetworkImage(event.host.avatarUrl!)
+                              : null,
+                          child: (event.host.avatarUrl == null ||
+                              event.host.avatarUrl!.isEmpty)
+                              ? const Icon(Icons.person, size: 36, color: Colors.white70)
+                              : null,
                         ),
-                      ),
-                      Text(
-                        loc.translate('host'),
-                        style: t.bodySmall?.copyWith(
-                          color: secondaryText,
-                          fontSize: st(context, 13),
+                        SizedBox(width: sw(context, 12)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.host.name,
+                              style: t.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: st(context, 15),
+                                color: textColor,
+                              ),
+                            ),
+                            Text(
+                              loc.translate('host'),
+                              style: t.bodySmall?.copyWith(
+                                color: secondaryText,
+                                fontSize: st(context, 13),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
 
               Text(
@@ -333,6 +346,7 @@ class _EventDetailState extends State<EventDetail> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(loc.translate("event_register_success"))),
                             );
+                            widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
                             Navigator.pop(context);
                           } catch (e) {
                             final errorString = e.toString();
@@ -403,13 +417,14 @@ class _EventDetailState extends State<EventDetail> {
                                         );
 
                                         if (!mounted) return;
-
+                                        widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
                                         Navigator.of(context, rootNavigator: true).pop();
                                         Navigator.pop(context);
 
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(content: Text(loc.translate("event_register_success"))),
                                         );
+
                                       } catch (e) {
                                         final err = e.toString();
                                         if (err.contains("Error.InvalidEventPassword")) {
@@ -486,6 +501,31 @@ class _EventDetailState extends State<EventDetail> {
           ),
         ],
       ),
+    );
+  }
+}
+
+extension EventModelCopy on EventModel {
+  EventModel copyWith({bool? isParticipant}) {
+    return EventModel(
+      id: id,
+      title: title,
+      description: description,
+      status: status,
+      startAt: startAt,
+      expectedDurationInMinutes: expectedDurationInMinutes,
+      registerDeadline: registerDeadline,
+      allowLateRegister: allowLateRegister,
+      capacity: capacity,
+      fee: fee,
+      bannerUrl: bannerUrl,
+      isPublic: isPublic,
+      numberOfParticipants: numberOfParticipants,
+      planType: planType,
+      isParticipant: isParticipant ?? this.isParticipant,
+      host: host,
+      language: language,
+      categories: categories,
     );
   }
 }

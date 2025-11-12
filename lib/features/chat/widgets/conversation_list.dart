@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_screen.dart';
@@ -10,7 +9,7 @@ import '../../../core/utils/conversation_time.dart';
 import '../../../data/models/chat/conversation_model.dart';
 import '../../../data/repositories/conversation_repository.dart';
 import '../../../data/services/signalr/chat_signalr_service.dart';
-import '../../../data/services/conversation_service.dart';
+import '../../../data/services/apis/conversation_service.dart';
 import '../../../data/services/signalr/user_presence.dart';
 
 class ConversationList extends StatefulWidget {
@@ -25,7 +24,7 @@ class _ConversationListState extends State<ConversationList> {
   late ChatSignalrService _chatSignalrService;
   String _userId = '';
   late UserPresenceService _userPresenceService;
-  Map<String, bool> _onlineStatus = {};
+  Map<String, bool> _userOnlineStatus = {};
 
   List<Conversation> _conversations = [];
   int _pageNumber = 1;
@@ -48,24 +47,60 @@ class _ConversationListState extends State<ConversationList> {
     final prefs = await SharedPreferences.getInstance();
     _userId = prefs.getString('userId') ?? '';
     debugPrint('Logged in userId: $_userId');
+
+    // ✅ KHÔNG gọi lại initHub — chỉ lấy instance đang chạy sẵn
+    _userPresenceService = UserPresenceManager().service;
+
+    // Nếu hub chưa sẵn sàng thì chờ 1 chút (tránh null)
+    int retry = 0;
+    while ((_userPresenceService.connection == null || !_userPresenceService.isConnected) && retry < 10) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      retry++;
+    }
+
+    // ✅ Lắng nghe thay đổi online/offline
+    _userPresenceService.statusStream.listen((data) {
+      final userId = data['userId'] as String?;
+      final isOnline = data['isOnline'] as bool? ?? false;
+      if (userId != null && mounted) {
+        setState(() {
+          _userOnlineStatus[userId] = isOnline;
+        });
+      }
+    });
+
+    // 2️⃣ Load danh sách hội thoại
     await _loadConversations(loadMore: false);
 
-    _chatSignalrService = ChatSignalrService();
-    await _chatSignalrService.initHub();
+    // 3️⃣ Lấy trạng thái online hiện tại
+    if (_conversations.isNotEmpty) {
+      final userIds = _conversations.map((e) => e.user.id).toList();
+      try {
+        final onlineMap = await _userPresenceService.getOnlineStatus(userIds);
+        if (mounted) {
+          setState(() {
+            _userOnlineStatus.addAll(onlineMap);
+          });
+        }
+      } catch (e) {
+        debugPrint("⚠️ getOnlineStatus error: $e");
+      }
+    }
 
+    // 4️⃣ Kết nối ChatSignalr
+    await _chatSignalrService.initHub();
     for (var conv in _conversations) {
       await _chatSignalrService.joinConversation(conv.id);
     }
 
-    // Listen message real-time
+    // 5️⃣ Lắng nghe tin nhắn realtime
     _chatSignalrService.messageStream.listen((data) {
       final convId = data['conversationId'] as String;
       final content = data['content'] as String?;
       final sentAt = data['sentAt'] as String?;
       final type = data['type'] is int ? data['type'] as int : 0;
-
       final isSentByYou = data['isSentByYou'] as bool? ?? false;
-      debugPrint('Logged in isSentByYou: $isSentByYou');
+
       if (!mounted) return;
 
       setState(() {
@@ -99,34 +134,6 @@ class _ConversationListState extends State<ConversationList> {
         }
       });
     });
-
-    _userPresenceService = UserPresenceService();
-    await _userPresenceService.initHub();
-
-    _userPresenceService.statusStream.listen((data) {
-      if (!mounted) return;
-      final userId = data['userId'] as String?;
-      final isOnline = data['isOnline'] as bool? ?? false;
-      final lastActiveAt = data['lastActiveAt'] ?? '';
-
-      if (userId != null) {
-        debugPrint(
-            '[Presence] UserId: $userId | isOnline: $isOnline | lastActiveAt: $lastActiveAt'
-        );
-
-        setState(() {
-          _onlineStatus[userId] = isOnline;
-          final index = _conversations.indexWhere((c) => c.user.id == userId);
-          if (index != -1) {
-            _conversations[index].user.isOnline = isOnline;
-            debugPrint(
-                '[Presence] Updated conversation list: ${_conversations[index].user.name} isOnline=$isOnline'
-            );
-          }
-        });
-      }
-    });
-
   }
 
   Future<void> _loadConversations({bool loadMore = false}) async {
@@ -172,7 +179,6 @@ class _ConversationListState extends State<ConversationList> {
   @override
   void dispose() {
     _chatSignalrService.stop();
-    _userPresenceService.stop();
     _searchController.dispose();
     super.dispose();
   }
@@ -181,7 +187,6 @@ class _ConversationListState extends State<ConversationList> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    const colorPrimary = Color(0xFF2563EB);
 
     if (_isInit) return const Center(child: CircularProgressIndicator());
 
@@ -270,7 +275,7 @@ class _ConversationListState extends State<ConversationList> {
                         userId: _userId,
                       );
                       setState(() {
-                        conv.hasSeen = true; // cập nhật đã đọc
+                        conv.hasSeen = true;
                       });
                     }
 
@@ -302,7 +307,7 @@ class _ConversationListState extends State<ConversationList> {
                             ? const Icon(Icons.person, color: Colors.white, size: 28)
                             : null,
                       ),
-                      if (_onlineStatus[conv.user.id] ?? conv.user.isOnline)
+                      if ((_userOnlineStatus[conv.user.id] ?? false))
                         Positioned(
                           bottom: 0,
                           right: 0,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -8,14 +9,13 @@ import '../../../data/models/chat/conversation_message_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/conversation_repository.dart';
 import '../../../data/repositories/media_repository.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../data/services/apis/auth_service.dart';
 import '../../../data/services/signalr/chat_signalr_service.dart';
-import '../../../data/services/conversation_service.dart';
-import '../../../data/services/media_service.dart';
+import '../../../data/services/apis/conversation_service.dart';
+import '../../../data/services/apis/media_service.dart';
 import 'chat_input.dart';
 import 'conversation_app_bar.dart';
 import 'message_item.dart';
-import 'chat_bubble.dart';
 
 class Conversation extends StatefulWidget {
   final String conversationId;
@@ -40,6 +40,7 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation> {
   bool _isUploadingImages = false;
   late ChatSignalrService _chatSignalrService;
+  late final StreamSubscription<Map<String, dynamic>> _messageSub;
   String? _showTimeMessageId;
   List<ConversationMessage> _messages = [];
   bool _isLoading = false;
@@ -55,7 +56,6 @@ class _ConversationState extends State<Conversation> {
   @override
   void initState() {
     super.initState();
-    _chatSignalrService = ChatSignalrService();
     _initConversation();
   }
 
@@ -65,10 +65,10 @@ class _ConversationState extends State<Conversation> {
 
     await _loadMessages();
 
-    await _chatSignalrService.initHub();
+    _chatSignalrService = ChatSignalrService();
     await _chatSignalrService.joinConversation(widget.conversationId);
 
-    _chatSignalrService.messageStream.listen(_handleIncomingMessage);
+    _messageSub = _chatSignalrService.messageStream.listen(_handleIncomingMessage);
   }
 
   Future<void> _loadCurrentUser() async {
@@ -248,6 +248,7 @@ class _ConversationState extends State<Conversation> {
   void dispose() {
     _scrollController.dispose();
     _messageController.dispose();
+    _messageSub.cancel();
     super.dispose();
   }
 
@@ -310,13 +311,18 @@ class _ConversationState extends State<Conversation> {
                         activeMessageId: _showTimeMessageId,
                         onTap: () {
                           setState(() {
-                            _showTimeMessageId = (_showTimeMessageId == msg.id)
-                                ? null
-                                : msg.id;
+                            _showTimeMessageId = (_showTimeMessageId == msg.id) ? null : msg.id;
                           });
                         },
                         showDateSeparator: showDateSeparator,
+                        onDelete: (messageId) async {
+                          await _chatSignalrService.deleteMessage(messageId: messageId);
+                          setState(() {
+                            _messages.removeWhere((m) => m.id == messageId);
+                          });
+                        },
                       );
+
                     },
                   ),
                 ),

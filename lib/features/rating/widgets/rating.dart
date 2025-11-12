@@ -6,8 +6,9 @@ import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/event_service.dart';
 import '../../myEvents/screens/my_events_screen.dart';
+import 'inven_gifts.dart';
 
 class RatingWidget extends StatefulWidget {
   final String eventId;
@@ -28,6 +29,7 @@ class _RatingWidgetState extends State<RatingWidget> {
   final TextEditingController _commentController = TextEditingController();
 
   String _selectedGift = '';
+  String _selectedGiftName = '';
   int _giftQuantity = 1;
 
   @override
@@ -71,61 +73,6 @@ class _RatingWidgetState extends State<RatingWidget> {
     );
   }
 
-  void _showGiftDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        int quantity = _giftQuantity;
-        String selectedGift = _selectedGift;
-        return AlertDialog(
-          title: const Text("Chọn quà"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                value: selectedGift.isEmpty ? null : selectedGift,
-                items: ['Hoa', 'Socola', 'Gấu bông']
-                    .map((gift) => DropdownMenuItem(
-                  value: gift,
-                  child: Text(gift),
-                ))
-                    .toList(),
-                onChanged: (v) => selectedGift = v ?? '',
-                decoration: const InputDecoration(
-                  labelText: "Chọn quà",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Số lượng",
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (v) => quantity = int.tryParse(v) ?? 1,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Hủy")),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _selectedGift = selectedGift;
-                  _giftQuantity = quantity;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text("Xác nhận"),
-            )
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,9 +128,11 @@ class _RatingWidgetState extends State<RatingWidget> {
                       ),
                     SizedBox(height: sh(context, 16)),
 
-                    // --- Host info ---
+                    // --- Host info + Gift button ---
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // Avatar
                         CircleAvatar(
                           radius: sw(context, 28),
                           backgroundImage: (_eventDetail!.host.avatarUrl != null &&
@@ -196,24 +145,68 @@ class _RatingWidgetState extends State<RatingWidget> {
                               ? Icon(Icons.person, size: 36, color: Colors.white70)
                               : null,
                         ),
+
                         SizedBox(width: sw(context, 12)),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _eventDetail!.host.name,
-                              style: t.titleMedium?.copyWith(
+
+                        // Host name + role
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _eventDetail!.host.name,
+                                style: t.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   fontSize: st(context, 16),
-                                  color: textColor),
-                            ),
-                            Text(
-                              "Host",
-                              style: t.bodySmall?.copyWith(
+                                  color: textColor,
+                                ),
+                              ),
+                              Text(
+                                "Host",
+                                style: t.bodySmall?.copyWith(
                                   fontSize: st(context, 14),
-                                  color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // --- Gift button ---
+                        OutlinedButton(
+                          onPressed: () async {
+                            final result = await showDialog(
+                              context: context,
+                              builder: (context) => const InvenGifts(),
+                            );
+
+                            if (result != null && mounted) {
+                              setState(() {
+                                _selectedGift = result['giftId'];
+                                _selectedGiftName = result['giftName'] ?? '';
+                                _giftQuantity = result['quantity'] ?? 1;
+                              });
+                              print('[RatingWidget] Gift selected: ${result['giftName']} '
+                                  '(ID: ${result['giftId']}) | Quantity: ${result['quantity']}');
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: colorPrimary, width: 2),
+                            foregroundColor: colorPrimary,
+                            padding: EdgeInsets.symmetric(
+                              vertical: sh(context, 8),
+                              horizontal: sw(context, 12),
                             ),
-                          ],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(sw(context, 10)),
+                            ),
+                          ),
+                          child: Text(
+                            _selectedGift.isEmpty
+                                ? "Tặng quà"
+                                : "$_selectedGiftName x$_giftQuantity",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ),
                       ],
                     ),
@@ -238,29 +231,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                       ),
                     ),
                     SizedBox(height: sh(context, 16)),
-
-                    // --- Gift ---
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _showGiftDialog,
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: colorPrimary, width: 2),
-                          foregroundColor: colorPrimary,
-                          padding: EdgeInsets.symmetric(vertical: sh(context, 12)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(sw(context, 10)),
-                          ),
-                        ),
-                        child: Text(
-                          _selectedGift.isEmpty
-                              ? "Chọn quà"
-                              : "$_selectedGift x$_giftQuantity",
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: sh(context, 20)),
 
                   ],
                 ).animate().fadeIn(duration: 250.ms).slideY(begin: 0.2, end: 0),

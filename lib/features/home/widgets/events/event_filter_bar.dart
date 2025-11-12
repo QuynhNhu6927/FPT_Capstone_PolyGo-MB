@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/localization/app_localizations.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class EventFilterBar extends StatelessWidget {
   final List<String> selectedFilters;

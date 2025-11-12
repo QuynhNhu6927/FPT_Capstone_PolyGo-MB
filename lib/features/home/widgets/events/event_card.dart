@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import '../../../../data/models/events/event_model.dart';
 import 'event_details.dart';
 
-class EventCard extends StatelessWidget {
-  final dynamic event;
+class EventCard extends StatefulWidget {
+  final EventModel event;
+  final ValueChanged<EventModel>? onEventUpdated;
+  const EventCard({super.key, required this.event, this.onEventUpdated});
 
-  const EventCard({super.key, required this.event});
+  @override
+  State<EventCard> createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  late EventModel _event;
+
+  @override
+  void initState() {
+    super.initState();
+    _event = widget.event;
+  }
+
+  void _updateEvent(EventModel updated) {
+    setState(() => _event = updated);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +40,23 @@ class EventCard extends StatelessWidget {
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final formattedDate = event.startAt != null
-        ? DateFormat('dd MMM yyyy, HH:mm').format(event.startAt.toLocal())
+    final formattedDate = _event.startAt != null
+        ? DateFormat('dd MMM yyyy, HH:mm').format(_event.startAt.toLocal())
         : '';
 
     return GestureDetector(
       onTap: () => showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (_) => EventDetail(event: event),
+        builder: (_) => EventDetail(
+          event: _event,
+          onEventUpdated: (updated) {
+            setState(() => _event = updated);
+            widget.onEventUpdated?.call(updated);
+          },
+        ),
       ),
+
       child: Container(
         decoration: BoxDecoration(
           gradient: cardBackground,
@@ -53,9 +78,9 @@ class EventCard extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 16 / 10,
-                child: event.bannerUrl?.isNotEmpty == true
+                child: _event.bannerUrl?.isNotEmpty == true
                     ? Image.network(
-                  event.bannerUrl,
+                  _event.bannerUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, __, ___) => Container(
@@ -82,7 +107,7 @@ class EventCard extends StatelessWidget {
                     SizedBox(
                       height: 36,
                       child: Text(
-                        event.title ?? '',
+                        _event.title ?? '',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -113,10 +138,10 @@ class EventCard extends StatelessWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: event.categories?.length ?? 0,
+                    itemCount: _event.categories?.length ?? 0,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, tagIndex) {
-                      final category = event.categories[tagIndex];
+                      final category = _event.categories[tagIndex];
                       return Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),

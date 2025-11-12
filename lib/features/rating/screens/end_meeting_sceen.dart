@@ -4,7 +4,7 @@ import 'package:polygo_mobile/features/rating/screens/rating_screen.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../routes/app_routes.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/event_service.dart';
 import '../../../core/api/api_client.dart';
 
 class EndMeetingScreen extends StatefulWidget {

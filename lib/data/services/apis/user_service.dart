@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/user/profile_setup_request.dart';
-import '../models/user/update_profile_request.dart';
-import '../models/user/update_userinfo_request.dart';
-import '../models/user/user_all_response.dart';
-import '../models/user/user_by_id_response.dart';
-import '../models/user/user_matching_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/user/profile_setup_request.dart';
+import '../../models/user/update_profile_request.dart';
+import '../../models/user/update_userinfo_request.dart';
+import '../../models/user/user_all_response.dart';
+import '../../models/user/user_by_id_response.dart';
+import '../../models/user/user_matching_response.dart';
 
 class UserService {
   final ApiClient apiClient;

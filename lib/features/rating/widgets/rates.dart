@@ -7,7 +7,7 @@ import '../../../data/models/events/event_model.dart';
 import '../../../data/models/events/event_my_rating_response.dart';
 import '../../../data/models/events/event_rating_item.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../data/services/event_service.dart';
+import '../../../data/services/apis/event_service.dart';
 
 class Rates extends StatefulWidget {
   final String eventId;

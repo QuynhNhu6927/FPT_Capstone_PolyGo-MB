@@ -42,9 +42,10 @@ class UserItem {
   final String avatarUrl;
   final String introduction;
   final String mail;
-  final String meritLevel;
+  final int merit;
   final String gender;
   final int experiencePoints;
+  // final int streakDays;
   final String planType;
   final List<UserLanguage> speakingLanguages;
   final List<UserLanguage> learningLanguages;
@@ -57,9 +58,10 @@ class UserItem {
     required this.avatarUrl,
     required this.introduction,
     required this.mail,
-    required this.meritLevel,
+    required this.merit,
     required this.gender,
     required this.experiencePoints,
+    // required this.streakDays,
     required this.planType,
     required this.speakingLanguages,
     required this.learningLanguages,
@@ -73,7 +75,7 @@ class UserItem {
     avatarUrl: json['avatarUrl'] ?? '',
     introduction: json['introduction'] ?? '',
     mail: json['mail'] ?? '',
-    meritLevel: json['meritLevel'] ?? '',
+    merit: json['merit'] ?? '',
     gender: json['gender'] ?? '',
     experiencePoints: json['experiencePoints'] ?? 0,
     planType: json['planType'] ?? '',
@@ -83,6 +85,9 @@ class UserItem {
     learningLanguages: (json['learningLanguages'] as List<dynamic>? ?? [])
         .map((e) => UserLanguage.fromJson(e))
         .toList(),
+    // streakDays: (json['streakDays'] is int)
+    //     ? json['streakDays'] as int
+    //     : int.tryParse(json['streakDays']?.toString() ?? '0') ?? 0,
     interests: (json['interests'] as List<dynamic>? ?? [])
         .map((e) => UserInterest.fromJson(e))
         .toList(),

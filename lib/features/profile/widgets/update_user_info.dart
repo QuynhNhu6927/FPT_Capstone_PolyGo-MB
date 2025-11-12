@@ -6,7 +6,7 @@ import '../../../../core/localization/app_localizations.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/user/update_userinfo_request.dart';
 import '../../../data/repositories/user_repository.dart';
-import '../../../data/services/user_service.dart';
+import '../../../data/services/apis/user_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../../data/models/auth/me_response.dart';
 

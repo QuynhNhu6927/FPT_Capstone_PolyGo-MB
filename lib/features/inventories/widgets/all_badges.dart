@@ -5,8 +5,8 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/models/badges/badge_model.dart';
 import '../../../../data/repositories/badge_repository.dart';
-import '../../../../data/services/badge_service.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../data/services/apis/badge_service.dart';
 
 class AllBadges extends StatefulWidget {
   const AllBadges({super.key});

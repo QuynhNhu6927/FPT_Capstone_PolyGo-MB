@@ -1,6 +1,6 @@
 import '../models/chat/conversation_message_model.dart';
 import '../models/chat/conversation_model.dart';
-import '../services/conversation_service.dart';
+import '../services/apis/conversation_service.dart';
 
 class ConversationRepository {
   final ConversationService _service;
@@ -91,5 +91,18 @@ class ConversationRepository {
 
     return res.data;
   }
+
+  Future<Conversation?> getConversationByUser({
+    required String token,
+    required String userId,
+  }) async {
+    final res = await _service.getConversationByUser(
+      token: token,
+      userId: userId,
+    );
+
+    return res.data;
+  }
+
 
 }

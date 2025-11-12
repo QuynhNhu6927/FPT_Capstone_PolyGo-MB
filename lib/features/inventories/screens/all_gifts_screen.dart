@@ -14,7 +14,7 @@ class AllGiftsScreen extends StatefulWidget {
 }
 
 class _AllGiftsScreenState extends State<AllGiftsScreen> {
-  int _selectedTab = 0;
+  int _selectedTab = 2;
 
   void _onTabSelected(int index) {
     setState(() => _selectedTab = index);

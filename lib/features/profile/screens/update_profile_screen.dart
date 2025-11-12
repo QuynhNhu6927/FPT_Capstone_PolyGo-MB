@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/user/update_profile_request.dart';
 import '../../../data/repositories/user_repository.dart';
-import '../../../data/services/user_service.dart';
+import '../../../data/services/apis/user_service.dart';
 import '../widgets/update_learning_language.dart';
 import '../widgets/update_speaking_language.dart';
 import '../widgets/update_interests.dart';

@@ -5,7 +5,7 @@ import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/gift/gift_me_response.dart';
 import '../../../data/repositories/gift_repository.dart';
-import '../../../data/services/gift_service.dart';
+import '../../../data/services/apis/gift_service.dart';
 import '../../../core/localization/app_localizations.dart';
 
 class MyGifts extends StatefulWidget {

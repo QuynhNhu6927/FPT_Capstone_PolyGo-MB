@@ -8,8 +8,8 @@ import '../../../data/models/gift/gift_model.dart';
 import '../../../data/models/gift/gift_purchase_request.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/gift_repository.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../data/services/gift_service.dart';
+import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/apis/gift_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../main.dart';
 import '../../shared/app_error_state.dart';
@@ -299,188 +299,164 @@ class _GiftsState extends State<Gifts> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () => _loadGiftsData(lang: _currentLocale?.languageCode),
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: sw(context, 16)),
+            child: GridView.builder(
+              padding: EdgeInsets.symmetric(horizontal: sw(context, 16), vertical: sh(context, 16)),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 500,
+                mainAxisSpacing: sh(context, 16),
+                crossAxisSpacing: sw(context, 16),
+                childAspectRatio: 3,
+              ),
               itemCount: _filteredGifts.length,
-                itemBuilder: (context, index) {
-                  final gift = _filteredGifts[index];
-                  final imageUrl = gift.iconUrl.isNotEmpty
-                      ? gift.iconUrl
-                      : fallbackImages[index % fallbackImages.length];
+              itemBuilder: (context, index) {
+                final gift = _filteredGifts[index];
+                final imageUrl = gift.iconUrl.isNotEmpty
+                    ? gift.iconUrl
+                    : fallbackImages[index % fallbackImages.length];
+                int quantity = _quantities[gift.id] ?? 1;
 
-                  int quantity = _quantities[gift.id] ?? 1;
-
-                  return Container(
-                    margin: EdgeInsets.only(bottom: sh(context, 16)),
-                    padding: EdgeInsets.all(sw(context, 16)),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: isDark
-                            ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
-                            : [Colors.white, Colors.white],
-                      ),
-                      borderRadius: BorderRadius.circular(sw(context, 12)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(sw(context, 12)),
-                          child: Image.network(
-                            imageUrl,
-                            width: sw(context, 60),
-                            height: sw(context, 60),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              width: sw(context, 60),
-                              height: sw(context, 60),
-                              color: Colors.grey[300],
-                              child: Icon(Icons.card_giftcard,
-                                  size: sw(context, 30), color: Colors.grey[600]),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: sw(context, 12)),
-
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                gift.name,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                              ),
-                              SizedBox(height: sh(context, 4)),
-                              Text.rich(
-                                TextSpan(
-                                  text: "${gift.price} ",
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isDark ? Colors.grey.shade400 : Colors.grey,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: "đ",
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: theme.textTheme.bodyMedium!.fontSize! * 0.7,
-                                        color: isDark ? Colors.grey.shade400 : Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (_ownedGiftQuantities.containsKey(gift.id))
-                                Padding(
-                                  padding: EdgeInsets.only(top: sh(context, 4)),
-                                  child: Text(
-                                    '${loc.translate("owned")}: ${_ownedGiftQuantities[gift.id]}',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.green.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      if (quantity > 1) {
-                                        setState(() {
-                                          _quantities[gift.id] = quantity - 1;
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? Colors.black : Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Icon(
-                                        Icons.remove,
-                                        size: 16,
-                                        color: isDark ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: sw(context, 8)),
-                                  Text(
-                                    "$quantity",
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: st(context, 16),
-                                      color: isDark ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  SizedBox(width: sw(context, 8)),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _quantities[gift.id] = quantity + 1;
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? Colors.black : Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Icon(
-                                        Icons.add,
-                                        size: 16,
-                                        color: isDark ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () => _purchaseGiftWithQuantity(gift, quantity),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: colorPrimary,
-                                    foregroundColor: Colors.white,
-                                    padding: EdgeInsets.symmetric(vertical: sh(context, 10)),
-                                  ),
-                                  child: Text(loc.translate("buy"),),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
-                },
+                return _buildGiftCard(gift, imageUrl, quantity, isDark, theme, colorPrimary, loc);
+              },
             ),
           ),
-        ),
+        )
       ],
     );
   }
+
+  Widget _buildGiftCard(GiftModel gift, String imageUrl, int quantity, bool isDark, ThemeData theme, Color colorPrimary, AppLocalizations loc) {
+    return Container(
+      padding: EdgeInsets.all(sw(context, 16)),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+              : [Colors.white, Colors.white],
+        ),
+        borderRadius: BorderRadius.circular(sw(context, 12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Ảnh
+          ClipRRect(
+            borderRadius: BorderRadius.circular(sw(context, 12)),
+            child: Image.network(
+              imageUrl,
+              width: sw(context, 60),
+              height: sw(context, 60),
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(width: sw(context, 12)),
+
+          // Info gift
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  gift.name,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: sh(context, 4)),
+                Text("${gift.price} đ",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark ? Colors.grey.shade400 : Colors.grey,
+                    )),
+                if (_ownedGiftQuantities.containsKey(gift.id))
+                  Text(
+                    '${loc.translate("owned")}: ${_ownedGiftQuantities[gift.id]}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.green.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Quantity + buy
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (quantity > 1) {
+                          setState(() {
+                            _quantities[gift.id] = quantity - 1;
+                          });
+                        }
+                      },
+                      child: _buildQtyButton(Icons.remove, isDark),
+                    ),
+                    SizedBox(width: sw(context, 8)),
+                    Text(
+                      "$quantity",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: st(context, 16),
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    SizedBox(width: sw(context, 8)),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _quantities[gift.id] = quantity + 1;
+                        });
+                      },
+                      child: _buildQtyButton(Icons.add, isDark),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => _purchaseGiftWithQuantity(gift, quantity),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorPrimary,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: sh(context, 10)),
+                  ),
+                  child: Text(loc.translate("buy")),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _buildQtyButton(IconData icon, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.black : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Icon(icon, size: 16, color: isDark ? Colors.white : Colors.black),
+    );
+  }
+
 }

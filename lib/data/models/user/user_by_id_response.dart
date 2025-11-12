@@ -4,10 +4,11 @@ class UserByIdResponse {
   final String? avatarUrl;
   final String? introduction;
   final String? mail;
-  final String? meritLevel;
+  final int? merit;
   final String? gender;
   final String friendStatus;
   final int? experiencePoints;
+  // final int? streakDays;
   final String? planType;
   final List<dynamic>? speakingLanguages;
   final List<dynamic>? learningLanguages;
@@ -21,11 +22,12 @@ class UserByIdResponse {
     this.avatarUrl,
     this.introduction,
     this.mail,
-    this.meritLevel,
+    this.merit,
     this.gender,
     required this.friendStatus,
     this.experiencePoints,
     this.planType,
+    // required this.streakDays,
     this.speakingLanguages,
     this.learningLanguages,
     this.interests,
@@ -39,10 +41,11 @@ class UserByIdResponse {
       avatarUrl: json['avatarUrl'],
       introduction: json['introduction'],
       mail: json['mail'],
-      meritLevel: json['meritLevel'],
+      merit: json['merit'],
       gender: json['gender'],
       friendStatus: json['friendStatus'] ?? '',
       experiencePoints: json['experiencePoints'],
+      // streakDays: json['streakDays'] ?? '',
       planType: json['planType'],
       speakingLanguages: List<dynamic>.from(json['speakingLanguages'] ?? []),
       learningLanguages: List<dynamic>.from(json['learningLanguages'] ?? []),
@@ -58,10 +61,11 @@ class UserByIdResponse {
     'avatarUrl': avatarUrl,
     'introduction': introduction,
     'mail': mail,
-    'meritLevel': meritLevel,
+    'merit': merit,
     'gender': gender,
     'friendStatus': friendStatus,
     'experiencePoints': experiencePoints,
+    // 'streakDays': streakDays,
     'planType': planType,
     'speakingLanguages': speakingLanguages,
     'learningLanguages': learningLanguages,

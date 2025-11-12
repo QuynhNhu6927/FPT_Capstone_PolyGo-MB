@@ -1,7 +1,7 @@
 import 'dart:io';
 import '../models/media/upload_file_response.dart';
 import '../models/api_response.dart';
-import '../services/media_service.dart';
+import '../services/apis/media_service.dart';
 
 class MediaRepository {
   final MediaService _service;

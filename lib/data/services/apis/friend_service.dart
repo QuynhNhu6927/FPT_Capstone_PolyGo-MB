@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/friends/friend_model.dart';
-import '../models/friends/friend_request_model.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/friends/friend_model.dart';
+import '../../models/friends/friend_request_model.dart';
 
 class FriendService {
   final ApiClient apiClient;

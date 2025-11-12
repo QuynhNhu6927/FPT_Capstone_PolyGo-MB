@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../routes/app_routes.dart';
+
 class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String avatarHeader;
@@ -126,17 +128,11 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
         actions: [
           IconButton(
             onPressed: () {
-              print('Call pressed');
+              Navigator.pushReplacementNamed(context, AppRoutes.call);
             },
             icon: Icon(Icons.call, color: isDark ? Colors.white : Colors.black),
           ),
-          IconButton(
-            onPressed: () {
-              print('Video pressed');
-            },
-            icon:
-            Icon(Icons.videocam, color: isDark ? Colors.white : Colors.black),
-          ),
+
           IconButton(
             onPressed: () {
               print('Settings pressed');

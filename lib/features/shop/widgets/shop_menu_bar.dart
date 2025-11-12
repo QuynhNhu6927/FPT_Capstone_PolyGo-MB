@@ -78,14 +78,25 @@ class _ShopMenuBarState extends State<ShopMenuBar> {
 
               return GestureDetector(
                 onTap: () => _onItemTapped(index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  padding: EdgeInsets.symmetric(vertical: paddingV / 2),
-                  child: Icon(
-                    item['icon'] as IconData,
-                    color: selected ? colorActive : colorInactive,
-                    size: iconSize,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      item['icon'] as IconData,
+                      color: selected ? colorActive : colorInactive,
+                      size: iconSize,
+                    ),
+                    const SizedBox(height: 4),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      height: 3,
+                      width: 18,
+                      decoration: BoxDecoration(
+                        color: selected ? colorActive : Colors.transparent,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }),

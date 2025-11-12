@@ -3,11 +3,13 @@ import '../../../../core/utils/responsive.dart';
 
 class TagListWidget extends StatelessWidget {
   final List<String> tags;
+  final List<String>? iconUrls;
   final Color? color;
 
   const TagListWidget({
     super.key,
     required this.tags,
+    this.iconUrls,
     this.color,
   });
 
@@ -20,13 +22,17 @@ class TagListWidget extends StatelessWidget {
         color ?? (isDark ? Colors.grey[800]! : const Color(0xFFF3F4F6));
 
     return SizedBox(
-      height: sh(context, 25),
+      height: sh(context, 30),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: tags.length,
         separatorBuilder: (_, __) => SizedBox(width: sw(context, 8)),
-        itemBuilder: (context, i) =>
-            TagItem(text: tags[i], color: defaultColor),
+        itemBuilder: (context, i) => TagItem(
+          text: tags[i],
+          iconUrl:
+          iconUrls != null && i < iconUrls!.length ? iconUrls![i] : null,
+          color: defaultColor,
+        ),
       ),
     );
   }
@@ -34,11 +40,13 @@ class TagListWidget extends StatelessWidget {
 
 class TagItem extends StatelessWidget {
   final String text;
+  final String? iconUrl;
   final Color color;
 
   const TagItem({
     super.key,
     required this.text,
+    this.iconUrl,
     required this.color,
   });
 
@@ -46,21 +54,38 @@ class TagItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: sw(context, 12),
+        horizontal: sw(context, 10),
         vertical: sh(context, 4),
       ),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(sw(context, 20)),
       ),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 13,
-          color: Colors.black,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (iconUrl != null && iconUrl!.isNotEmpty) ...[
+            Image.network(
+              iconUrl!,
+              width: st(context, 16),
+              height: st(context, 16),
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.image_not_supported,
+                size: 14,
+                color: Colors.black54,
+              ),
+            ),
+            SizedBox(width: sw(context, 4)),
+          ],
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }

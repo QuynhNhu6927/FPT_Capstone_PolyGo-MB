@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/features/users/widgets/plus_frame.dart';
+import 'package:polygo_mobile/features/users/widgets/sent_gifts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/repositories/friend_repository.dart';
-import '../../../../data/services/friend_service.dart';
+import '../../../core/utils/responsive.dart';
+import '../../../data/repositories/conversation_repository.dart';
+import '../../../data/services/apis/conversation_service.dart';
+import '../../../data/services/apis/friend_service.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../routes/app_routes.dart';
+import '../../shared/about_merit.dart';
+import '../../shared/about_plus.dart';
+import '../../shared/about_streak.dart';
 import 'friend_button.dart';
 
 class UserProfileHeader extends StatefulWidget {
@@ -24,6 +32,7 @@ class UserProfileHeader extends StatefulWidget {
 class _UserProfileHeaderState extends State<UserProfileHeader> {
   late String _friendStatus;
   bool _isLoading = false;
+  bool _isChatLoading = false;
 
   @override
   void initState() {
@@ -155,6 +164,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     final avatarUrl = widget.user.avatarUrl;
     final name = widget.user.name ?? "Unnamed";
     final experiencePoints = widget.user.experiencePoints;
+    final int? merit = widget.user.merit;
     final introduction = widget.user.introduction ?? "";
 
     const blue = Color(0xFF2563EB);
@@ -182,9 +192,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
           // ---------------- Avatar + Name ----------------
           Row(
             children: [
-              widget.user.planType == "Plus"
-                  ? ShinyAvatar(avatarUrl: avatarUrl)
-                  : CircleAvatar(
+              CircleAvatar(
                 radius: 36,
                 backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
                     ? NetworkImage(avatarUrl)
@@ -227,9 +235,118 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               introduction,
               style: t.bodyMedium?.copyWith(height: 1.4),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
           ],
 
+          // ---------- Tags Row ----------
+          if ((widget.user != null && experiencePoints != null) ||
+              (widget.user.planType == 'Plus')
+              // (widget.user.streakDays != null && widget.user.streakDays! > 0)
+          ) ...[
+            SizedBox(height: sh(context, 12)),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  // PlanType tag
+                  if (widget.user.planType == 'Plus')
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const AboutPlusDialog(),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(sw(context, 8)),
+                        margin: EdgeInsets.only(right: sw(context, 8)),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.orangeAccent,
+                              Colors.yellow,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(sw(context, 16)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.stars_sharp,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: sw(context, 4)),
+                            Text(
+                              "Plus Member",
+                              style: t.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // Merit tag
+                  if (merit != null)
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const AboutMeritDialog(),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: sw(context, 12),
+                          vertical: sh(context, 6),
+                        ),
+                        margin: EdgeInsets.only(right: sw(context, 8)),
+                        decoration: BoxDecoration(
+                          gradient: merit >= 80
+                              ? const LinearGradient(
+                            colors: [Color(0xFF4CAF50), Color(0xFF81C784)], // xanh lá đậm -> xanh lá nhạt
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                              : merit >= 40
+                              ? const LinearGradient(
+                            colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)], // vàng đậm -> vàng nhạt
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                              : const LinearGradient(
+                            colors: [Color(0xFFF44336), Color(0xFFE57373)], // đỏ đậm -> đỏ nhạt
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(sw(context, 16)),
+                        ),
+
+                        child: Row(
+                          children: [
+                            const Icon(Icons.verified_user, size: 16, color: Colors.white),
+                            SizedBox(width: sw(context, 4)),
+                            Text(
+                              "$merit",
+                              style: t.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
           // ---------------- Buttons ----------------
           Row(
             children: [
@@ -251,7 +368,12 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               // Gift button
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => SentGiftsDialog(receiverId: widget.user.id),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: blue,
                     shape: RoundedRectangleBorder(
@@ -267,14 +389,51 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                 ),
               ),
 
-              // Chat button — chỉ hiện nếu là bạn bè
+              // Chat button
               if (_friendStatus == "Friends") ...[
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: mở màn hình chat
+                    onPressed: () async {
+                      setState(() => _isChatLoading = true);
+                      try {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('token') ?? '';
+                        final repo = ConversationRepository(ConversationService(ApiClient()));
+
+                        final conversation = await repo.getConversationByUser(
+                          token: token,
+                          userId: widget.user.id,
+                        );
+                        if (!mounted) return;
+
+                        if (conversation != null) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.conversation,
+                            arguments: {
+                              'conversationId': conversation.id,
+                              'userName': conversation.user.name,
+                              'avatarHeader': conversation.user.avatarUrl ?? '',
+                              'lastActiveAt': conversation.user.lastActiveAt ?? '',
+                              'isOnline': conversation.user.isOnline,
+                            },
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Không thể mở đoạn chat.")),
+                          );
+                        }
+                      } catch (e, s) {
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Lỗi: $e")),
+                        );
+                      } finally {
+                        setState(() => _isLoading = false);
+                      }
                     },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: blue,
                       shape: RoundedRectangleBorder(

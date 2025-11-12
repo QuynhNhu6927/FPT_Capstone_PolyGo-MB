@@ -4,11 +4,11 @@ import 'package:polygo_mobile/features/users/widgets/tag_list.dart';
 import 'package:polygo_mobile/features/users/widgets/user_profile_header.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../data/repositories/user_repository.dart';
-import '../../../../data/services/user_service.dart';
+import '../../../core/utils/responsive.dart';
+import '../../../data/services/apis/user_service.dart';
 import '../../../../data/models/user/user_by_id_response.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
-import 'friend_button.dart';
 
 class UserProfile extends StatefulWidget {
   final String? userId;
@@ -131,22 +131,34 @@ class _UserProfileState extends State<UserProfile> {
     final avatarUrl = user!.avatarUrl;
     final friendStatus = user!.friendStatus;
     final name = user!.name ?? "Unnamed";
-    final meritLevel = user!.meritLevel;
+    final meritLevel = user!.merit;
     final experiencePoints = user!.experiencePoints;
     final introduction = user!.introduction;
     final nativeLangs = (user!.speakingLanguages ?? [])
         .map((e) => e is Map<String, dynamic> ? e['name']?.toString() ?? '' : e.toString())
         .where((name) => name.isNotEmpty)
         .toList();
+    final nativeIcons = (user!.learningLanguages ?? [])
+        .map((e) => e is Map<String, dynamic> ? e['iconUrl']?.toString() ?? '' : e.toString())
+        .where((iconUrl) => iconUrl.isNotEmpty)
+        .toList();
 
     final learningLangs = (user!.learningLanguages ?? [])
         .map((e) => e is Map<String, dynamic> ? e['name']?.toString() ?? '' : e.toString())
         .where((name) => name.isNotEmpty)
         .toList();
+    final learningIcons = (user!.learningLanguages ?? [])
+        .map((e) => e is Map<String, dynamic> ? e['iconUrl']?.toString() ?? '' : e.toString())
+        .where((iconUrl) => iconUrl.isNotEmpty)
+        .toList();
 
     final interests = (user!.interests ?? [])
         .map((e) => e is Map<String, dynamic> ? e['name']?.toString() ?? '' : e.toString())
         .where((name) => name.isNotEmpty)
+        .toList();
+    final interestsIcons = (user!.interests ?? [])
+        .map((e) => e is Map<String, dynamic> ? e['iconUrl']?.toString() ?? '' : e.toString())
+        .where((iconUrl) => iconUrl.isNotEmpty)
         .toList();
 
     final bool hasNoData =
@@ -185,48 +197,210 @@ class _UserProfileState extends State<UserProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (introduction != null && introduction.isNotEmpty) ...[
-                  Text(loc.translate("introduction"),
-                      style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text(introduction, style: t.bodyMedium),
-                  const SizedBox(height: 20),
-                ],
-                if (!hasNoData) ...[
-                  if (nativeLangs.isNotEmpty) ...[
-                    Text(loc.translate("native_languages"),
-                        style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TagList(items: nativeLangs, color: Colors.green[100]!),
-                    const SizedBox(height: 16),
-                  ],
-                  if (learningLangs.isNotEmpty) ...[
-                    Text(loc.translate("learning"),
-                        style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TagList(items: learningLangs, color: Colors.blue[100]!),
-                    const SizedBox(height: 20),
-                  ],
-                  if (interests.isNotEmpty) ...[
-                    Text(loc.translate("interests"),
-                        style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    TagList(items: interests, color: const Color(0xFFF3F4F6)),
-                  ],
-                ] else
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    child: Text(
-                      loc.translate("no_information_yet"),
-                      style: t.bodyMedium?.copyWith(
-                        color: theme.colorScheme.outline,
-                        fontStyle: FontStyle.italic,
+                // Languages + Interests
+                if (hasNoData)
+                  Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: sh(context, 16),
+                        horizontal: sw(context, 12),
                       ),
-                    ),
-                  ),
+                      child: Text(
+                        loc.translate("no_info_yet"),
+                        textAlign: TextAlign.left,
+                        style: t.bodyMedium?.copyWith(
+                          fontSize: st(context, 15),
+                          color: theme.colorScheme.outline,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    )
+                else
+                  ...[
+                    if (nativeLangs.isNotEmpty) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("native_language")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 15),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                            child: TagList(
+                                items: nativeLangs,
+                                iconUrls: nativeIcons,
+                                color: Colors.green[100] ?? Colors.green
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: sh(context, 12)),
+                    ],
+                    if (learningLangs.isNotEmpty) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("learning")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 16),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                            child: TagList(
+                              items: learningLangs,
+                              iconUrls: learningIcons,
+                              color: Colors.blue[100] ?? Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: sh(context, 12)),
+                    ],
+
+                    if (interests.isNotEmpty) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loc.translate("interests")} ",
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 16),
+                            ),
+                          ),
+                          SizedBox(width: sh(context, 4)),
+                          Expanded(
+                              child: TagList(
+                                items: interests,
+                                iconUrls: interestsIcons,
+                                color: Colors.grey[100] ?? Colors.grey,
+                              )
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
               ],
             ),
           ).animate().fadeIn(duration: 400.ms),
+
+          // ---------------- Badges & Gifts Section ----------------
+          // ---------------- Badges Container ----------------
+          if (user!.badges?.isNotEmpty ?? false)
+            Container(
+              width: containerWidth,
+              margin: EdgeInsets.only(top: sh(context, 14)),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.translate("my_badges"),
+                    style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 60, // chiều cao badges row
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: user!.badges!.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final badge = user!.badges![index];
+                        final imageUrl = (badge is Map<String, dynamic>)
+                            ? (badge['iconUrl'] ?? '')
+                            : badge.toString();
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: imageUrl.isNotEmpty
+                                ? Image.network(imageUrl, fit: BoxFit.cover)
+                                : Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.emoji_events, color: Colors.grey),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+
+// ---------------- Gifts Container ----------------
+          if (user!.gifts?.isNotEmpty ?? false)
+            Container(
+              width: containerWidth,
+              margin: EdgeInsets.only(top: sh(context, 14)),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.translate("my_gifts"),
+                    style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 60,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: user!.gifts!.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final gift = user!.gifts![index];
+                        final imageUrl = (gift is Map<String, dynamic>)
+                            ? (gift['iconUrl'] ?? '')
+                            : gift.toString();
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: imageUrl.isNotEmpty
+                                ? Image.network(imageUrl, fit: BoxFit.cover)
+                                : Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.card_giftcard, color: Colors.grey),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 400.ms),
         ],
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/badges/badge_list_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/badges/badge_list_response.dart';
 
 class BadgeService {
   final ApiClient apiClient;

@@ -9,7 +9,7 @@ class FriendModel {
   final String avatarUrl;
   final String introduction;
   final String mail;
-  final String meritLevel;
+  final int merit;
   final String gender;
   final int experiencePoints;
   final String planType;
@@ -25,7 +25,7 @@ class FriendModel {
     required this.avatarUrl,
     required this.introduction,
     required this.mail,
-    required this.meritLevel,
+    required this.merit,
     required this.gender,
     required this.experiencePoints,
     required this.planType,
@@ -43,7 +43,7 @@ class FriendModel {
       avatarUrl: json['avatarUrl'] ?? '',
       introduction: json['introduction'] ?? '',
       mail: json['mail'] ?? '',
-      meritLevel: json['meritLevel'] ?? '',
+      merit: json['merit'] ?? 0,
       gender: json['gender'] ?? '',
       experiencePoints: json['experiencePoints'] ?? 0,
       planType: json['planType'] ?? '',

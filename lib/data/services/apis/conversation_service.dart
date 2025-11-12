@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/chat/conversation_message_model.dart';
-import '../models/chat/conversation_model.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/chat/conversation_message_model.dart';
+import '../../models/chat/conversation_model.dart';
 
 class ConversationService {
   final ApiClient apiClient;
@@ -88,6 +88,32 @@ class ConversationService {
     try {
       final response = await apiClient.get(
         ApiConstants.getConversationById.replaceFirst('{id}', conversationId),
+        headers: {
+          ApiConstants.headerAuthorization: 'Bearer $token',
+        },
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      final dataJson = json['data'] as Map<String, dynamic>?;
+
+      return ApiResponse.fromJson(
+        json,
+            (data) => dataJson != null
+            ? Conversation.fromJson(dataJson)
+            : throw Exception("Conversation data is null"),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<Conversation>> getConversationByUser({
+    required String token,
+    required String userId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        ApiConstants.getConversationByUser.replaceFirst('{userId}', userId),
         headers: {
           ApiConstants.headerAuthorization: 'Bearer $token',
         },

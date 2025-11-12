@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import '../../core/api/api_client.dart';
-import '../../core/config/api_constants.dart';
-import '../models/api_response.dart';
-import '../models/interests/interest_model.dart';
-import '../models/interests/interest_list_response.dart';
-import '../models/interests/me_interests_list_response.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/config/api_constants.dart';
+import '../../models/api_response.dart';
+import '../../models/interests/interest_model.dart';
+import '../../models/interests/interest_list_response.dart';
+import '../../models/interests/me_interests_list_response.dart';
 
 class InterestService {
   final ApiClient apiClient;

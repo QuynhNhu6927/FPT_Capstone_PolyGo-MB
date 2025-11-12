@@ -7,7 +7,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/languages/speak_language_model.dart';
 import '../../../data/repositories/language_repository.dart';
-import '../../../data/services/language_service.dart';
+import '../../../data/services/apis/language_service.dart';
 import '../../shared/app_error_state.dart';
 
 class UpdateSpeakingLanguage extends StatefulWidget {

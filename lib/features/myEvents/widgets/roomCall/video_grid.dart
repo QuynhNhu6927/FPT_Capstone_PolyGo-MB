@@ -81,6 +81,7 @@ class VideoGrid extends StatelessWidget {
                   participant: hostParticipant,
                   isLarge: true,
                   isHost: true,
+                  onSwitchCamera: () => controller.switchCamera(),
                 ),
               ),
             ),
@@ -142,15 +143,17 @@ class VideoGrid extends StatelessWidget {
 }
 
 /// --- Participant Card ---
-class ParticipantCard extends StatefulWidget {
-  final Participant participant;
-  final bool isLarge;
-  final bool isHost;
+  class ParticipantCard extends StatefulWidget {
+    final Participant participant;
+    final bool isLarge;
+    final bool isHost;
+    final VoidCallback? onSwitchCamera;
 
   const ParticipantCard({
     required this.participant,
     this.isLarge = false,
     this.isHost = false,
+    this.onSwitchCamera,
   });
 
   @override
@@ -187,7 +190,6 @@ class _ParticipantCardState extends State<ParticipantCard> {
     _renderer.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final p = widget.participant;
@@ -259,6 +261,26 @@ class _ParticipantCardState extends State<ParticipantCard> {
               ),
             ),
           ),
+          if ((p.id == 'local' || widget.isHost) && p.videoEnabled)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: widget.onSwitchCamera,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black45,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.cameraswitch,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

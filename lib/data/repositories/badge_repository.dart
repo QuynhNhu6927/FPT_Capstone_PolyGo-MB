@@ -1,5 +1,5 @@
 import '../models/badges/badge_model.dart';
-import '../services/badge_service.dart';
+import '../services/apis/badge_service.dart';
 
 class BadgeRepository {
   final BadgeService _service;

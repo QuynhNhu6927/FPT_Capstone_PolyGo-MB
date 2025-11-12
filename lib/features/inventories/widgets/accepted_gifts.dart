@@ -7,7 +7,7 @@ import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../data/models/gift/gift_received_response.dart';
 import '../../../data/repositories/gift_repository.dart';
-import '../../../data/services/gift_service.dart';
+import '../../../data/services/apis/gift_service.dart';
 
 class AcceptedGifts extends StatefulWidget {
   const AcceptedGifts({super.key});

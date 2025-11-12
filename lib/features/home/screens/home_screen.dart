@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
-import '../widgets/events_content.dart';
-import '../widgets/users.dart';
+import '../widgets/events/events_content.dart';
+import '../widgets/games/games_content.dart';
+import '../widgets/users/users.dart';
 import '../widgets/home_header.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialIndex;
+  const HomeScreen({super.key, this.initialIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -46,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _menuIndex = widget.initialIndex;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -62,8 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
         isRetrying: _isRetrying,
         searchQuery: _searchQuery,
       ),
-      const Center(
-        child: Text('Game', style: TextStyle(fontSize: 24)),
+      WordSetContent(
+        key: const ValueKey('games'),
+        searchQuery: _searchQuery,
       ),
       const Center(
         child: Text('Explore', style: TextStyle(fontSize: 24)),
@@ -93,9 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const SafeArea(
+      bottomNavigationBar: SafeArea(
         top: false,
-        child: AppBottomBar(currentIndex: 0),
+        child: AppBottomBar(currentIndex: _menuIndex),
       ),
     );
   }

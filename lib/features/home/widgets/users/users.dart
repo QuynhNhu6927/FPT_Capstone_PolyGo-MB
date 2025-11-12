@@ -3,14 +3,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/api/api_client.dart';
-import '../../../data/models/user/user_all_response.dart';
-import '../../../data/models/user/user_matching_response.dart';
-import '../../../data/repositories/user_repository.dart';
-import '../../../data/services/user_service.dart';
-import '../../../main.dart';
-import '../../../routes/app_routes.dart';
-import '../../shared/app_error_state.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../data/models/user/user_all_response.dart';
+import '../../../../data/models/user/user_matching_response.dart';
+import '../../../../data/repositories/user_repository.dart';
+import '../../../../data/services/apis/user_service.dart';
+import '../../../../main.dart';
+import '../../../../routes/app_routes.dart';
+import '../../../shared/app_error_state.dart';
 import 'filter_pop_up.dart';
 
 class Users extends StatefulWidget {

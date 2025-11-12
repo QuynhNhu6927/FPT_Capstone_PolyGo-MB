@@ -1,7 +1,7 @@
 import '../models/interests/interest_model.dart';
 import '../models/interests/interest_list_response.dart';
 import '../models/interests/me_interests_model.dart';
-import '../services/interest_service.dart';
+import '../services/apis/interest_service.dart';
 
 class InterestRepository {
   final InterestService _service;

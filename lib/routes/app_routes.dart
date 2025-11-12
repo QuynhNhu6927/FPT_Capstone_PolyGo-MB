@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:polygo_mobile/features/chat/screens/call_screen.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_list_screen.dart';
+import 'package:polygo_mobile/features/game/screens/play_screen.dart';
+import '../data/models/wordsets/start_wordset_response.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/forget_password_screen.dart';
 import '../features/chat/screens/conversation_screen.dart';
+import '../features/game/screens/overview_screen.dart';
 import '../features/home/screens/notification_screen.dart';
 import '../features/inventories/screens/all_badges_screen.dart';
 import '../features/inventories/screens/all_gifts_screen.dart';
@@ -43,6 +47,9 @@ class AppRoutes {
   static const String rates = '/rates';
   static const String conversations = '/conversations';
   static const String conversation = '/conversation';
+  static const String call = '/call';
+  static const String overview = '/overview';
+  static const String play = '/play';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -81,7 +88,19 @@ class AppRoutes {
 
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationScreen());
-
+      case play:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final startData = args?['startData'] as WordSetData?;
+        if (startData == null) {
+          return MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(child: Text("No game data passed!")),
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => PlayScreen(startData: startData),
+        );
       case userProfile:
         final args = settings.arguments as Map<String, dynamic>?;
         final userId = args?['id'] as String?;
@@ -91,7 +110,6 @@ class AppRoutes {
 
       case eventWaiting:
         final args = settings.arguments as Map<String, dynamic>?;
-        print('eventWaiting args: $args'); // <--- Debug: in ra toàn bộ arguments
 
         final eventId = args?['eventId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
@@ -99,8 +117,6 @@ class AppRoutes {
         final hostId = args?['hostId'] as String? ?? '';
         final hostName = args?['hostName'] as String? ?? '';
         final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
-
-        print('Parsed eventWaiting -> eventId: $eventId, eventTitle: $eventTitle, hostId: $hostId, hostName: $hostName, startAt: $startAt, eventStatus: $eventStatus');
 
         return MaterialPageRoute(
           builder: (_) => WaitingRoomScreen(
@@ -176,6 +192,16 @@ class AppRoutes {
             lastActiveAt: lastActiveAt,
             isOnline: isOnline,
           ),
+        );
+      case call:
+        return MaterialPageRoute(builder: (_) => const CallScreen());
+      case overview:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final id = args?['id'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => OverviewScreen(
+            id: id,
+          )
         );
       default:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
