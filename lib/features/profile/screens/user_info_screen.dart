@@ -90,7 +90,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       ),
       bottomNavigationBar: const SafeArea(
         top: false,
-        child: AppBottomBar(currentIndex: 3),
+        child: AppBottomBar(currentIndex: 4),
       ),
     );
   }

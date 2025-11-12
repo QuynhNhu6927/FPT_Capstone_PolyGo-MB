@@ -8,6 +8,7 @@ class PlayInfoRowWidget extends StatefulWidget {
   final ValueNotifier<int> progressNotifier;
   final ValueNotifier<int> mistakesNotifier;
   final ValueNotifier<int> hintsNotifier;
+  final ValueNotifier<bool> isCompletedNotifier;
 
   const PlayInfoRowWidget({
     super.key,
@@ -15,6 +16,7 @@ class PlayInfoRowWidget extends StatefulWidget {
     required this.progressNotifier,
     required this.mistakesNotifier,
     required this.hintsNotifier,
+    required this.isCompletedNotifier,
   });
 
   @override
@@ -29,11 +31,16 @@ class _PlayInfoRowWidgetState extends State<PlayInfoRowWidget> {
   void initState() {
     super.initState();
 
-    // Bắt đầu đếm từ 0 tiến lên
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         elapsedSeconds++;
       });
+    });
+
+    widget.isCompletedNotifier.addListener(() {
+      if (widget.isCompletedNotifier.value) {
+        _timer.cancel();
+      }
     });
   }
 

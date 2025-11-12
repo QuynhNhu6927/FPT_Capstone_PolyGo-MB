@@ -4,6 +4,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/config/api_constants.dart';
 import '../../models/api_response.dart';
 import '../../models/wordsets/game_state_response.dart';
+import '../../models/wordsets/hint_response.dart';
+import '../../models/wordsets/joined_word_set.dart';
 import '../../models/wordsets/leaderboard_model.dart';
 import '../../models/wordsets/play_word_response.dart';
 import '../../models/wordsets/start_wordset_response.dart';
@@ -13,6 +15,32 @@ class WordSetService {
   final ApiClient apiClient;
 
   WordSetService(this.apiClient);
+
+  Future<ApiResponse<PlayedWordSetListResponse>> getPlayedWordSets({
+    required String token,
+    String? lang,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    if (lang != null) queryParameters['lang'] = lang;
+
+    final response = await apiClient.get(
+      ApiConstants.joinedGame,
+      queryParameters: queryParameters,
+      headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+    );
+
+    final json = response.data as Map<String, dynamic>;
+    return ApiResponse.fromJson(
+      json,
+          (data) => PlayedWordSetListResponse.fromJson(json['data']),
+    );
+  }
 
   Future<ApiResponse<WordSetListResponse>> getWordSets({
     required String token,
@@ -38,6 +66,41 @@ class WordSetService {
 
     final response = await apiClient.get(
       ApiConstants.allWordSets,
+      queryParameters: queryParameters,
+      headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+    );
+
+    final json = response.data as Map<String, dynamic>;
+    return ApiResponse.fromJson(
+      json,
+          (data) => WordSetListResponse.fromJson(data),
+    );
+  }
+
+  Future<ApiResponse<WordSetListResponse>> getCreatedWordSets({
+    required String token,
+    String? lang,
+    String? name,
+    List<String>? languageIds,
+    String? difficulty,
+    String? category,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    if (lang != null) queryParameters['lang'] = lang;
+    if (name != null) queryParameters['name'] = name;
+    if (languageIds != null && languageIds.isNotEmpty)
+      queryParameters['languageIds'] = languageIds;
+    if (difficulty != null) queryParameters['difficulty'] = difficulty;
+    if (category != null) queryParameters['category'] = category;
+
+    final response = await apiClient.get(
+      ApiConstants.createdGame,
       queryParameters: queryParameters,
       headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
     );
@@ -155,16 +218,10 @@ class WordSetService {
   }) async {
     final endpoint = ApiConstants.hintGame.replaceAll('{wordSetId}', wordSetId);
 
-    debugPrint("=== getHint called ===");
-    debugPrint("Endpoint: $endpoint");
-    debugPrint("Token: $token");
-
     final response = await apiClient.get(
       endpoint,
       headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
     );
-
-    debugPrint("Raw Response Data: ${response.data}");
 
     final json = response.data as Map<String, dynamic>;
     final apiResponse = ApiResponse.fromJson(
@@ -172,9 +229,28 @@ class WordSetService {
           (_) => GameStateResponse.fromJson(json),
     );
 
-    debugPrint("Parsed ApiResponse hint: ${apiResponse.data?.data?.currentWord.hint}");
-
     return apiResponse;
+  }
+
+  Future<ApiResponse<HintResponse>> addHint({
+    required String token,
+    required String wordSetId,
+    required String wordId,
+  }) async {
+    final endpoint = ApiConstants.plusHint.replaceAll('{wordSetId}', wordSetId);
+
+    final response = await apiClient.post(
+      endpoint,
+      headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      data: {'wordId': wordId},
+    );
+
+    final json = response.data as Map<String, dynamic>;
+
+    return ApiResponse.fromJson(
+      json,
+          (data) => HintResponse.fromJson(data['data'] as Map<String, dynamic>),
+    );
   }
 
 }

@@ -136,14 +136,7 @@ class _WordSetContentState extends State<WordSetContent> {
         _loading = false;
         _isLoadingMore = false;
       });
-    } catch (e, st) {
-      debugPrint("❌ Failed to load word sets:");
-      debugPrint("Error: $e");
-      debugPrint("StackTrace: $st");
-      debugPrint("Token: ${await SharedPreferences.getInstance().then((prefs) => prefs.getString('token'))}");
-      debugPrint("Filters -> Languages: $_filterLanguages, Difficulty: $_filterDifficulty, Category: $_filterCategory");
-      debugPrint("Page: $_currentPage, PageSize: $_pageSize");
-
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _hasError = true;

@@ -14,6 +14,7 @@ import '../features/inventories/screens/all_gifts_screen.dart';
 import '../features/inventories/screens/friends_screen.dart';
 import '../features/myEvents/screens/my_events_screen.dart';
 import '../features/myEvents/screens/event_waiting_screen.dart';
+import '../features/myGame/screens/my_games_screen.dart';
 import '../features/profile/screens/profile_setup_screen.dart';
 import '../features/profile/screens/user_info_screen.dart';
 import '../features/profile/screens/update_profile_screen.dart';
@@ -50,6 +51,7 @@ class AppRoutes {
   static const String call = '/call';
   static const String overview = '/overview';
   static const String play = '/play';
+  static const String myGames = '/my-games';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -70,6 +72,9 @@ class AppRoutes {
 
       case profileSetup:
         return MaterialPageRoute(builder: (_) => const ProfileSetupScreen());
+
+      case myGames:
+        return MaterialPageRoute(builder: (_) => const MyGamesScreen());
 
       case updateProfile:
         return MaterialPageRoute(builder: (_) => const UpdateProfileScreen());

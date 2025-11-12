@@ -239,36 +239,46 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                                               ),
                                               SizedBox(width: sw(context, 10)),
                                               Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    player.name,
-                                                    style: t.titleMedium
-                                                        ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: isDark
-                                                              ? Colors.white
-                                                              : Colors.black87,
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        player.name,
+                                                        style: t.titleMedium?.copyWith(
+                                                          fontWeight: FontWeight.w600,
+                                                          color: isDark ? Colors.white : Colors.black87,
                                                         ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: sh(context, 2),
-                                                  ),
-                                                  Text(
-                                                    item.completedAt
-                                                        .toLocal()
-                                                        .toIso8601String()
-                                                        .split('T')
-                                                        .first,
-                                                    style: t.bodySmall
-                                                        ?.copyWith(
-                                                          color: isDark
-                                                              ? Colors.grey[400]
-                                                              : Colors
-                                                                    .grey[700],
+                                                      ),
+                                                      if (item.isMe) ...[
+                                                        SizedBox(width: sw(context, 6)),
+                                                        Container(
+                                                          padding: EdgeInsets.symmetric(
+                                                            horizontal: sw(context, 4),
+                                                            vertical: sh(context, 2),
+                                                          ),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.blue.shade400,
+                                                            borderRadius: BorderRadius.circular(sw(context, 4)),
+                                                          ),
+                                                          child: Text(
+                                                            'YOU',
+                                                            style: t.bodySmall?.copyWith(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: st(context, 10),
+                                                            ),
+                                                          ),
                                                         ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: sh(context, 2)),
+                                                  Text(
+                                                    item.completedAt.toLocal().toIso8601String().split('T').first,
+                                                    style: t.bodySmall?.copyWith(
+                                                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -280,12 +290,10 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
 
                                     SizedBox(height: sh(context, 8)),
 
-                                    // Score + hints + mistakes + time (xuống hàng, căn trái)
                                     Padding(
                                       padding: EdgeInsets.only(
                                         left: sw(context, 46),
                                       ),
-                                      // thụt vào để thẳng avatar
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -419,33 +427,49 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                                           ),
                                           SizedBox(width: sw(context, 10)),
                                           Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                player.name,
-                                                style: t.titleMedium?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: isDark
-                                                      ? Colors.white
-                                                      : Colors.black87,
-                                                ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    player.name,
+                                                    style: t.titleMedium?.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: isDark ? Colors.white : Colors.black87,
+                                                    ),
+                                                  ),
+                                                  if (item.isMe) ...[
+                                                    SizedBox(width: sw(context, 6)),
+                                                    Container(
+                                                      padding: EdgeInsets.symmetric(
+                                                        horizontal: sw(context, 2),
+                                                        vertical: sh(context, 2),
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.blue.shade400,
+                                                        borderRadius: BorderRadius.circular(sw(context, 4)),
+                                                      ),
+                                                      child: Text(
+                                                        'YOU',
+                                                        style: t.bodySmall?.copyWith(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: st(context, 7),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
                                               ),
                                               SizedBox(height: sh(context, 2)),
                                               Text(
-                                                item.completedAt
-                                                    .toLocal()
-                                                    .toIso8601String()
-                                                    .split('T')
-                                                    .first,
+                                                item.completedAt.toLocal().toIso8601String().split('T').first,
                                                 style: t.bodySmall?.copyWith(
-                                                  color: isDark
-                                                      ? Colors.grey[400]
-                                                      : Colors.grey[700],
+                                                  color: isDark ? Colors.grey[400] : Colors.grey[700],
                                                 ),
                                               ),
                                             ],
-                                          ),
+                                          )
                                         ],
                                       ),
                                     ),

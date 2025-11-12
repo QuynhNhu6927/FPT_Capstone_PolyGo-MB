@@ -23,6 +23,7 @@ class _PlayScreenState extends State<PlayScreen> {
   late ValueNotifier<int> progressNotifier;
   late ValueNotifier<int> mistakesNotifier;
   late ValueNotifier<int> hintsNotifier;
+  late ValueNotifier<bool> isCompletedNotifier;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _PlayScreenState extends State<PlayScreen> {
     progressNotifier = ValueNotifier(startData.currentWordIndex);
     mistakesNotifier = ValueNotifier(0);
     hintsNotifier = ValueNotifier(0);
+    isCompletedNotifier = ValueNotifier(false);
   }
 
   Future<bool> _onWillPop() async {
@@ -42,24 +44,24 @@ class _PlayScreenState extends State<PlayScreen> {
         content: const Text("Bạn chưa chơi xong. Bạn có muốn thoát không?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Hủy thoát
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text("Hủy"),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true), // Xác nhận thoát
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text("Thoát"),
           ),
         ],
       ),
     );
 
-    return result ?? false; // nếu dialog bị dismiss -> không thoát
+    return result ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop, // Bắt tất cả sự kiện back
+      onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Play Game"),
@@ -73,6 +75,7 @@ class _PlayScreenState extends State<PlayScreen> {
               progressNotifier: progressNotifier,
               mistakesNotifier: mistakesNotifier,
               hintsNotifier: hintsNotifier,
+              isCompletedNotifier: isCompletedNotifier,
             ),
             const SizedBox(height: 12),
             PlayCardWidget(
@@ -81,6 +84,7 @@ class _PlayScreenState extends State<PlayScreen> {
               progressNotifier: progressNotifier,
               mistakesNotifier: mistakesNotifier,
               hintsNotifier: hintsNotifier,
+              isCompletedNotifier: isCompletedNotifier,
             ),
           ],
         ),

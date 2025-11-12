@@ -73,7 +73,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       ),
       bottomNavigationBar: const SafeArea(
         top: false,
-        child: AppBottomBar(currentIndex: 4),
+        child: AppBottomBar(currentIndex: 5),
       ),
     );
   }

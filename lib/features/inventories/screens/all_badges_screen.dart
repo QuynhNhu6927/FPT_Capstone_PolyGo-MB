@@ -24,7 +24,7 @@ class AllBadgesScreen extends StatelessWidget {
       body: const AllBadges(),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: const AppBottomBar(currentIndex: 4),
+        child: const AppBottomBar(currentIndex: 5),
       ),
     );
   }

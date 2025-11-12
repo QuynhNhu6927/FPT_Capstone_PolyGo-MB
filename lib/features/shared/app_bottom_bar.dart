@@ -18,6 +18,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
   final _items = const [
     {'icon': Icons.home_rounded, 'labelKey': 'bottom_home'},
     {'icon': Icons.edit_calendar, 'labelKey': 'bottom_my_events'},
+    {'icon': Icons.videogame_asset_rounded, 'labelKey': 'bottom_my_games'},
     {'icon': Icons.storefront_rounded, 'labelKey': 'bottom_shop'},
     {'icon': Icons.person_rounded, 'labelKey': 'bottom_me'},
   ];
@@ -39,12 +40,15 @@ class _AppBottomBarState extends State<AppBottomBar> {
         Navigator.pushNamed(context, AppRoutes.myEvents);
         break;
       case 2:
-        Navigator.pushNamed(context, AppRoutes.shop);
+        Navigator.pushNamed(context, AppRoutes.myGames);
         break;
       case 3:
-        Navigator.pushNamed(context, AppRoutes.userInfo);
+        Navigator.pushNamed(context, AppRoutes.shop);
         break;
       case 4:
+        Navigator.pushNamed(context, AppRoutes.userInfo);
+        break;
+      case 5:
 
         break;
     }
@@ -102,17 +106,17 @@ class _AppBottomBarState extends State<AppBottomBar> {
               child: Row(
                 children: [
                   Icon(item['icon'] as IconData, color: iconColor, size: iconSize),
-                  if (selected) ...[
-                    SizedBox(width: 6 * scale),
-                    Text(
-                      loc.translate(item['labelKey'] as String),
-                      style: TextStyle(
-                        color: colorActive,
-                        fontWeight: FontWeight.w600,
-                        fontSize: fontSize,
-                      ),
-                    ).animate().fadeIn(duration: 250.ms),
-                  ],
+                  // if (selected) ...[
+                  //   SizedBox(width: 6 * scale),
+                  //   Text(
+                  //     loc.translate(item['labelKey'] as String),
+                  //     style: TextStyle(
+                  //       color: colorActive,
+                  //       fontWeight: FontWeight.w600,
+                  //       fontSize: fontSize,
+                  //     ),
+                  //   ).animate().fadeIn(duration: 250.ms),
+                  // ],
                 ],
               ),
             ),

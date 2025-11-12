@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +8,8 @@ import '../../../core/utils/responsive.dart';
 import '../../../data/models/wordsets/play_word_response.dart';
 import '../../../data/models/wordsets/start_wordset_response.dart';
 import '../../../data/repositories/wordset_repository.dart';
+import '../../../routes/app_routes.dart';
+import '../../home/screens/home_screen.dart';
 import '../screens/overview_screen.dart';
 
 class PlayCardWidget extends StatefulWidget {
@@ -13,6 +18,7 @@ class PlayCardWidget extends StatefulWidget {
   final ValueNotifier<int> progressNotifier;
   final ValueNotifier<int> mistakesNotifier;
   final ValueNotifier<int> hintsNotifier;
+  final ValueNotifier<bool> isCompletedNotifier;
 
   const PlayCardWidget({
     super.key,
@@ -21,6 +27,7 @@ class PlayCardWidget extends StatefulWidget {
     required this.progressNotifier,
     required this.mistakesNotifier,
     required this.hintsNotifier,
+    required this.isCompletedNotifier,
   });
 
   @override
@@ -37,6 +44,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
   String userAnswer = "";
   bool showAnswer = false;
   bool hintUsed = false;
+  final AudioPlayer _player = AudioPlayer();
 
   final colorPrimary = const Color(0xFF2563EB);
 
@@ -75,6 +83,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
       if (data == null) return;
 
       if (data.isCorrect) {
+        await _player.play(AssetSource('correct.mp3'));
         widget.progressNotifier.value++;
         _answerController.clear();
         userAnswer = '';
@@ -92,21 +101,79 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
             showAnswer = false;
           });
         } else {
-          // Hết từ -> show dialog
+          widget.isCompletedNotifier.value = true;
+
+          await _player.play(AssetSource('omedetou.mp3'));
+
+          final score = data.score;
+          final completionTime = data.completionTimeInSeconds;
+          final hintsUsed = data.hintsUsed;
+          final mistakes = data.mistakes;
+
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: const Text("🎉 Congratulations!"),
-              content: const Text("You have completed the word set."),
+              title: const Text(
+                "Congratulations!",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "You have completed the word set.",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 16), // khoảng cách trên
+                  Row(
+                    children: [
+                      const Icon(Icons.star, size: 20, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Text("Score: $score", style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.timer, size: 20, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text("Completion Time: $completionTime seconds",
+                          style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.lightbulb_outline, size: 20, color: Colors.green),
+                      const SizedBox(width: 8),
+                      Text("Hints Used: $hintsUsed", style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.close, size: 20, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text("Mistakes: $mistakes", style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ],
+              ),
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(
+                    _player.stop();
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (_) => OverviewScreen(id: widget.startData.wordSetId),
+                        builder: (_) => HomeScreen(initialIndex: 2),
                       ),
+                          (route) => false,
+                    );
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.overview,
+                      arguments: {'id': widget.startData.wordSetId},
                     );
                   },
                   child: const Text("OK"),
@@ -116,17 +183,19 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
           );
         }
       } else {
+        await _player.play(AssetSource('incorrect.mp3'));
         widget.mistakesNotifier.value++;
         _answerController.clear();
         userAnswer = '';
         setState(() => showAnswer = true);
       }
     } catch (e, st) {
-      debugPrint("Failed to submit answer: $e\n$st");
+      //
     }
   }
+
   Future<void> showHintOnce() async {
-    if (hintUsed) return; // chỉ dùng hint 1 lần
+    if (hintUsed) return;
     hintUsed = true;
 
     setState(() {
@@ -134,10 +203,10 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
     });
 
     try {
-      // Lấy token
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final wordSetId = widget.startData.wordSetId;
+      final wordId = currentWordId;
 
       if (token.isEmpty) {
         setState(() {
@@ -146,26 +215,26 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
         return;
       }
 
-      // Gọi API game-state để lấy hint
       final response = await widget.repo.getHint(token: token, wordSetId: wordSetId);
 
-      // Check response
-      if (response == null || response.data == null || response.data.currentWord == null) {
-        setState(() {
-          hint = "No hint available";
-        });
-        return;
+      String apiHint = widget.startData.currentWord.hint ?? "No hint available";
+
+      if (response != null && response.data != null && response.data.currentWord != null) {
+        apiHint = response.data.currentWord.hint ?? apiHint;
       }
 
-      // Lấy hint từ currentWord
-      final apiHint = response.data.currentWord.hint;
-
       setState(() {
-        hint = apiHint ?? "No hint available";
-        widget.hintsNotifier.value++; // tăng count hint đã dùng
+        hint = apiHint;
+        widget.hintsNotifier.value++;
       });
-    } catch (e, st) {
-      debugPrint("Error fetching hint: $e\n$st");
+
+      unawaited(widget.repo.addHint(
+        token: token,
+        wordSetId: wordSetId,
+        wordId: wordId,
+      ));
+
+    } catch (e) {
       setState(() {
         hint = "Failed to load hint";
       });
@@ -232,6 +301,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
             Wrap(
               alignment: WrapAlignment.center,
               spacing: sw(context, 8),
+              runSpacing: sh(context, 8),
               children: scramble
                   .split('')
                   .map((c) => Container(
@@ -248,7 +318,6 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
             Text(definition, textAlign: TextAlign.center, style: TextStyle(color: textColor)),
             const SizedBox(height: 8),
 
-            // Hiển thị hint nếu có
             if (hint != null)
               Container(
                 margin: EdgeInsets.only(top: sh(context, 8)),

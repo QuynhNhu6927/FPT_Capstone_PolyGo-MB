@@ -76,7 +76,7 @@ class _ShopScreenState extends State<ShopScreen> {
       ),
       bottomNavigationBar: const SafeArea(
         top: false,
-        child: AppBottomBar(currentIndex: 2),
+        child: AppBottomBar(currentIndex: 3),
       ),
     );
   }

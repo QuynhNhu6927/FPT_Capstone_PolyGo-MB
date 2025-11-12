@@ -1,4 +1,6 @@
 import '../models/wordsets/game_state_response.dart';
+import '../models/wordsets/hint_response.dart';
+import '../models/wordsets/joined_word_set.dart';
 import '../models/wordsets/leaderboard_model.dart';
 import '../models/wordsets/play_word_response.dart';
 import '../models/wordsets/start_wordset_response.dart';
@@ -21,6 +23,42 @@ class WordSetRepository {
         int pageSize = 10,
       }) async {
     final res = await _service.getWordSets(
+      token: token,
+      lang: lang,
+      name: name,
+      languageIds: languageIds,
+      difficulty: difficulty,
+      category: category,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+
+    if (res.data == null) {
+      return WordSetListResponse(
+        items: [],
+        totalItems: 0,
+        currentPage: 1,
+        totalPages: 1,
+        pageSize: pageSize,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      );
+    }
+
+    return res.data!;
+  }
+
+  Future<WordSetListResponse> getCreatedWordSetsPaged(
+      String token, {
+        String? lang,
+        String? name,
+        List<String>? languageIds,
+        String? difficulty,
+        String? category,
+        int pageNumber = 1,
+        int pageSize = 10,
+      }) async {
+    final res = await _service.getCreatedWordSets(
       token: token,
       lang: lang,
       name: name,
@@ -76,6 +114,34 @@ class WordSetRepository {
     return res.data!;
   }
 
+  Future<PlayedWordSetListResponse> getPlayedWordSetsPaged(
+      String token, {
+        String? lang,
+        int pageNumber = 1,
+        int pageSize = 10,
+      }) async {
+    final res = await _service.getPlayedWordSets(
+      token: token,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+
+    if (res.data == null) {
+      return PlayedWordSetListResponse(
+        items: [],
+        totalItems: 0,
+        currentPage: 1,
+        totalPages: 1,
+        pageSize: pageSize,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      );
+    }
+
+    return res.data!;
+  }
+
   Future<WordSetModel?> getWordSetById({
     required String token,
     required String id,
@@ -110,7 +176,6 @@ class WordSetRepository {
       answer: answer,
     );
 
-    // Nếu service trả null => trả null
     if (res == null) return null;
 
     return res.data;
@@ -121,6 +186,20 @@ class WordSetRepository {
     required String wordSetId,
   }) async {
     final res = await _service.getHint(token: token, wordSetId: wordSetId);
+    return res.data;
+  }
+
+  Future<HintResponse?> addHint({
+    required String token,
+    required String wordSetId,
+    required String wordId,
+  }) async {
+    final res = await _service.addHint(
+      token: token,
+      wordSetId: wordSetId,
+      wordId: wordId,
+    );
+
     return res.data;
   }
 }

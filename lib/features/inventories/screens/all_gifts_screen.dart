@@ -53,7 +53,7 @@ class _AllGiftsScreenState extends State<AllGiftsScreen> {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: const AppBottomBar(currentIndex: 4),
+        child: const AppBottomBar(currentIndex: 5),
       ),
     );
   }

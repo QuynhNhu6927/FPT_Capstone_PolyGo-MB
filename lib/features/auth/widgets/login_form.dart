@@ -132,7 +132,7 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               Center(
                 child: Image.asset(
-                  'lib/assets/Primary.png',
+                  'assets/Primary.png',
                   width: st(context, 150),
                   height: st(context, 150),
                   fit: BoxFit.contain,

@@ -48,8 +48,12 @@ class WordSetModel {
     averageTimeInSeconds: (json['averageTimeInSeconds'] ?? 0).toDouble(),
     averageRating: (json['averageRating'] ?? 0).toDouble(),
     wordCount: (json['wordCount'] ?? 0) as int,
-    language: Language.fromJson(json['language']),
-    creator: Creator.fromJson(json['creator']),
+    language: json['language'] != null
+        ? Language.fromJson(json['language'])
+        : Language(id: '', code: '', name: 'Unknown', iconUrl: ''),
+    creator: json['creator'] != null
+        ? Creator.fromJson(json['creator'])
+        : Creator(id: '', name: 'Unknown'),
     words: json['words'] != null
         ? (json['words'] as List<dynamic>)
         .map((e) => Word.fromJson(e))

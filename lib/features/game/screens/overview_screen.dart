@@ -26,13 +26,7 @@ class OverviewScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const HomeScreen(initialIndex: 2),
-              ),
-                  (route) => false,
-            );
+            Navigator.pop(context);
           },
         ),
       ),
@@ -40,7 +34,7 @@ class OverviewScreen extends StatelessWidget {
       body: OverviewWidget(wordSetId: id),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: const AppBottomBar(currentIndex: 4),
+        child: const AppBottomBar(currentIndex: 5),
       ),
     );
   }
