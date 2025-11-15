@@ -7,6 +7,7 @@ import '../../models/wordsets/game_state_response.dart';
 import '../../models/wordsets/hint_response.dart';
 import '../../models/wordsets/joined_word_set.dart';
 import '../../models/wordsets/leaderboard_model.dart';
+import '../../models/wordsets/created_wordsets.dart';
 import '../../models/wordsets/play_word_response.dart';
 import '../../models/wordsets/start_wordset_response.dart';
 import '../../models/wordsets/word_sets_model.dart';
@@ -19,6 +20,9 @@ class WordSetService {
   Future<ApiResponse<PlayedWordSetListResponse>> getPlayedWordSets({
     required String token,
     String? lang,
+    String? name,
+    List<String>? languageIds,
+    String? difficulty,
     int pageNumber = 1,
     int pageSize = 10,
   }) async {
@@ -26,6 +30,12 @@ class WordSetService {
       'pageNumber': pageNumber,
       'pageSize': pageSize,
     };
+
+    if (lang != null) queryParameters['lang'] = lang;
+    if (name != null) queryParameters['name'] = name;
+    if (languageIds != null && languageIds.isNotEmpty)
+      queryParameters['languageIds'] = languageIds;
+    if (difficulty != null) queryParameters['difficulty'] = difficulty;
 
     if (lang != null) queryParameters['lang'] = lang;
 
@@ -48,7 +58,7 @@ class WordSetService {
     String? name,
     List<String>? languageIds,
     String? difficulty,
-    String? category,
+    List<String>? interestIds,
     int pageNumber = 1,
     int pageSize = 10,
   }) async {
@@ -62,7 +72,8 @@ class WordSetService {
     if (languageIds != null && languageIds.isNotEmpty)
       queryParameters['languageIds'] = languageIds;
     if (difficulty != null) queryParameters['difficulty'] = difficulty;
-    if (category != null) queryParameters['category'] = category;
+    if (interestIds != null && interestIds.isNotEmpty)
+      queryParameters['interestIds'] = interestIds;
 
     final response = await apiClient.get(
       ApiConstants.allWordSets,
@@ -77,13 +88,12 @@ class WordSetService {
     );
   }
 
-  Future<ApiResponse<WordSetListResponse>> getCreatedWordSets({
+  Future<ApiResponse<CreatedWordSetListResponse>> getCreatedWordSets({
     required String token,
     String? lang,
     String? name,
     List<String>? languageIds,
     String? difficulty,
-    String? category,
     int pageNumber = 1,
     int pageSize = 10,
   }) async {
@@ -97,7 +107,8 @@ class WordSetService {
     if (languageIds != null && languageIds.isNotEmpty)
       queryParameters['languageIds'] = languageIds;
     if (difficulty != null) queryParameters['difficulty'] = difficulty;
-    if (category != null) queryParameters['category'] = category;
+
+    if (lang != null) queryParameters['lang'] = lang;
 
     final response = await apiClient.get(
       ApiConstants.createdGame,
@@ -108,7 +119,7 @@ class WordSetService {
     final json = response.data as Map<String, dynamic>;
     return ApiResponse.fromJson(
       json,
-          (data) => WordSetListResponse.fromJson(data),
+          (data) => CreatedWordSetListResponse.fromJson(json['data']),
     );
   }
 

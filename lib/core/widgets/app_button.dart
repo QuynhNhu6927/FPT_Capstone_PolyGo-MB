@@ -112,7 +112,7 @@ class AppButton extends StatelessWidget {
         duration: 200.ms,
         height: _height,
         padding: isIconOnly
-            ? EdgeInsets.zero
+            ? EdgeInsets.all(10)
             : EdgeInsets.symmetric(horizontal: _horizontalPadding),
         decoration: BoxDecoration(
           color: disabled

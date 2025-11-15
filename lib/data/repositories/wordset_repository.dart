@@ -2,6 +2,7 @@ import '../models/wordsets/game_state_response.dart';
 import '../models/wordsets/hint_response.dart';
 import '../models/wordsets/joined_word_set.dart';
 import '../models/wordsets/leaderboard_model.dart';
+import '../models/wordsets/created_wordsets.dart';
 import '../models/wordsets/play_word_response.dart';
 import '../models/wordsets/start_wordset_response.dart';
 import '../models/wordsets/word_sets_model.dart';
@@ -18,7 +19,7 @@ class WordSetRepository {
         String? name,
         List<String>? languageIds,
         String? difficulty,
-        String? category,
+        List<String>? interestIds,
         int pageNumber = 1,
         int pageSize = 10,
       }) async {
@@ -28,7 +29,7 @@ class WordSetRepository {
       name: name,
       languageIds: languageIds,
       difficulty: difficulty,
-      category: category,
+      interestIds: interestIds,
       pageNumber: pageNumber,
       pageSize: pageSize,
     );
@@ -48,13 +49,12 @@ class WordSetRepository {
     return res.data!;
   }
 
-  Future<WordSetListResponse> getCreatedWordSetsPaged(
+  Future<CreatedWordSetListResponse> getCreatedWordSetsPaged(
       String token, {
         String? lang,
         String? name,
         List<String>? languageIds,
         String? difficulty,
-        String? category,
         int pageNumber = 1,
         int pageSize = 10,
       }) async {
@@ -64,13 +64,12 @@ class WordSetRepository {
       name: name,
       languageIds: languageIds,
       difficulty: difficulty,
-      category: category,
       pageNumber: pageNumber,
       pageSize: pageSize,
     );
 
     if (res.data == null) {
-      return WordSetListResponse(
+      return CreatedWordSetListResponse(
         items: [],
         totalItems: 0,
         currentPage: 1,
@@ -83,6 +82,7 @@ class WordSetRepository {
 
     return res.data!;
   }
+
 
   Future<LeaderboardResponse> getLeaderboard(
       String token, {
@@ -117,12 +117,18 @@ class WordSetRepository {
   Future<PlayedWordSetListResponse> getPlayedWordSetsPaged(
       String token, {
         String? lang,
+        String? name,
+        List<String>? languageIds,
+        String? difficulty,
         int pageNumber = 1,
         int pageSize = 10,
       }) async {
     final res = await _service.getPlayedWordSets(
       token: token,
       lang: lang,
+      name: name,
+      languageIds: languageIds,
+      difficulty: difficulty,
       pageNumber: pageNumber,
       pageSize: pageSize,
     );

@@ -65,8 +65,9 @@ class _ParticipantListState extends State<ParticipantList> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 color: theme.cardColor,
                 boxShadow: const [
                   BoxShadow(
@@ -96,8 +97,10 @@ class _ParticipantListState extends State<ParticipantList> {
             // Host controls
             if (widget.isHost)
               Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -125,78 +128,127 @@ class _ParticipantListState extends State<ParticipantList> {
             Expanded(
               child: participants.isEmpty
                   ? Center(
-                child: Text(
-                  "No participants yet",
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: participants.length,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                itemBuilder: (context, index) {
-                  final p = participants[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: theme.dividerColor,
-                      child: const Icon(
-                        Icons.person,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            p.name,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                      child: Text(
+                        "No participants yet",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
                         ),
-
-                        if (widget.isHost) ...[
-                          const SizedBox(width: 16),
-
-                          GestureDetector(
-                            onTap: () async {
-                              if (p.audioEnabled) {
-                                await widget.controller?.toggleParticipantAudio(
-                                  p.id,
-                                  false,
-                                );
-                              }
-                            },
-                            child: Icon(
-                              p.audioEnabled ? Icons.mic : Icons.mic_off,
-                              color: p.audioEnabled ? Colors.green : Colors.red,
-                              size: 22,
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: participants.length,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      itemBuilder: (context, index) {
+                        final p = participants[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.dividerColor,
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white70,
                             ),
                           ),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  p.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
 
-                          const SizedBox(width: 20),
+                              if (widget.isHost) ...[
+                                const SizedBox(width: 16),
 
-                          GestureDetector(
-                            onTap: () async {
-                              if (p.videoEnabled) {
-                                await widget.controller?.toggleParticipantCamera(
-                                  p.id,
-                                  false,
-                                );
-                              }
-                            },
-                            child: Icon(
-                              p.videoEnabled ? Icons.videocam : Icons.videocam_off,
-                              color: p.videoEnabled ? Colors.green : Colors.red,
-                              size: 22,
-                            ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (p.audioEnabled) {
+                                      await widget.controller
+                                          ?.toggleParticipantAudio(p.id, false);
+                                    }
+                                  },
+                                  child: Icon(
+                                    p.audioEnabled ? Icons.mic : Icons.mic_off,
+                                    color: p.audioEnabled
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: 22,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 20),
+
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (p.videoEnabled) {
+                                      await widget.controller
+                                          ?.toggleParticipantCamera(
+                                            p.id,
+                                            false,
+                                          );
+                                    }
+                                  },
+                                  child: Icon(
+                                    p.videoEnabled
+                                        ? Icons.videocam
+                                        : Icons.videocam_off,
+                                    color: p.videoEnabled
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: 22,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 20),
+
+                                GestureDetector(
+                                  onTap: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: const Text("Kick participant"),
+                                          content: Text(
+                                            "Are you sure you want to kick ${p.name}?",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, false),
+                                              child: const Text("Cancel"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, true),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                              ),
+                                              child: const Text("Kick"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+
+                                    if (confirm == true) {
+                                      await widget.controller?.kickUser(p.id);
+                                    }
+                                  },
+                                  child: const Icon(
+                                    Icons.remove_circle,
+                                    color: Colors.red,
+                                    size: 24,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
             const SizedBox(height: 10),
           ],

@@ -34,7 +34,7 @@ class _WordSetContentState extends State<WordSetContent> {
 
   List<Map<String, String>> _filterLanguages = [];
   String? _filterDifficulty;
-  String? _filterCategory;
+  List<Map<String, String>> _filterInterests = [];
 
   Locale? _currentLocale;
   bool _initialized = false;
@@ -47,13 +47,13 @@ class _WordSetContentState extends State<WordSetContent> {
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
     if (_filterDifficulty != null) _filterDifficulty!,
-    if (_filterCategory != null) _filterCategory!,
+    ..._filterInterests.map((e) => e['name'] ?? ''),
   ];
 
   bool get _hasActiveFilter =>
       _filterLanguages.isNotEmpty ||
           _filterDifficulty != null ||
-          _filterCategory != null;
+          _filterInterests.isNotEmpty;
 
   @override
   void initState() {
@@ -124,7 +124,7 @@ class _WordSetContentState extends State<WordSetContent> {
         lang: _currentLocale?.languageCode,
         languageIds: _filterLanguages.map((e) => e['id']!).toList(),
         difficulty: _filterDifficulty,
-        category: _filterCategory,
+        interestIds: _filterInterests.map((e) => e['id']!).toList(),
         pageNumber: _currentPage,
         pageSize: _pageSize,
       );
@@ -204,7 +204,8 @@ class _WordSetContentState extends State<WordSetContent> {
                       _filterLanguages =
                       List<Map<String, String>>.from(result['languages'] ?? []);
                       _filterDifficulty = result['difficulty'];
-                      _filterCategory = result['category'];
+                      _filterInterests =
+                      List<Map<String, String>>.from(result['interests'] ?? []);
                     });
                     _loadWordSets(reset: true);
                   }
@@ -213,7 +214,7 @@ class _WordSetContentState extends State<WordSetContent> {
                   setState(() {
                     _filterLanguages.removeWhere((f) => f['name'] == tag);
                     if (_filterDifficulty == tag) _filterDifficulty = null;
-                    if (_filterCategory == tag) _filterCategory = null;
+                    _filterInterests.removeWhere((f) => f['name'] == tag);
                   });
                   _loadWordSets(reset: true);
                 },

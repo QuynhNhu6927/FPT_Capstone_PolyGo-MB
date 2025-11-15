@@ -175,7 +175,7 @@ class WordSetCard extends StatelessWidget {
                                 ? wordSet.difficulty
                                 : index == 1
                                 ? wordSet.language.name
-                                : wordSet.category;
+                                : wordSet.interest.name;
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),

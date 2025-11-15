@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:polygo_mobile/features/chat/screens/call_screen.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_list_screen.dart';
 import 'package:polygo_mobile/features/game/screens/play_screen.dart';
 import '../data/models/wordsets/start_wordset_response.dart';
@@ -185,12 +184,14 @@ class AppRoutes {
       case conversation:
         final args = settings.arguments as Map<String, dynamic>?;
         final conversationId = args?['conversationId'] as String? ?? '';
+        final receiverId = args?['receiverId'] as String? ?? '';
         final lastActiveAt = args?['lastActiveAt'] as String? ?? '';
         final userName = args?['userName'] as String? ?? '';
         final avatarHeader = args?['avatarHeader'] as String? ?? '';
         final isOnline = args?['isOnline'] as bool? ?? false;
         return MaterialPageRoute(
           builder: (_) => ConversationScreen(
+            receiverId: receiverId,
             conversationId: conversationId,
             userName: userName,
             avatarHeader: avatarHeader,
@@ -198,8 +199,6 @@ class AppRoutes {
             isOnline: isOnline,
           ),
         );
-      case call:
-        return MaterialPageRoute(builder: (_) => const CallScreen());
       case overview:
         final args = settings.arguments as Map<String, dynamic>?;
         final id = args?['id'] as String? ?? '';

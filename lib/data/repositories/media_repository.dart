@@ -21,4 +21,18 @@ class MediaRepository {
       rethrow;
     }
   }
+
+  Future<ApiResponse<UploadFileResponse>> uploadAudio(
+      String token, File file,
+      {bool addUniqueName = true}) async {
+    try {
+      return await _service.uploadAudio(
+        token: token,
+        file: file,
+        addUniqueName: addUniqueName,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

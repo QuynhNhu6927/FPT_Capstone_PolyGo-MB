@@ -48,17 +48,14 @@ class _ConversationListState extends State<ConversationList> {
     _userId = prefs.getString('userId') ?? '';
     debugPrint('Logged in userId: $_userId');
 
-    // ✅ KHÔNG gọi lại initHub — chỉ lấy instance đang chạy sẵn
     _userPresenceService = UserPresenceManager().service;
 
-    // Nếu hub chưa sẵn sàng thì chờ 1 chút (tránh null)
     int retry = 0;
     while ((_userPresenceService.connection == null || !_userPresenceService.isConnected) && retry < 10) {
       await Future.delayed(const Duration(milliseconds: 300));
       retry++;
     }
 
-    // ✅ Lắng nghe thay đổi online/offline
     _userPresenceService.statusStream.listen((data) {
       final userId = data['userId'] as String?;
       final isOnline = data['isOnline'] as bool? ?? false;
@@ -69,10 +66,8 @@ class _ConversationListState extends State<ConversationList> {
       }
     });
 
-    // 2️⃣ Load danh sách hội thoại
     await _loadConversations(loadMore: false);
 
-    // 3️⃣ Lấy trạng thái online hiện tại
     if (_conversations.isNotEmpty) {
       final userIds = _conversations.map((e) => e.user.id).toList();
       try {
@@ -87,13 +82,11 @@ class _ConversationListState extends State<ConversationList> {
       }
     }
 
-    // 4️⃣ Kết nối ChatSignalr
     await _chatSignalrService.initHub();
     for (var conv in _conversations) {
       await _chatSignalrService.joinConversation(conv.id);
     }
 
-    // 5️⃣ Lắng nghe tin nhắn realtime
     _chatSignalrService.messageStream.listen((data) {
       final convId = data['conversationId'] as String;
       final content = data['content'] as String?;
@@ -285,6 +278,7 @@ class _ConversationListState extends State<ConversationList> {
                         builder: (_) => ConversationScreen(
                           conversationId: conv.id,
                           userName: conv.user.name,
+                          receiverId: conv.user.id,
                           lastActiveAt: conv.user.lastActiveAt ?? '',
                           isOnline: conv.user.isOnline,
                           avatarHeader: conv.user.avatarUrl ?? '',
@@ -390,6 +384,9 @@ String _getLastMessageText(LastMessage lastMessage) {
         }
       }
       return isMe ? 'Bạn: đã gửi nhiều ảnh' : 'Đã gửi nhiều ảnh';
+
+    case 3: // audio
+      return isMe ? 'Bạn: đã gửi thu âm' : 'Đã gửi thu âm';
 
     default:
       final content = lastMessage.content ?? '';

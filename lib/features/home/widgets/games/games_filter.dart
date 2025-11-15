@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../data/models/interests/interest_model.dart';
 import '../../../../data/models/languages/language_model.dart';
+import '../../../../data/repositories/interest_repository.dart';
 import '../../../../data/repositories/language_repository.dart';
+import '../../../../data/services/apis/interest_service.dart';
 import '../../../../data/services/apis/language_service.dart';
 import '../../../shared/app_error_state.dart';
 
@@ -16,21 +19,23 @@ class WordSetFilter extends StatefulWidget {
 
 class _WordSetFilterState extends State<WordSetFilter> {
   late final LanguageRepository _languageRepo;
+  late final InterestRepository _interestRepo;
   bool _loading = true;
   String? _error;
 
   List<LanguageModel> _languages = [];
   final Set<String> _selectedLanguages = {};
+  List<InterestModel> _interest = [];
+  final Set<String> _selectedInterests = {};
   String? _selectedDifficulty;
-  String? _selectedCategory;
 
   final List<String> _difficulties = ['Easy', 'Medium', 'Hard'];
-  final List<String> _categories = ['Food', 'Travel', 'Business', 'Tech', 'Culture', 'Daily', 'Education', 'Health'];
 
   @override
   void initState() {
     super.initState();
     _languageRepo = LanguageRepository(LanguageService(ApiClient()));
+    _interestRepo = InterestRepository(InterestService(ApiClient()));
     _loadData();
   }
 
@@ -50,6 +55,11 @@ class _WordSetFilterState extends State<WordSetFilter> {
         _languages = langs;
         _loading = false;
       });
+      final interests = await _interestRepo.getAllInterests(token, lang: 'vi');
+      setState(() {
+        _interest = interests;
+        _loading = false;
+      });
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -67,6 +77,17 @@ class _WordSetFilterState extends State<WordSetFilter> {
       }
     });
   }
+
+  void _toggleInterest(String id) {
+    setState(() {
+      if (_selectedInterests.contains(id)) {
+        _selectedInterests.remove(id);
+      } else {
+        _selectedInterests.add(id);
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,12 +160,12 @@ class _WordSetFilterState extends State<WordSetFilter> {
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
-                        children: _categories
-                            .map((cat) => ChoiceChip(
-                          label: Text(cat),
-                          selected: _selectedCategory == cat,
-                          onSelected: (_) =>
-                              setState(() => _selectedCategory = cat),
+                        runSpacing: 8,
+                        children: _interest
+                            .map((interests) => FilterChip(
+                          label: Text(interests.name),
+                          selected: _selectedInterests.contains(interests.id),
+                          onSelected: (_) => _toggleInterest(interests.id),
                         ))
                             .toList(),
                       ),
@@ -165,7 +186,10 @@ class _WordSetFilterState extends State<WordSetFilter> {
                           .map((lang) => {'id': lang.id, 'name': lang.name})
                           .toList(),
                       'difficulty': _selectedDifficulty,
-                      'category': _selectedCategory,
+                      'interests': _selectedInterests
+                          .map((id) => _interest.firstWhere((x) => x.id == id))
+                          .map((lang) => {'id': lang.id, 'name': lang.name})
+                          .toList(),
                     });
                   },
                 ),

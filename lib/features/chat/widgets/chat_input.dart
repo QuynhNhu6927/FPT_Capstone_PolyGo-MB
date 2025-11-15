@@ -8,6 +8,11 @@ class ChatInputBar extends StatelessWidget {
   final ScrollController scrollController;
   final VoidCallback onPickImages;
   final Future<void> Function(String text) onSendText;
+  final bool isRecording;
+  final bool isRecordingDone;
+  final Future<void> Function({bool cancel})? onStopRecording;
+  // Callback cho audio
+  final Future<void> Function()? onStartRecording;
 
   const ChatInputBar({
     super.key,
@@ -18,6 +23,10 @@ class ChatInputBar extends StatelessWidget {
     required this.scrollController,
     required this.onPickImages,
     required this.onSendText,
+    this.onStartRecording,
+    this.onStopRecording,
+    this.isRecording = false,
+    this.isRecordingDone = false,
   });
 
   @override
@@ -36,10 +45,14 @@ class ChatInputBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Icon chọn ảnh
           IconButton(
             icon: const Icon(Icons.image),
             onPressed: isUploadingImages ? null : onPickImages,
           ),
+
+          const SizedBox(width: 8),
+          // Text field
           Expanded(
             child: TextField(
               controller: controller,
@@ -59,6 +72,24 @@ class ChatInputBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          // Icon micro
+          GestureDetector(
+            onTap: () {
+              if (!isRecording) {
+                // Bắt đầu ghi
+                onStartRecording?.call();
+              } else {
+                onStopRecording?.call(cancel: false);
+              }
+            },
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: colorPrimary,
+              child: Icon(isRecording ? Icons.stop : Icons.mic, color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Icon gửi
           CircleAvatar(
             radius: 22,
             backgroundColor: colorPrimary,

@@ -1,85 +1,71 @@
-// =================== PLAYED WORDSET MODELS ===================
-
-class PlayedCreator {
-  final String id;
-  final String name;
-  final String? avatarUrl;
-
-  PlayedCreator({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-  });
-
-  factory PlayedCreator.fromJson(Map<String, dynamic> json) => PlayedCreator(
-    id: json['id'] ?? '',
-    name: json['name'] ?? '',
-    avatarUrl: json['avatarUrl'],
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'avatarUrl': avatarUrl,
-  };
-}
-
-class PlayedWordSet {
+class CreatedWordSet {
   final String id;
   final String title;
   final String description;
+  final String status;
   final String difficulty;
-  final int bestTime;
-  final int bestScore;
-  final Language language;
+  final int estimatedTimeInMinutes;
   final int playCount;
-  final DateTime lastPlayed;
-  final PlayedCreator creator;
+  final int averageTimeInSeconds;
+  final double averageRating;
+  final int wordCount;
+  final int totalPlays;
+  final Language language;
+  final DateTime createdAt;
 
-  PlayedWordSet({
+  CreatedWordSet({
     required this.id,
     required this.title,
     required this.description,
+    required this.status,
     required this.difficulty,
-    required this.bestTime,
-    required this.bestScore,
-    required this.language,
+    required this.estimatedTimeInMinutes,
     required this.playCount,
-    required this.lastPlayed,
-    required this.creator,
+    required this.averageTimeInSeconds,
+    required this.averageRating,
+    required this.wordCount,
+    required this.totalPlays,
+    required this.language,
+    required this.createdAt,
   });
 
-  factory PlayedWordSet.fromJson(Map<String, dynamic> json) => PlayedWordSet(
+  factory CreatedWordSet.fromJson(Map<String, dynamic> json) => CreatedWordSet(
     id: json['id'] ?? '',
     title: json['title'] ?? '',
     description: json['description'] ?? '',
+    status: json['status'] ?? '',
     difficulty: json['difficulty'] ?? '',
-    bestTime: (json['bestTime'] ?? 0) as int,
-    bestScore: (json['bestScore'] ?? 0) as int,
+    estimatedTimeInMinutes: (json['estimatedTimeInMinutes'] ?? 0) as int,
+    playCount: (json['playCount'] ?? 0) as int,
+    averageTimeInSeconds: (json['averageTimeInSeconds'] ?? 0) as int,
+    averageRating: (json['averageRating'] ?? 0).toDouble(),
+    wordCount: (json['wordCount'] ?? 0) as int,
+    totalPlays: (json['totalPlays'] ?? 0) as int,
     language: json['language'] != null
         ? Language.fromJson(json['language'])
         : Language(id: '', code: '', name: 'Unknown', iconUrl: ''),
-    playCount: (json['playCount'] ?? 0) as int,
-    lastPlayed: DateTime.parse(json['lastPlayed']),
-    creator: PlayedCreator.fromJson(json['creator']),
+    createdAt: DateTime.parse(json['createdAt']),
   );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'title': title,
     'description': description,
+    'status': status,
     'difficulty': difficulty,
-    'bestTime': bestTime,
-    'bestScore': bestScore,
-    'language': language,
+    'estimatedTimeInMinutes': estimatedTimeInMinutes,
     'playCount': playCount,
-    'lastPlayed': lastPlayed.toIso8601String(),
-    'creator': creator.toJson(),
+    'averageTimeInSeconds': averageTimeInSeconds,
+    'averageRating': averageRating,
+    'wordCount': wordCount,
+    'totalPlays': totalPlays,
+    'language': language.toJson(),
+    'createdAt': createdAt.toIso8601String(),
   };
 }
 
-class PlayedWordSetListResponse {
-  final List<PlayedWordSet> items;
+class CreatedWordSetListResponse {
+  final List<CreatedWordSet> items;
   final int totalItems;
   final int currentPage;
   final int totalPages;
@@ -87,7 +73,7 @@ class PlayedWordSetListResponse {
   final bool hasPreviousPage;
   final bool hasNextPage;
 
-  PlayedWordSetListResponse({
+  CreatedWordSetListResponse({
     required this.items,
     required this.totalItems,
     required this.currentPage,
@@ -97,10 +83,10 @@ class PlayedWordSetListResponse {
     required this.hasNextPage,
   });
 
-  factory PlayedWordSetListResponse.fromJson(Map<String, dynamic> json) =>
-      PlayedWordSetListResponse(
+  factory CreatedWordSetListResponse.fromJson(Map<String, dynamic> json) =>
+      CreatedWordSetListResponse(
         items: (json['items'] as List<dynamic>)
-            .map((e) => PlayedWordSet.fromJson(e))
+            .map((e) => CreatedWordSet.fromJson(e))
             .toList(),
         totalItems: json['totalItems'] ?? 0,
         currentPage: json['currentPage'] ?? 1,
@@ -135,9 +121,16 @@ class Language {
   });
 
   factory Language.fromJson(Map<String, dynamic> json) => Language(
-    id: json['id'],
-    code: json['code'],
-    name: json['name'],
-    iconUrl: json['iconUrl'],
+    id: json['id'] ?? '',
+    code: json['code'] ?? '',
+    name: json['name'] ?? '',
+    iconUrl: json['iconUrl'] ?? '',
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'code': code,
+    'name': name,
+    'iconUrl': iconUrl,
+  };
 }

@@ -276,7 +276,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                                   SnackBar(
                                                     content: Text(
                                                       loc.translate(
-                                                        'error_occurred',
+                                                        'cancel_too_late',
                                                       ),
                                                     ),
                                                   ),
@@ -418,13 +418,14 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                   Divider(color: dividerColor, thickness: 1),
                   const SizedBox(height: 16),
 
-                  if (widget.event.status == 'Approved' || widget.event.status.toLowerCase() == 'live' || widget.event.status == 'Completed')
+                  if (widget.event.status == 'Approved' ||
+                      widget.event.status.toLowerCase() == 'live' ||
+                      widget.event.status == 'Completed')
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         // Share button
                         AppButton(
-                          text: loc.translate('share'),
                           variant: ButtonVariant.outline,
                           size: ButtonSize.md,
                           icon: const Icon(Icons.share_outlined, size: 18),
@@ -432,34 +433,39 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                             // Chức năng share chưa cần
                           },
                         ),
-                        const SizedBox(width: 12),
 
                         // View rating button (chỉ hiển thị khi Completed)
                         if (widget.event.status == 'Completed')
-                          AppButton(
-                            text: loc.translate('view_rating'),
-                            variant: ButtonVariant.outline,
-                            size: ButtonSize.md,
-                            icon: const Icon(Icons.star_outline, size: 18),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => RatesScreen(
-                                    eventId: widget.event.id,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: AppButton(
+                              text: loc.translate('rating'),
+                              variant: ButtonVariant.outline,
+                              size: ButtonSize.md,
+                              icon: const Icon(Icons.star_outline, size: 18),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        RatesScreen(eventId: widget.event.id),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
 
                         // Join/Start/Wait button cho Approved/Live
-                        if (widget.event.status == 'Approved' || widget.event.status.toLowerCase() == 'live')
+                        if (widget.event.status == 'Approved' ||
+                            widget.event.status.toLowerCase() == 'live')
                           Builder(
                             builder: (_) {
                               final now = DateTime.now();
-                              final isEventStarted = now.isAfter(widget.event.startAt);
-                              final isLive = widget.event.status.toLowerCase() == 'live';
+                              final isEventStarted = now.isAfter(
+                                widget.event.startAt,
+                              );
+                              final isLive =
+                                  widget.event.status.toLowerCase() == 'live';
 
                               final buttonText = isLive
                                   ? loc.translate('join')
@@ -475,28 +481,32 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                   text: buttonText,
                                   size: ButtonSize.md,
                                   icon: Icon(
-                                    isLive ? Icons.login : Icons.play_circle_outline,
+                                    isLive ? Icons.login : Icons.access_time,
                                     size: 18,
                                     color: canJoin ? null : Colors.grey[400],
                                   ),
                                   onPressed: canJoin
                                       ? () {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      AppRoutes.eventWaiting,
-                                      arguments: {
-                                        'eventId': widget.event.id,
-                                        'eventTitle': widget.event.title,
-                                        'eventStatus': widget.event.status,
-                                        'isHost': true,
-                                        'hostId': widget.event.host.id,
-                                        'hostName': widget.event.host.name,
-                                        'startAt': widget.event.startAt,
-                                      },
-                                    );
-                                  }
+                                          Navigator.pushReplacementNamed(
+                                            context,
+                                            AppRoutes.eventWaiting,
+                                            arguments: {
+                                              'eventId': widget.event.id,
+                                              'eventTitle': widget.event.title,
+                                              'eventStatus':
+                                                  widget.event.status,
+                                              'isHost': true,
+                                              'hostId': widget.event.host.id,
+                                              'hostName':
+                                                  widget.event.host.name,
+                                              'startAt': widget.event.startAt,
+                                            },
+                                          );
+                                        }
                                       : null,
-                                  variant: canJoin ? ButtonVariant.primary : ButtonVariant.outline,
+                                  variant: canJoin
+                                      ? ButtonVariant.primary
+                                      : ButtonVariant.outline,
                                   color: canJoin
                                       ? Theme.of(context).colorScheme.primary
                                       : Colors.grey[300],
@@ -506,7 +516,6 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                           ),
                       ],
                     ),
-
                 ],
               ),
             ),

@@ -38,7 +38,7 @@ class _EventsContentState extends State<EventsContent> {
 
   List<Map<String, String>> _filterLanguages = [];
   List<Map<String, String>> _filterInterests = [];
-
+  bool? _selectedIsFree;
   Locale? _currentLocale;
   bool _initialized = false;
 
@@ -49,10 +49,12 @@ class _EventsContentState extends State<EventsContent> {
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
     ..._filterInterests.map((e) => e['name'] ?? ''),
+    if (_selectedIsFree != null)
+      _selectedIsFree! ? "Miễn phí" : "Trả phí",
   ];
 
   bool get _hasActiveFilter =>
-      _filterLanguages.isNotEmpty || _filterInterests.isNotEmpty;
+      _filterLanguages.isNotEmpty || _filterInterests.isNotEmpty || _selectedIsFree != null;
 
   @override
   void initState() {
@@ -174,6 +176,7 @@ class _EventsContentState extends State<EventsContent> {
         pageSize: _pageSize,
         languageIds: languageIds,
         interestIds: interestIds,
+        isFree: _selectedIsFree,
       );
 
       if (!mounted) return;
@@ -271,6 +274,7 @@ class _EventsContentState extends State<EventsContent> {
                           result['languages'] ?? []);
                       _filterInterests = List<Map<String, String>>.from(
                           result['interests'] ?? []);
+                      _selectedIsFree = result['isFree'];
                     });
                     if (_hasActiveFilter) {
                       _loadUpcomingEvents(
@@ -288,6 +292,9 @@ class _EventsContentState extends State<EventsContent> {
                         .removeWhere((f) => f['name'] == tag);
                     _filterInterests
                         .removeWhere((f) => f['name'] == tag);
+                    if (tag == "Miễn phí" || tag == "Trả phí") {
+                      _selectedIsFree = null;
+                    }
                   });
                   _hasActiveFilter
                       ? _loadUpcomingEvents(

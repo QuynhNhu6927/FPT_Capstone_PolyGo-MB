@@ -152,12 +152,12 @@ class JoinedGameCard extends StatelessWidget {
                       height: 28,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 3,
+                        itemCount: 2,
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           String label = index == 0
                               ? wordSet.difficulty
-                              : wordSet.category;
+                              : wordSet.language.name;
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),

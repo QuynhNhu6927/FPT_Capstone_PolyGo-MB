@@ -22,10 +22,8 @@ class _MyGameFilterState extends State<MyGameFilter> {
   List<LanguageModel> _languages = [];
   final Set<String> _selectedLanguages = {};
   String? _selectedDifficulty;
-  String? _selectedCategory;
 
   final List<String> _difficulties = ['Easy', 'Medium', 'Hard'];
-  final List<String> _categories = ['Food', 'Travel', 'Business', 'Tech', 'Culture', 'Daily', 'Education', 'Health'];
 
   @override
   void initState() {
@@ -67,6 +65,7 @@ class _MyGameFilterState extends State<MyGameFilter> {
       }
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,20 +133,6 @@ class _MyGameFilterState extends State<MyGameFilter> {
                             .toList(),
                       ),
                       const SizedBox(height: 16),
-                      const Divider(),
-                      const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: _categories
-                            .map((cat) => ChoiceChip(
-                          label: Text(cat),
-                          selected: _selectedCategory == cat,
-                          onSelected: (_) =>
-                              setState(() => _selectedCategory = cat),
-                        ))
-                            .toList(),
-                      ),
                     ],
                   ),
                 ),
@@ -165,7 +150,6 @@ class _MyGameFilterState extends State<MyGameFilter> {
                           .map((lang) => {'id': lang.id, 'name': lang.name})
                           .toList(),
                       'difficulty': _selectedDifficulty,
-                      'category': _selectedCategory,
                     });
                   },
                 ),

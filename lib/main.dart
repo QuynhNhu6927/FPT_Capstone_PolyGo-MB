@@ -11,8 +11,9 @@ import 'data/services/signalr/chat_signalr_service.dart';
 import 'data/services/signalr/user_presence.dart';
 import 'routes/app_routes.dart';
 
+final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 void main() {
-  runApp(DevicePreview(enabled: false, builder: (context) => const MyApp()));
+  runApp(DevicePreview(enabled: true, builder: (context) => const MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -76,26 +77,27 @@ class _MyAppState extends State<MyApp> {
 
     final initialRoute = _token != null ? AppRoutes.home : AppRoutes.login;
 
-    return HubManager(
-      child: ChatHubManager(
-        child: MaterialApp(
-          title: 'PolyGo App',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: _themeMode,
-          initialRoute: initialRoute,
-          onGenerateRoute: AppRoutes.generateRoute,
-          locale: _locale,
-          supportedLocales: const [Locale('en'), Locale('vi')],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          builder: (context, child) {
-            return InheritedLocale(
+    return MaterialApp(
+      navigatorKey: globalNavigatorKey,
+      title: 'PolyGo App',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: _themeMode,
+      initialRoute: initialRoute,
+      onGenerateRoute: AppRoutes.generateRoute,
+      locale: _locale,
+      supportedLocales: const [Locale('en'), Locale('vi')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (context, child) {
+        return HubManager(
+          child: ChatHubManager(
+            child: InheritedLocale(
               locale: _locale,
               setLocale: _setLocale,
               child: InheritedThemeMode(
@@ -103,10 +105,10 @@ class _MyAppState extends State<MyApp> {
                 setThemeMode: _setThemeMode,
                 child: child!,
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

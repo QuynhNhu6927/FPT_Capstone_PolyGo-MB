@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
@@ -20,6 +23,7 @@ import 'message_item.dart';
 class Conversation extends StatefulWidget {
   final String conversationId;
   final String userName;
+  final String receiverId;
   final String avatarHeader;
   final String lastActiveAt;
   final bool isOnline;
@@ -30,6 +34,7 @@ class Conversation extends StatefulWidget {
     required this.userName,
     required this.avatarHeader,
     required this.lastActiveAt,
+    required this.receiverId,
     required this.isOnline,
   });
 
@@ -45,6 +50,10 @@ class _ConversationState extends State<Conversation> {
   List<ConversationMessage> _messages = [];
   bool _isLoading = false;
   final int _pageSize = 20;
+  FlutterSoundRecorder? _recorder;
+  String? _audioFilePath;
+  bool _isRecording = false;
+  bool _isRecordingDone = false;
 
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController = TextEditingController();
@@ -57,6 +66,12 @@ class _ConversationState extends State<Conversation> {
   void initState() {
     super.initState();
     _initConversation();
+    _initRecorder();
+  }
+
+  Future<void> _initRecorder() async {
+    _recorder = FlutterSoundRecorder();
+    await _recorder!.openRecorder();
   }
 
   Future<void> _initConversation() async {
@@ -105,6 +120,75 @@ class _ConversationState extends State<Conversation> {
       });
     }
   }
+
+  Future<void> _startRecording() async {
+    if (_recorder == null) return;
+    final granted = await _checkMicrophonePermission();
+    if (!granted) {
+      debugPrint('Microphone permission denied');
+      return;
+    }
+
+    final tempDir = await getTemporaryDirectory();
+    _audioFilePath =
+    '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.aac';
+
+    await _recorder!.startRecorder(
+      toFile: _audioFilePath,
+      codec: Codec.aacADTS,
+    );
+
+    setState(() {
+      _isRecording = true;
+      _isRecordingDone = false;
+    });
+  }
+
+  Future<bool> _checkMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      status = await Permission.microphone.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<void> _stopRecording({bool cancel = false}) async {
+    if (_recorder == null || !_isRecording) return;
+
+    final path = await _recorder!.stopRecorder();
+    setState(() {
+      _isRecording = false;
+      _isRecordingDone = true;
+    });
+
+    if (cancel || path == null || path.isEmpty) {
+      debugPrint('Recording canceled');
+      _audioFilePath = null;
+      return;
+    }
+
+    debugPrint('Recording finished: $path');
+
+    // Upload và gửi audio
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    final mediaRepo = MediaRepository(MediaService(ApiClient()));
+    final file = File(path);
+    final uploadRes = await mediaRepo.uploadAudio(token, file);
+    if (uploadRes.data != null && uploadRes.data!.url.isNotEmpty) {
+      await _chatSignalrService.sendAudioMessage(
+        conversationId: widget.conversationId,
+        senderId: _myUserId,
+        audioUrl: uploadRes.data!.url,
+      );
+    }
+
+    _audioFilePath = null;
+    setState(() => _isRecordingDone = false);
+  }
+
 
   Future<void> _loadMessages() async {
     if (_isLoading) return;
@@ -169,6 +253,9 @@ class _ConversationState extends State<Conversation> {
             images = List<String>.from(jsonDecode(data['content']));
           } catch (_) {}
         }
+        break;
+      case 3: // Audio
+        messageType = 'Audio';
         break;
     }
 
@@ -249,6 +336,8 @@ class _ConversationState extends State<Conversation> {
     _scrollController.dispose();
     _messageController.dispose();
     _messageSub.cancel();
+    _recorder?.closeRecorder();
+    _recorder = null;
     super.dispose();
   }
 
@@ -260,6 +349,7 @@ class _ConversationState extends State<Conversation> {
 
     return Scaffold(
       appBar: ConversationAppBar(
+        receiverId: widget.receiverId,
         userName: widget.userName,
         avatarHeader: widget.avatarHeader,
         lastActiveAt: widget.lastActiveAt,
@@ -334,7 +424,12 @@ class _ConversationState extends State<Conversation> {
                   scrollController: _scrollController,
                   onPickImages: _handlePickAndUploadImages,
                   onSendText: _handleSendText,
+                  onStartRecording: _startRecording,
+                  onStopRecording: _stopRecording,
+                  isRecording: _isRecording,
+                  isRecordingDone: _isRecordingDone,
                 ),
+
               ],
             ),
           ),

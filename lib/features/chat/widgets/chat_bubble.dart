@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
@@ -9,7 +10,7 @@ String formatTime(String sentAt) {
   return DateFormat('HH:mm').format(date);
 }
 
-class ChatBubble extends StatelessWidget {
+class ChatBubble extends StatefulWidget {
   final ConversationMessage message;
   final bool isMine;
   final bool isDark;
@@ -28,26 +29,95 @@ class ChatBubble extends StatelessWidget {
   });
 
   @override
+  State<ChatBubble> createState() => _ChatBubbleState();
+}
+
+class _ChatBubbleState extends State<ChatBubble> {
+  AudioPlayer? _audioPlayer;
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.message.type == "Audio") {
+      _audioPlayer = AudioPlayer();
+
+      _audioPlayer!.onPlayerStateChanged.listen((state) {
+        setState(() {
+          _isPlaying = state == PlayerState.playing;
+        });
+      });
+
+      _audioPlayer!.onDurationChanged.listen((d) {
+        if (d.inMilliseconds > 0) {
+          setState(() {
+            _duration = d;
+          });
+        }
+      });
+
+      _audioPlayer!.onPositionChanged.listen((p) {
+        setState(() {
+          _position = p;
+        });
+      });
+
+      // **Lắng nghe khi audio kết thúc**
+      _audioPlayer!.onPlayerComplete.listen((_) {
+        setState(() {
+          _position = Duration.zero;
+          _isPlaying = false;
+        });
+      });
+
+      // Load audio
+      _loadAudio(widget.message.content);
+    }
+  }
+
+  Future<void> _loadAudio(String url) async {
+    try {
+      await _audioPlayer!.setSourceUrl(url); // Load audio
+      final d = await _audioPlayer!.getDuration();
+      if (d != null && d.inMilliseconds > 0) {
+        setState(() {
+          _duration = d;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading audio: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final showTime = activeMessageId == message.id;
+    final showTime = widget.activeMessageId == widget.message.id;
 
     return Column(
       crossAxisAlignment:
-      isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      widget.isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         if (showTime)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Text(
-              formatTime(message.sentAt),
+              formatTime(widget.message.sentAt),
               style: TextStyle(
                 fontSize: 11,
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
               ),
             ),
           ),
         GestureDetector(
-          onTap: onTap,
+          onTap: widget.onTap,
           child: _buildContent(context),
         ),
       ],
@@ -55,28 +125,104 @@ class ChatBubble extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    // Text message
-    if (message.type == "Text") {
+    // TEXT message
+    if (widget.message.type == "Text") {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: isMine
-              ? colorPrimary.withOpacity(0.85)
-              : (isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
+          color: widget.isMine
+              ? widget.colorPrimary.withOpacity(0.85)
+              : (widget.isDark
+              ? const Color(0xFF2C2C2C)
+              : const Color(0xFFDFDFDF)),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          message.content,
+          widget.message.content,
           style: TextStyle(
-            color: isMine ? Colors.white : (isDark ? Colors.white : Colors.black),
+            color: widget.isMine
+                ? Colors.white
+                : (widget.isDark ? Colors.white : Colors.black),
             fontSize: 14,
           ),
         ),
       );
     }
 
-    // Image(s) message
-    final images = message.images;
+    // AUDIO message
+    if (widget.message.type == "Audio") {
+      final url = widget.message.content;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: widget.isMine
+              ? widget.colorPrimary.withOpacity(0.85)
+              : (widget.isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                color: widget.isMine ? Colors.white : Colors.black,
+              ),
+              onPressed: () async {
+                try {
+                  if (_isPlaying) {
+                    await _audioPlayer?.pause();
+                  } else {
+                    // Nếu audio đã kết thúc, play lại từ đầu
+                    if (_position >= _duration) {
+                      await _audioPlayer?.seek(Duration.zero);
+                      setState(() => _position = Duration.zero);
+                    }
+
+                    // Nếu duration chưa load, load audio
+                    if (_duration == Duration.zero) {
+                      await _loadAudio(url);
+                    }
+
+                    // Dùng play() thay vì resume()
+                    await _audioPlayer?.play(UrlSource(url));
+                  }
+                } catch (e) {
+                  debugPrint("Audio play error: $e");
+                }
+              },
+
+            ),
+            Expanded(
+              child: Slider(
+                activeColor: widget.isMine ? Colors.white : widget.colorPrimary,
+                inactiveColor: widget.isMine ? Colors.white70 : Colors.black26,
+                min: 0,
+                max: _duration.inMilliseconds.toDouble() > 0
+                    ? _duration.inMilliseconds.toDouble()
+                    : 1, // tránh chia cho 0
+                value: _position.inMilliseconds
+                    .toDouble()
+                    .clamp(0.0, _duration.inMilliseconds.toDouble()),
+                onChanged: (value) async {
+                  final pos = Duration(milliseconds: value.toInt());
+                  await _audioPlayer?.seek(pos);
+                  setState(() => _position = pos);
+                },
+              ),
+            ),
+            Text(
+              _formatDuration(_duration - _position),
+              style: TextStyle(
+                  color: widget.isMine ? Colors.white : Colors.black, fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // IMAGE message
+    final images = widget.message.images;
     if (images.isEmpty) return const SizedBox.shrink();
 
     if (images.length == 1) {
@@ -146,7 +292,12 @@ class ChatBubble extends StatelessWidget {
         ),
       );
     }
+  }
 
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
   }
 
   void _showFullImage(BuildContext context, List<String> images) {

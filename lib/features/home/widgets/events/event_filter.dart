@@ -20,7 +20,7 @@ class EventFilter extends StatefulWidget {
 class _EventFilterState extends State<EventFilter> {
   late final LanguageRepository _languageRepo;
   late final InterestRepository _interestRepo;
-
+  bool? _selectedIsFree;
   bool _loading = true;
   String? _error;
 
@@ -161,6 +161,30 @@ class _EventFilterState extends State<EventFilter> {
                         ))
                             .toList(),
                       ),
+                      const Divider(thickness: 1),
+                      SizedBox(height: 8),
+                      const Text(
+                        'Hình thức',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+
+                      SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const Text("Miễn phí"),
+                            selected: _selectedIsFree == true,
+                            onSelected: (_) => setState(() => _selectedIsFree = true),
+                          ),
+                          ChoiceChip(
+                            label: const Text("Trả phí"),
+                            selected: _selectedIsFree == false,
+                            onSelected: (_) => setState(() => _selectedIsFree = false),
+                          ),
+                        ],
+                      ),
+
                     ],
                   ),
                 ),
@@ -187,6 +211,7 @@ class _EventFilterState extends State<EventFilter> {
                           .map((id) => _interests.firstWhere((x) => x.id == id))
                           .map((interest) => {'id': interest.id, 'name': interest.name})
                           .toList(),
+                      'isFree': _selectedIsFree,
                     });
                   },
                 ),

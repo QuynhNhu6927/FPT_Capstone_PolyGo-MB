@@ -137,6 +137,37 @@ class ChatSignalrService {
     }
   }
 
+  Future<void> sendAudioMessage({
+    required String conversationId,
+    required String senderId,
+    required String audioUrl,
+  }) async {
+    if (_hubConnection == null || _hubConnection!.state != HubConnectionState.connected) {
+      debugPrint('[SignalR] Hub chưa kết nối, không thể gửi audio');
+      return;
+    }
+
+    if (audioUrl.isEmpty) {
+      debugPrint('[SignalR] Audio URL rỗng, không gửi audio');
+      return;
+    }
+
+    try {
+      debugPrint('[SignalR] Gửi audio message:');
+      debugPrint('ConversationId: $conversationId');
+      debugPrint('SenderId: $senderId');
+      debugPrint('Audio URL: $audioUrl');
+
+      await _hubConnection!.invoke(
+        'SendAudioMessage',
+        args: [conversationId, senderId, audioUrl],
+      );
+
+      debugPrint('[SignalR] Gửi audio message thành công');
+    } catch (e) {
+      debugPrint('[SignalR] Lỗi gửi audio message: $e');
+    }
+  }
 
   Future<void> sendImageMessage({
     required String conversationId,

@@ -188,18 +188,6 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                         children: [
                           Icon(Icons.chat_bubble_outline_rounded,
                               size: 26, color: searchTextColor),
-                          Positioned(
-                            right: -1,
-                            top: -1,
-                            child: Container(
-                              width: 9,
-                              height: 9,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       onPressed: () {

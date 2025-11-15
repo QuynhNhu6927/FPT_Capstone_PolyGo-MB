@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../../data/models/wordsets/word_sets_model.dart';
+import '../../../data/models/wordsets/created_wordsets.dart';
 import '../../../routes/app_routes.dart';
 
 class MyGameCard extends StatelessWidget {
-  final WordSetModel wordSet;
+  final CreatedWordSet wordSet;
 
   const MyGameCard({super.key, required this.wordSet});
 
@@ -58,11 +58,11 @@ class MyGameCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        wordSet.averageRating.toStringAsFixed(1),
+                        '${wordSet.playCount}',
                         style: TextStyle(color: secondaryText, fontSize: 12),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.access_time_filled, color: Colors.blue, size: 14),
                     ],
                   ),
                 ],
@@ -92,38 +92,19 @@ class MyGameCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Est: ${wordSet.estimatedTimeInMinutes} min',
+                      'Word Count: ${wordSet.wordCount}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      'Avg: ${wordSet.averageTimeInSeconds}s',
+                      'Time: ${wordSet.estimatedTimeInMinutes}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
-
-              // --- WordCount & PlayCount ---
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Words: ${wordSet.wordCount}',
-                      style: TextStyle(fontSize: 12, color: secondaryText),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Plays: ${wordSet.playCount}',
-                      style: TextStyle(fontSize: 12, color: secondaryText),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
 
               // --- Tags + Star Button ---
               Row(
@@ -134,14 +115,12 @@ class MyGameCard extends StatelessWidget {
                       height: 28,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 3,
+                        itemCount: 2,
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           String label = index == 0
                               ? wordSet.difficulty
-                              : index == 1
-                              ? wordSet.language.name
-                              : wordSet.category;
+                              : wordSet.language.name;
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),

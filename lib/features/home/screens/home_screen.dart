@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: AppBottomBar(currentIndex: _menuIndex),
+        child: AppBottomBar(currentIndex: 0),
       ),
     );
   }

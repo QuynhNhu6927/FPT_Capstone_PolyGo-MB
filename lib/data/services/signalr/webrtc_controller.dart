@@ -228,8 +228,8 @@ class WebRTCController extends ChangeNotifier {
         id: connId,
         name: name,
         role: connId == hostId ? "host" : "attendee",
-        audioEnabled: false, // default false
-        videoEnabled: false, // default false
+        audioEnabled: localVideoEnabled,
+        videoEnabled: localAudioEnabled,
       );
       notifyListeners();
 
@@ -355,6 +355,38 @@ class WebRTCController extends ChangeNotifier {
       await pc.addCandidate(candidate);
     });
 
+    // Khi người khác wave
+    _hub!.on("ReceiveWave", (args) {
+      final connId = args?[0];
+      final name = args?[1];
+
+      if (connId != null && participants.containsKey(connId)) {
+        participants[connId]!.isHandRaised = true;
+        print("🙋 $name ($connId) waved");
+        notifyListeners();
+      }
+    });
+
+// Khi người khác unwave
+    _hub!.on("ReceiveUnwave", (args) {
+      final connId = args?[0];
+
+      if (connId != null && participants.containsKey(connId)) {
+        participants[connId]!.isHandRaised = false;
+        print("✋ User $connId unwaved");
+        notifyListeners();
+      }
+    });
+
+// Khi bị host kick
+    _hub!.on("KickedFromRoom", (args) async {
+      final room = args?[0];
+      print("❌ You were kicked from room: $room");
+
+      // Tự rời room
+      await leaveRoom();
+    });
+
     await _hub!.start();
     isConnected = true;
   }
@@ -426,6 +458,65 @@ class WebRTCController extends ChangeNotifier {
     }
   }
 
+  Future<bool> joinRoomConfirm(String userId) async {
+    if (_hub == null || !isConnected) {
+      return false;
+    }
+    try {
+      await _hub!.invoke(
+        "JoinRoomConfirm",
+        args: [
+          eventId,
+          userId,
+        ],
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> sendWave() async {
+    if (_hub == null || !isConnected) return;
+
+    try {
+      await _hub!.invoke("SendWave", args: [eventId]);
+      print("🙋 Sent Wave");
+    } catch (e) {
+      print("Error sending wave: $e");
+    }
+  }
+
+  Future<void> unwave() async {
+    if (_hub == null || !isConnected) return;
+
+    try {
+      await _hub!.invoke("Unwave", args: [eventId]);
+      print("✋ Sent Unwave");
+    } catch (e) {
+      print("Error sending unwave: $e");
+    }
+  }
+
+// =========================
+// KICK USER (HOST ONLY)
+// =========================
+  Future<void> kickUser(String targetConnId) async {
+    if (!isHost) {
+      print("❌ Only host can kick user");
+      return;
+    }
+
+    if (_hub == null || !isConnected) return;
+
+    try {
+      await _hub!.invoke("KickUser", args: [eventId, targetConnId]);
+      print("🚫 Host kicked: $targetConnId");
+    } catch (e) {
+      print("Error kicking user: $e");
+    }
+  }
+
   Future<void> toggleAudio({bool? initial}) async {
     final audioTrack = localStream?.getAudioTracks().isNotEmpty == true
         ? localStream!.getAudioTracks().first
@@ -482,10 +573,9 @@ class WebRTCController extends ChangeNotifier {
     if (_hub == null) return;
 
     try {
-      // 🔹 Cập nhật ngay trạng thái trong danh sách participant
       if (participants.containsKey(participantId)) {
         participants[participantId]!.audioEnabled = enabled;
-        notifyListeners(); // 🔸 Thông báo cho UI cập nhật icon
+        notifyListeners();
       }
 
       await _hub!.invoke("ToggleMic", args: [
@@ -514,9 +604,9 @@ class WebRTCController extends ChangeNotifier {
       }
 
       await _hub!.invoke("ToggleCam", args: [
-        eventId, // roomId
-        participantId, // targetConnId
-        enabled, // false để tắt cam
+        eventId,
+        participantId,
+        enabled,
       ]);
       if (!enabled) {
         onParticipantCameraOff?.call(participantId);

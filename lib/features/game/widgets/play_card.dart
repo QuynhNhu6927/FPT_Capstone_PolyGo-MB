@@ -103,7 +103,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
         } else {
           widget.isCompletedNotifier.value = true;
 
-          await _player.play(AssetSource('omedetou.mp3'));
+          await _player.play(AssetSource('winning.mp3'));
 
           final score = data.score;
           final completionTime = data.completionTimeInSeconds;

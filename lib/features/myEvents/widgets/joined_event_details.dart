@@ -268,7 +268,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                             );
                                           } catch (_) {
                                             ScaffoldMessenger.of(widget.parentContext).showSnackBar(
-                                              SnackBar(content: Text(loc.translate('error_occurred'))),
+                                              SnackBar(content: Text(loc.translate('cancel_too_late'))),
                                             );
                                           }
                                         },
@@ -433,7 +433,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
 
                     case 'completed':
                       actionButton = AppButton(
-                        text: loc.translate('share'),
                         variant: ButtonVariant.outline,
                         size: ButtonSize.md,
                         icon: const Icon(Icons.share_outlined, size: 18),
@@ -466,7 +465,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                       buttons.add(const SizedBox(width: 12));
                       buttons.add(
                         AppButton(
-                          text: loc.translate('view_rating'),
+                          text: loc.translate('rating'),
                           size: ButtonSize.md,
                           variant: ButtonVariant.outline,
                           icon: const Icon(Icons.star_outline, size: 18),
@@ -489,7 +488,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                         // Nếu đã rate → View Rating
                         buttons.add(
                           AppButton(
-                            text: loc.translate('view_rating'),
+                            text: loc.translate('rating'),
                             size: ButtonSize.md,
                             variant: ButtonVariant.outline,
                             icon: const Icon(Icons.star_outline, size: 18),
@@ -533,7 +532,6 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                     buttons.insert(
                       0,
                       AppButton(
-                        text: loc.translate('share'),
                         variant: ButtonVariant.outline,
                         size: ButtonSize.md,
                         icon: const Icon(Icons.share_outlined, size: 18),

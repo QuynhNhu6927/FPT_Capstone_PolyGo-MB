@@ -55,6 +55,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
   bool showLeaveDialog = false;
   bool showEndDialog = false;
   bool _chatListenerAdded = false;
+  bool isHandRaised = false;
 
   @override
   void initState() {
@@ -185,6 +186,23 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         print("Participant: id=${v.id}, name=${v.name}, role=${v.role}");
       });
 
+      final prefs2 = await SharedPreferences.getInstance();
+      final token2 = prefs2.getString('token');
+      String? userId;
+
+      if (token2 != null && token2.isNotEmpty) {
+        try {
+          final me = await AuthRepository(AuthService(ApiClient())).me(token2);
+          userId = me.id;
+        } catch (e) {
+          //
+        }
+      }
+
+      if (userId != null) {
+        final ok = await _controller.joinRoomConfirm(userId);
+      }
+
       if (isUserHost) {
         Future.delayed(const Duration(seconds: 1), () async {
           await _controller.startCall();
@@ -196,8 +214,20 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         if (mounted) setState(() {});
       });
     } catch (e) {
-      _showSnack("Error initializing meeting: $e");
+      //
     }
+  }
+
+  void _toggleHand() async {
+    if (isHandRaised) {
+      await _controller.unwave();
+    } else {
+      await _controller.sendWave();
+    }
+
+    setState(() {
+      isHandRaised = !isHandRaised;
+    });
   }
 
   void _showSnack(String msg) =>
@@ -385,6 +415,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 duration: const Duration(milliseconds: 200),
                 opacity: (isChatOpen || isParticipantsOpen) ? 0 : 1,
                 child: MeetingControls(
+                  isHandRaised: isHandRaised,
+                  onToggleHand: _toggleHand,
                   isHost: widget.isHost,
                   isCameraOn: _controller.isVideoEnabled,
                   isMicOn: _controller.isAudioEnabled,

@@ -45,6 +45,12 @@ class VideoGrid extends StatelessWidget {
         final otherParticipants =
         allParticipants.where((p) => p.id != hostParticipant.id).toList();
 
+        otherParticipants.sort((a, b) {
+          if (a.isHandRaised && !b.isHandRaised) return -1;
+          if (!a.isHandRaised && b.isHandRaised) return 1;
+          return 0;
+        });
+
         // --- LOG ---
         print("=== Participants List Updated ===");
         print("Local user is host? ${widgetIsHost}, controller.hostId=${controller.hostId}");
@@ -220,6 +226,24 @@ class _ParticipantCardState extends State<ParticipantCard> {
               color: Colors.white54,
             ),
           ),
+          if (p.isHandRaised)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Icon(
+                Icons.pan_tool,
+                color: Colors.amber,
+                size: 24,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.6),
+                    offset: Offset(1, 1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+
           // Name + icons
           Positioned(
             left: 8,
@@ -261,7 +285,8 @@ class _ParticipantCardState extends State<ParticipantCard> {
               ),
             ),
           ),
-          if ((p.id == 'local' || widget.isHost) && p.videoEnabled)
+          // if ((p.id == 'local' || widget.isHost) && p.videoEnabled)
+          if (p.id == 'local' && p.videoEnabled)
             Positioned(
               top: 8,
               right: 8,

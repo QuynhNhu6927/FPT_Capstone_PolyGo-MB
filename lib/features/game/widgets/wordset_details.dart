@@ -290,7 +290,7 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                             ? _wordSet!.difficulty
                             : index == 1
                             ? _wordSet!.language.name
-                            : _wordSet!.category;
+                            : _wordSet!.interest.name;
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(

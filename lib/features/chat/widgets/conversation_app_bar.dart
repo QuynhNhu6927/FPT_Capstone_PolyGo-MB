@@ -1,22 +1,34 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../../../routes/app_routes.dart';
+import '../../../data/services/signalr/user_presence.dart';
+import '../screens/calling_screen.dart';
 
-class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String userName;
   final String avatarHeader;
   final bool isOnline;
   final String lastActiveAt;
+  final String receiverId;
 
   const ConversationAppBar({
     super.key,
+    required this.receiverId,
     required this.userName,
     required this.avatarHeader,
     required this.isOnline,
     required this.lastActiveAt,
   });
 
+  @override
+  State<ConversationAppBar> createState() => _ConversationAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _ConversationAppBarState extends State<ConversationAppBar> {
   String _formatLastActive(String? date) {
     if (date == null || date.isEmpty) return '';
     try {
@@ -26,6 +38,75 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
       return '';
     }
   }
+
+  Future<void> _handleCall() async {
+    try {
+      final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+      final isReceiverOnline = statusMap[widget.receiverId] ?? false;
+
+      if (!isReceiverOnline) {
+        if (!mounted) return; // check mounted trước khi dùng context
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Người dùng hiện đang offline")),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CallingScreen(
+            receiverId: widget.receiverId,
+            receiverName: widget.userName,
+            receiverAvatar: widget.avatarHeader,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint("❌ Error checking user online status: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Không thể kiểm tra trạng thái người dùng")),
+      );
+    }
+  }
+
+  // Trong _ConversationAppBarState
+  Future<void> _handleVideoCall() async {
+    try {
+      final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+      final isReceiverOnline = statusMap[widget.receiverId] ?? false;
+
+      if (!isReceiverOnline) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Người dùng hiện đang offline")),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CallingScreen(
+            receiverId: widget.receiverId,
+            receiverName: widget.userName,
+            receiverAvatar: widget.avatarHeader,
+            isVideoCall: true, // bật video call
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint("❌ Error checking user online status: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Không thể kiểm tra trạng thái người dùng")),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +118,10 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
         ? Colors.grey.withOpacity(0.1)
         : Colors.black.withOpacity(0.08);
 
-    final formattedLastActive = isOnline
+    final formattedLastActive = widget.isOnline
         ? 'Đang hoạt động'
-        : (lastActiveAt != null && lastActiveAt!.isNotEmpty
-        ? 'Lần cuối: ${_formatLastActive(lastActiveAt)}'
+        : (widget.lastActiveAt.isNotEmpty
+        ? 'Lần cuối: ${_formatLastActive(widget.lastActiveAt)}'
         : '');
 
     return Container(
@@ -66,15 +147,14 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor:
-                  (avatarHeader.isEmpty) ? Colors.grey : Colors.transparent,
+                  backgroundColor: widget.avatarHeader.isEmpty ? Colors.grey : Colors.transparent,
                   backgroundImage:
-                  (avatarHeader.isNotEmpty) ? NetworkImage(avatarHeader) : null,
-                  child: (avatarHeader.isEmpty)
+                  widget.avatarHeader.isNotEmpty ? NetworkImage(widget.avatarHeader) : null,
+                  child: widget.avatarHeader.isEmpty
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
-                if (isOnline)
+                if (widget.isOnline)
                   Positioned(
                     right: 0,
                     bottom: 0,
@@ -84,10 +164,7 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
                       decoration: BoxDecoration(
                         color: Colors.green,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: bgColor,
-                          width: 2,
-                        ),
+                        border: Border.all(color: bgColor, width: 2),
                       ),
                     ),
                   ),
@@ -100,7 +177,7 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    userName,
+                    widget.userName,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black,
@@ -112,11 +189,9 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
                     Text(
                       formattedLastActive,
                       style: TextStyle(
-                        color: isOnline
+                        color: widget.isOnline
                             ? Colors.green
-                            : (isDark
-                            ? Colors.grey[400]
-                            : Colors.grey[700]),
+                            : (isDark ? Colors.grey[400] : Colors.grey[700]),
                         fontSize: 13,
                       ),
                     ),
@@ -127,24 +202,21 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.call);
-            },
+            onPressed: _handleCall,
             icon: Icon(Icons.call, color: isDark ? Colors.white : Colors.black),
           ),
-
+          IconButton(
+            onPressed: _handleVideoCall,
+            icon: Icon(Icons.videocam, color: isDark ? Colors.white : Colors.black),
+          ),
           IconButton(
             onPressed: () {
-              print('Settings pressed');
+              debugPrint('Settings pressed');
             },
-            icon: Icon(Icons.more_vert,
-                color: isDark ? Colors.white : Colors.black),
+            icon: Icon(Icons.more_vert, color: isDark ? Colors.white : Colors.black),
           ),
         ],
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

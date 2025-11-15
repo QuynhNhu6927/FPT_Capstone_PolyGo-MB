@@ -310,7 +310,6 @@ class _EventDetailState extends State<EventDetail> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   AppButton(
-                    text: loc.translate('share'),
                     variant: ButtonVariant.outline,
                     size: ButtonSize.md,
                     icon: const Icon(Icons.share_outlined, size: 18),

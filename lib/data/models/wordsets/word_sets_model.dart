@@ -5,7 +5,7 @@ class WordSetModel {
   final String description;
   final String status;
   final String difficulty;
-  final String category;
+  final Interest interest;
   final int estimatedTimeInMinutes;
   final int playCount;
   final double averageTimeInSeconds;
@@ -23,7 +23,7 @@ class WordSetModel {
     required this.description,
     required this.status,
     required this.difficulty,
-    required this.category,
+    required this.interest,
     required this.estimatedTimeInMinutes,
     required this.playCount,
     required this.averageTimeInSeconds,
@@ -42,7 +42,6 @@ class WordSetModel {
     description: json['description'],
     status: json['status'],
     difficulty: json['difficulty'],
-    category: json['category'],
     estimatedTimeInMinutes: (json['estimatedTimeInMinutes'] ?? 0) as int,
     playCount: (json['playCount'] ?? 0) as int,
     averageTimeInSeconds: (json['averageTimeInSeconds'] ?? 0).toDouble(),
@@ -51,6 +50,9 @@ class WordSetModel {
     language: json['language'] != null
         ? Language.fromJson(json['language'])
         : Language(id: '', code: '', name: 'Unknown', iconUrl: ''),
+    interest: json['interest'] != null
+        ? Interest.fromJson(json['interest'])
+        : Interest(id: '', name: 'Unknown', iconUrl: ''),
     creator: json['creator'] != null
         ? Creator.fromJson(json['creator'])
         : Creator(id: '', name: 'Unknown'),
@@ -83,6 +85,26 @@ class Language {
   factory Language.fromJson(Map<String, dynamic> json) => Language(
     id: json['id'],
     code: json['code'],
+    name: json['name'],
+    iconUrl: json['iconUrl'],
+  );
+}
+
+
+// =================== INTEREST MODEL ===================
+class Interest {
+  final String id;
+  final String name;
+  final String iconUrl;
+
+  Interest({
+    required this.id,
+    required this.name,
+    required this.iconUrl,
+  });
+
+  factory Interest.fromJson(Map<String, dynamic> json) => Interest(
+    id: json['id'],
     name: json['name'],
     iconUrl: json['iconUrl'],
   );

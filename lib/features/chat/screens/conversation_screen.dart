@@ -6,12 +6,14 @@ class ConversationScreen extends StatefulWidget {
   final String userName;
   final String avatarHeader;
   final String lastActiveAt;
+  final String receiverId;
   final bool isOnline;
 
   const ConversationScreen({
     super.key,
     required this.conversationId,
     required this.lastActiveAt,
+    required this.receiverId,
     required this.userName,
     required this.avatarHeader,
     required this.isOnline,
@@ -31,6 +33,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       backgroundColor: isDark ? Colors.black : Colors.white,
       body: SafeArea(
         child: Conversation(
+          receiverId: widget.receiverId,
           conversationId: widget.conversationId,
           userName: widget.userName,
           lastActiveAt: widget.lastActiveAt,

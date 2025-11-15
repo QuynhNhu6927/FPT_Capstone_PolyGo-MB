@@ -5,7 +5,8 @@ class MeetingControls extends StatelessWidget {
   final bool isCameraOn;
   final bool isMicOn;
   final bool hasStartedEvent;
-
+  final bool isHandRaised;
+  final VoidCallback onToggleHand;
   final VoidCallback onToggleCamera;
   final VoidCallback onToggleMic;
   final VoidCallback onChatToggle;
@@ -27,6 +28,8 @@ class MeetingControls extends StatelessWidget {
     required this.onParticipants,
     required this.onSettings,
     required this.onLeave,
+    required this.isHandRaised,
+    required this.onToggleHand,
     this.onStartEvent,
     this.onEndEvent,
   }) : super(key: key);
@@ -61,6 +64,17 @@ class MeetingControls extends StatelessWidget {
               onPressed: onChatToggle,
               tooltip: "Chat",
             ),
+            const SizedBox(width: 14),
+            if (!isHost) ...[
+              _buildButton(
+                icon: isHandRaised ? Icons.back_hand : Icons.pan_tool_alt_outlined,
+                color: isHandRaised ? Colors.amber : Colors.white,
+                onPressed: onToggleHand,
+                tooltip: isHandRaised ? "Hạ tay" : "Giơ tay",
+              ),
+
+            ],
+
             const SizedBox(width: 14),
             _buildButton(
               icon: Icons.people,
