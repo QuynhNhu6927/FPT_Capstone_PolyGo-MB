@@ -50,6 +50,20 @@
   "enter_introduction": "Enter introduction",
   "update_profile_button": "Confirm",
   "update_profile_success": "Update profile success",
-  "update_profile_failed": "Update profile failed"
+  "update_profile_failed": "Update profile failed",
 
+  "detail": "Details",
+  "no_gifts_available": "You don't have any gift",
+  "no_badges_available": "You don't have any badge",
+  "my_badges": "Badges",
+  "my_gifts": "Gifts",
+
+  "friends": "Friends",
+  "posts": "Posts",
+
+  "plus_member": "Plus Member",
+  "days": "days",
+
+  "logout": "Logout",
+  "update_profile_title": "Update Information"
 }

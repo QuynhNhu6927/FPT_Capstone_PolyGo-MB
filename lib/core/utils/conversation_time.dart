@@ -1,8 +1,12 @@
 
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 
-String formatConversationTime(String? sentAt) {
+import '../localization/app_localizations.dart';
+
+String formatConversationTime(BuildContext context, String? sentAt) {
+  final loc = AppLocalizations.of(context);
   if (sentAt == null || sentAt.isEmpty) return '';
 
   final date = DateTime.tryParse(sentAt)?.toLocal();
@@ -17,15 +21,15 @@ String formatConversationTime(String? sentAt) {
     return DateFormat('HH:mm').format(date);
   } else {
     // Thứ 2 = Monday = 1, Sunday = 7
-    const weekdays = [
+    final weekdays = [
       '', // placeholder
-      'Thứ Hai',
-      'Thứ Ba',
-      'Thứ Tư',
-      'Thứ Năm',
-      'Thứ Sáu',
-      'Thứ Bảy',
-      'Chủ Nhật',
+      loc.translate('monday'),
+      loc.translate('tuesday'),
+      loc.translate('wednesday'),
+      loc.translate('thursday'),
+      loc.translate('friday'),
+      loc.translate('saturday'),
+      loc.translate('sunday'),
     ];
     return weekdays[date.weekday];
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../routes/app_routes.dart';
 
 class HomeHeader extends StatefulWidget {
@@ -59,7 +60,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
     const colorPrimary = Color(0xFF2563EB);
     const colorActive = colorPrimary;
-
+    final loc = AppLocalizations.of(context);
     final bgColor = isDark ? Colors.black : Colors.white;
     final shadowColor = isDark ? Colors.grey.withOpacity(0.1) : Colors.black.withOpacity(0.08);
     final searchBgColor = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F4F6);
@@ -149,7 +150,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                             style: TextStyle(fontSize: 16, color: searchTextColor),
                             textAlignVertical: TextAlignVertical.center,
                             decoration: InputDecoration(
-                              hintText: "Search...",
+                              hintText: loc.translate("search_placeholder") ?? "Search...",
                               hintStyle: TextStyle(color: searchHintColor),
                               border: InputBorder.none,
                               isCollapsed: true,

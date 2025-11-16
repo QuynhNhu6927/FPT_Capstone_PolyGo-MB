@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_localizations.dart';
+
 class IncomingCallScreen extends StatelessWidget {
   final String callerId;
   final String callerName;
@@ -20,6 +22,7 @@ class IncomingCallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final firstLetter = callerName.isNotEmpty ? callerName[0] : '?';
 
     return Scaffold(
@@ -28,7 +31,7 @@ class IncomingCallScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 60),
           Text(
-            isVideoCall ? "Video Call From" : "Voice Call From",
+            isVideoCall ? loc.translate("video_from") : loc.translate("voice_from"),
             style: const TextStyle(color: Colors.white70, fontSize: 18),
           ),
           const SizedBox(height: 8),

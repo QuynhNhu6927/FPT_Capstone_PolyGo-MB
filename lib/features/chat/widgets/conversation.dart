@@ -8,6 +8,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/conversation_repository.dart';
@@ -125,7 +126,6 @@ class _ConversationState extends State<Conversation> {
     if (_recorder == null) return;
     final granted = await _checkMicrophonePermission();
     if (!granted) {
-      debugPrint('Microphone permission denied');
       return;
     }
 
@@ -162,12 +162,10 @@ class _ConversationState extends State<Conversation> {
     });
 
     if (cancel || path == null || path.isEmpty) {
-      debugPrint('Recording canceled');
       _audioFilePath = null;
       return;
     }
 
-    debugPrint('Recording finished: $path');
 
     // Upload và gửi audio
     final prefs = await SharedPreferences.getInstance();
@@ -346,6 +344,7 @@ class _ConversationState extends State<Conversation> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     const colorPrimary = Color(0xFF2563EB);
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: ConversationAppBar(
@@ -439,15 +438,15 @@ class _ConversationState extends State<Conversation> {
                 ignoring: false,
                 child: Container(
                   color: Colors.black.withOpacity(0.4),
-                  child: const Center(
+                  child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(color: Colors.white),
-                        SizedBox(height: 16),
+                        const CircularProgressIndicator(color: Colors.white),
+                        const SizedBox(height: 16),
                         Text(
-                          'Đang tải ảnh lên...',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          loc.translate("loading..."),
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       ],
                     ),

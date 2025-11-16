@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/conversation_time.dart';
 import '../../../data/models/chat/conversation_model.dart';
 import '../../../data/repositories/conversation_repository.dart';
@@ -180,7 +181,7 @@ class _ConversationListState extends State<ConversationList> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     if (_isInit) return const Center(child: CircularProgressIndicator());
 
     return Column(
@@ -198,7 +199,7 @@ class _ConversationListState extends State<ConversationList> {
                     _loadConversations(loadMore: false);
                   },
                   decoration: InputDecoration(
-                    hintText: "Tìm kiếm...",
+                    hintText: loc.translate("search_placeholder"),
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F4F6),
@@ -238,7 +239,7 @@ class _ConversationListState extends State<ConversationList> {
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                       onPressed: () => _loadConversations(loadMore: true),
-                      child: const Text("Xem thêm"),
+                      child:Text(loc.translate("load_more")),
                     ),
                   ),
                 );
@@ -329,7 +330,7 @@ class _ConversationListState extends State<ConversationList> {
                     ),
                   ),
                   subtitle: Text(
-                    _getLastMessageText(conv.lastMessage),
+                    _getLastMessageText(conv.lastMessage, loc),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -341,7 +342,7 @@ class _ConversationListState extends State<ConversationList> {
                   ),
 
                   trailing: Text(
-                    formatConversationTime(conv.lastMessage.sentAt),
+                    formatConversationTime(context, conv.lastMessage.sentAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark ? Colors.grey[500] : Colors.grey[600],
                     ),
@@ -356,18 +357,21 @@ class _ConversationListState extends State<ConversationList> {
   }
 }
 
-String _getLastMessageText(LastMessage lastMessage) {
+String _getLastMessageText(LastMessage lastMessage, AppLocalizations loc) {
   final isMe = lastMessage.isSentByYou ?? false;
-
   switch (lastMessage.type) {
     case 0: // Text
       final content = lastMessage.content ?? '';
-      return isMe ? 'Bạn: $content' : content;
+      return isMe
+          ? '${loc.translate("you_sent")}: $content'
+          : content;
 
     case 1: // 1 ảnh
-      return isMe ? 'Bạn: đã gửi 1 ảnh' : 'Đã gửi 1 ảnh';
+      return isMe
+          ? '${loc.translate("you_sent")}: ${loc.translate("sent_one_image")}'
+          : loc.translate("sent_one_image");
 
-    case 2:
+    case 2: // nhiều ảnh
       int count = 0;
       if (lastMessage.content != null && lastMessage.content!.isNotEmpty) {
         try {
@@ -383,13 +387,19 @@ String _getLastMessageText(LastMessage lastMessage) {
           count = 1;
         }
       }
-      return isMe ? 'Bạn: đã gửi nhiều ảnh' : 'Đã gửi nhiều ảnh';
+      return isMe
+          ? '${loc.translate("you_sent")}: ${loc.translate("sent_multiple_images")}'
+          : loc.translate("sent_multiple_images");
 
     case 3: // audio
-      return isMe ? 'Bạn: đã gửi thu âm' : 'Đã gửi thu âm';
+      return isMe
+          ? '${loc.translate("you_sent")}: ${loc.translate("sent_audio")}'
+          : loc.translate("sent_audio");
 
     default:
       final content = lastMessage.content ?? '';
-      return isMe ? 'Bạn: $content' : content;
+      return isMe
+          ? '${loc.translate("you_sent")}: $content'
+          : content;
   }
 }

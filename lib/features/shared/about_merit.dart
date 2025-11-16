@@ -31,9 +31,10 @@ class AboutMeritDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(sw(context, 16)),
               boxShadow: const [
                 BoxShadow(
-                    color: Color(0x11000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 8)),
+                  color: Color(0x11000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
               ],
             ),
             child: Column(
@@ -45,34 +46,44 @@ class AboutMeritDialog extends StatelessWidget {
                     color: const Color(0xFFE0F7FA),
                     borderRadius: BorderRadius.circular(sw(context, 12)),
                   ),
-                  child: Icon(Icons.verified_user,
-                      size: sw(context, 40), color: Colors.teal[700]),
+                  child: Icon(
+                    Icons.verified_user,
+                    size: sw(context, 40),
+                    color: Colors.teal[700],
+                  ),
                 ),
                 SizedBox(height: sh(context, 20)),
 
+                // Title
                 Text(
-                  loc.translate("about_merit_title") ?? "Điểm uy tín",
+                  loc.translate("about_merit_title") ?? "Merit Info",
                   textAlign: TextAlign.center,
                   style: t.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, fontSize: st(context, 24)),
+                    fontWeight: FontWeight.bold,
+                    fontSize: st(context, 24),
+                  ),
                 ),
                 SizedBox(height: sh(context, 16)),
 
+                // Description items
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "+80 - 100: Bạn là thành viên hoạt động sôi nổi và đáng tin cậy",
+                      loc.translate("merit_range_high") ??
+                          "+80 - 100: Active and trustworthy member",
                       style: t.bodyLarge?.copyWith(color: Colors.green),
                     ),
                     SizedBox(height: sh(context, 8)),
                     Text(
-                      "+40 - 79: Bạn bị cảnh cáo nhiều lần, sẽ bị hạn chế một số chức năng",
+                      loc.translate("merit_range_mid") ??
+                          "+40 - 79: Warned multiple times, some features restricted",
                       style: t.bodyLarge?.copyWith(color: Colors.orange),
                     ),
                     SizedBox(height: sh(context, 8)),
                     Text(
-                      "+0 - 39: Bạn không đáng tin cậy và sẽ bị cấm trong một thời gian",
+                      loc.translate("merit_range_low") ??
+                          "+0 - 39: Untrustworthy and temporarily banned",
                       style: t.bodyLarge?.copyWith(color: Colors.red),
                     ),
                   ],

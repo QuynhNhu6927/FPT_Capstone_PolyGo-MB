@@ -193,7 +193,7 @@ class UserInfoHeader extends StatelessWidget {
                           ),
                           SizedBox(width: sw(context, 4)),
                           Text(
-                            "Plus Member",
+                            loc.translate("plus_member"),
                             style: t.bodyMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -289,7 +289,7 @@ class UserInfoHeader extends StatelessWidget {
                           ),
                           SizedBox(width: sw(context, 4)),
                           Text(
-                            "${user.streakDays} days",
+                            "${user.streakDays} ${loc.translate("days")}",
                             style: t.bodyMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

@@ -32,7 +32,7 @@ class _WordSetDetailsState extends State<WordSetDetails> {
     _loadWordSet();
   }
 
-  Future<void> _loadWordSet() async {
+    Future<void> _loadWordSet() async {
     setState(() {
       _loading = true;
       _error = null;
@@ -50,10 +50,14 @@ class _WordSetDetailsState extends State<WordSetDetails> {
     }
 
     try {
+      final currentLang = Localizations.localeOf(context).languageCode;
+
       final res = await _repo.getWordSetById(
         token: token,
         id: widget.wordSetId,
+        lang: currentLang,
       );
+
       if (!mounted) return;
       setState(() {
         _wordSet = res;
@@ -168,16 +172,6 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                   DateFormat('dd MMM yyyy').format(_wordSet!.createdAt),
                   style: TextStyle(color: secondaryText, fontSize: 12),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      _wordSet!.averageRating.toStringAsFixed(1),
-                      style: TextStyle(color: secondaryText, fontSize: 12),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.star, color: Colors.amber, size: 14),
-                  ],
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -227,7 +221,7 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                           color: textColor),
                     ),
                     Text(
-                      'Creator',
+                      loc.translate("creator") ?? "Creator",
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ],
@@ -241,13 +235,13 @@ class _WordSetDetailsState extends State<WordSetDetails> {
               children: [
                 Expanded(
                   child: Text(
-                    'Est: ${_wordSet!.estimatedTimeInMinutes} min',
+                    '${loc.translate("est") ?? "Est"}: ${_wordSet?.estimatedTimeInMinutes} ${loc.translate("minutes") ?? "min"}',
                     style: TextStyle(fontSize: 12, color: secondaryText),
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    'Avg: ${_wordSet!.averageTimeInSeconds}s',
+                    '${loc.translate("avg") ?? "Avg"}: ${_wordSet?.averageTimeInSeconds.toStringAsFixed(2)}${loc.translate("seconds_short") ?? "s"}',
                     style: TextStyle(fontSize: 12, color: secondaryText),
                   ),
                 ),
@@ -260,13 +254,13 @@ class _WordSetDetailsState extends State<WordSetDetails> {
               children: [
                 Expanded(
                   child: Text(
-                    'Words: ${_wordSet!.wordCount}',
+                    '${loc.translate("words") ?? "Words"}: ${_wordSet?.wordCount}',
                     style: TextStyle(fontSize: 12, color: secondaryText),
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    'Plays: ${_wordSet!.playCount}',
+                    '${loc.translate("plays") ?? "Plays"}: ${_wordSet?.playCount}',
                     style: TextStyle(fontSize: 12, color: secondaryText),
                   ),
                 ),
@@ -287,7 +281,7 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                       separatorBuilder: (_, __) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         String label = index == 0
-                            ? _wordSet!.difficulty
+                            ? loc.translate(_wordSet!.difficulty.toLowerCase()) ?? _wordSet!.difficulty
                             : index == 1
                             ? _wordSet!.language.name
                             : _wordSet!.interest.name;
@@ -320,8 +314,8 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Play',
+                  child: Text(
+                    loc.translate("start") ?? "Start",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

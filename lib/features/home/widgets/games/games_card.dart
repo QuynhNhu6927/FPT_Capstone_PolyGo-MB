@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/models/wordsets/word_sets_model.dart';
 import '../../../../routes/app_routes.dart';
 
@@ -13,7 +14,7 @@ class WordSetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -53,15 +54,70 @@ class WordSetCard extends StatelessWidget {
                       DateFormat('dd MMM yyyy').format(wordSet.createdAt),
                       style: TextStyle(color: secondaryText, fontSize: 12),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          wordSet.averageRating.toStringAsFixed(1),
-                          style: TextStyle(color: secondaryText, fontSize: 12),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.help_outline, color: Colors.grey),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            content: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Cách chơi
+                                  Text(
+                                    loc.translate("how_to_play"),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    loc.translate("how_to_play_1"),
+                                  ),
+                                  Text(
+                                    loc.translate("how_to_play_2"),
+                                  ),
+                                  Text(
+                                    loc.translate("how_to_play_3"),
+                                  ),
+                                  Text(
+                                    loc.translate("how_to_play_4"),
+                                  ),
+                                  Text(
+                                    loc.translate("how_to_play_5"),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Cách tính điểm
+                                  Text(
+                                    loc.translate("scoring"),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    loc.translate("scoring_1"),
+                                  ),
+                                  Text(
+                                    loc.translate("scoring_2"),
+                                  ),
+                                  Text(
+                                    loc.translate("scoring_3"),
+                                  ),
+                                  Text(
+                                    loc.translate("scoring_4"),
+                                  ),
+                                ],
+                              )
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(loc.translate("understand")),
+                              ),
+                            ],
+                          ),
+                        );
+
+                      },
                     ),
                   ],
                 ),
@@ -112,7 +168,7 @@ class WordSetCard extends StatelessWidget {
                               color: textColor),
                         ),
                         Text(
-                          'Creator',
+                          loc.translate("creator"),
                           style: TextStyle(fontSize: 12, color: secondaryText),
                         ),
                       ],
@@ -126,13 +182,13 @@ class WordSetCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Est: ${wordSet.estimatedTimeInMinutes} min',
+                        '${loc.translate("est")}: ${wordSet.estimatedTimeInMinutes} ${loc.translate("minutes")}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),
                     Expanded(
                       child: Text(
-                        'Avg: ${wordSet.averageTimeInSeconds}s',
+                        '${loc.translate("avg")}: ${wordSet.averageTimeInSeconds.toStringAsFixed(2)}${loc.translate("seconds_short")}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),
@@ -145,13 +201,13 @@ class WordSetCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Words: ${wordSet.wordCount}',
+                        '${loc.translate("words")}: ${wordSet.wordCount}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),
                     Expanded(
                       child: Text(
-                        'Plays: ${wordSet.playCount}',
+                        '${loc.translate("plays")}: ${wordSet.playCount}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),
@@ -172,7 +228,7 @@ class WordSetCard extends StatelessWidget {
                           separatorBuilder: (_, __) => const SizedBox(width: 8),
                           itemBuilder: (context, index) {
                             String label = index == 0
-                                ? wordSet.difficulty
+                                ? loc.translate(wordSet.difficulty.toLowerCase())
                                 : index == 1
                                 ? wordSet.language.name
                                 : wordSet.interest.name;
@@ -215,8 +271,8 @@ class WordSetCard extends StatelessWidget {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Go',
+                      child: Text(
+                        loc.translate("go"),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,

@@ -49,8 +49,9 @@ class _HostedFilterState extends State<HostedFilter> {
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
 
-      final langsFuture = _languageRepo.getAllLanguages(token, lang: 'vi');
-      final interestsFuture = _interestRepo.getAllInterests(token, lang: 'vi');
+      final currentLang = Localizations.localeOf(context).languageCode;
+      final langsFuture = _languageRepo.getAllLanguages(token, lang: currentLang);
+      final interestsFuture = _interestRepo.getAllInterests(token, lang: currentLang);
 
       final results = await Future.wait([langsFuture, interestsFuture]);
       final langs = results[0] as List<LanguageModel>;
@@ -124,8 +125,8 @@ class _HostedFilterState extends State<HostedFilter> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ngôn ngữ',
+                      Text(
+                        loc.translate("language"),
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
@@ -143,8 +144,8 @@ class _HostedFilterState extends State<HostedFilter> {
                       ),
                       const SizedBox(height: 16),
                       const Divider(thickness: 1),
-                      const Text(
-                        'Sở thích',
+                      Text(
+                        loc.translate("interest"),
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),

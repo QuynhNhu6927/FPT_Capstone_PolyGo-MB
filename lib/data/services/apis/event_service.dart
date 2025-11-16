@@ -56,6 +56,7 @@ class EventService {
     List<String>? languageIds,
     List<String>? interestIds,
     bool? isFree,
+    String? name,
   }) async {
     final queryParameters = <String, dynamic>{
       'lang': lang,
@@ -71,6 +72,9 @@ class EventService {
     }
     if (isFree != null) {
       queryParameters['isFree'] = isFree;
+    }
+    if (name != null) {
+      queryParameters['name'] = name;
     }
 
     final response = await apiClient.get(

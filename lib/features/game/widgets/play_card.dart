@@ -4,13 +4,12 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/responsive.dart';
-import '../../../data/models/wordsets/play_word_response.dart';
 import '../../../data/models/wordsets/start_wordset_response.dart';
 import '../../../data/repositories/wordset_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../home/screens/home_screen.dart';
-import '../screens/overview_screen.dart';
 
 class PlayCardWidget extends StatefulWidget {
   final WordSetData startData;
@@ -65,6 +64,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
   }
 
   Future<void> submitAnswer() async {
+    final loc = AppLocalizations.of(context);
     final answer = _answerController.text.trim();
     if (answer.isEmpty) return;
 
@@ -102,7 +102,6 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
           });
         } else {
           widget.isCompletedNotifier.value = true;
-
           await _player.play(AssetSource('winning.mp3'));
 
           final score = data.score;
@@ -114,24 +113,25 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: const Text(
-                "Congratulations!",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              title: Text(
+                loc.translate("congratulations"),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "You have completed the word set.",
-                    style: TextStyle(fontSize: 16),
+                  Text(
+                    loc.translate("completed_word_set"),
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  SizedBox(height: 16), // khoảng cách trên
+                  SizedBox(height: 16),
                   Row(
                     children: [
                       const Icon(Icons.star, size: 20, color: Colors.amber),
                       const SizedBox(width: 8),
-                      Text("Score: $score", style: const TextStyle(fontSize: 16)),
+                      Text("${loc.translate("score")}: $score",
+                          style: const TextStyle(fontSize: 16)),
                     ],
                   ),
                   SizedBox(height: 12),
@@ -139,7 +139,8 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                     children: [
                       const Icon(Icons.timer, size: 20, color: Colors.blue),
                       const SizedBox(width: 8),
-                      Text("Completion Time: $completionTime seconds",
+                      Text(
+                          "${loc.translate("completion_time")}: $completionTime ${loc.translate("seconds")}",
                           style: const TextStyle(fontSize: 16)),
                     ],
                   ),
@@ -148,7 +149,8 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                     children: [
                       const Icon(Icons.lightbulb_outline, size: 20, color: Colors.green),
                       const SizedBox(width: 8),
-                      Text("Hints Used: $hintsUsed", style: const TextStyle(fontSize: 16)),
+                      Text("${loc.translate("hints_used")}: $hintsUsed",
+                          style: const TextStyle(fontSize: 16)),
                     ],
                   ),
                   SizedBox(height: 12),
@@ -156,7 +158,8 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                     children: [
                       const Icon(Icons.close, size: 20, color: Colors.red),
                       const SizedBox(width: 8),
-                      Text("Mistakes: $mistakes", style: const TextStyle(fontSize: 16)),
+                      Text("${loc.translate("mistakes")}: $mistakes",
+                          style: const TextStyle(fontSize: 16)),
                     ],
                   ),
                 ],
@@ -176,7 +179,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                       arguments: {'id': widget.startData.wordSetId},
                     );
                   },
-                  child: const Text("OK"),
+                  child: Text(loc.translate("ok")),
                 ),
               ],
             ),
@@ -189,17 +192,18 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
         userAnswer = '';
         setState(() => showAnswer = true);
       }
-    } catch (e, st) {
+    } catch (e) {
       //
     }
   }
 
   Future<void> showHintOnce() async {
+    final loc = AppLocalizations.of(context);
     if (hintUsed) return;
     hintUsed = true;
 
     setState(() {
-      hint = "Loading hint...";
+      hint = loc.translate("loading_hint");
     });
 
     try {
@@ -210,16 +214,16 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
 
       if (token.isEmpty) {
         setState(() {
-          hint = "No token available";
+          hint = loc.translate("no_token_available");
         });
         return;
       }
 
       final response = await widget.repo.getHint(token: token, wordSetId: wordSetId);
 
-      String apiHint = widget.startData.currentWord.hint ?? "No hint available";
+      String apiHint = widget.startData.currentWord.hint ?? (loc.translate("no_hint_available"));
 
-      if (response != null && response.data != null && response.data.currentWord != null) {
+      if (response != null) {
         apiHint = response.data.currentWord.hint ?? apiHint;
       }
 
@@ -236,7 +240,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
 
     } catch (e) {
       setState(() {
-        hint = "Failed to load hint";
+        hint = loc.translate("failed_to_load_hint");
       });
     }
   }
@@ -245,6 +249,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context);
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final cardBg = isDark
         ? const LinearGradient(colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)])
@@ -274,7 +279,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
               children: [
                 Center(
                   child: Text(
-                    "Scramble word",
+                    loc.translate("scramble_word"),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: textColor,
@@ -291,13 +296,12 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                     icon: Icon(
                       Icons.lightbulb_outline,
                       color: hintUsed ? Colors.grey : Colors.amber,
-                      size: 28,
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: sh(context, 12)),
+            SizedBox(height: sh(context, 20)),
             Wrap(
               alignment: WrapAlignment.center,
               spacing: sw(context, 8),
@@ -334,7 +338,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
               controller: _answerController,
               textAlign: TextAlign.center,
               decoration: InputDecoration(
-                hintText: "Type the word here...",
+                hintText: loc.translate("type_the_word_here..."),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(sw(context, 8))),
               ),
             ),
@@ -347,14 +351,16 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                   backgroundColor: colorPrimary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sw(context, 8))),
                 ),
-                child: const Text("Submit Answer", style: TextStyle(color: Colors.white)),
+                child: Text(loc.translate("submit_answer"), style: const TextStyle(color: Colors.white)),
               ),
             ),
             if (showAnswer)
               Padding(
                 padding: EdgeInsets.only(top: sh(context, 16)),
                 child: Text(
-                  userAnswer.toUpperCase() == question.toUpperCase() ? "✅ Correct!" : "❌ Try again",
+                  userAnswer.toUpperCase() == question.toUpperCase()
+                      ? loc.translate("correct!")
+                      : loc.translate("try_again"),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: userAnswer.toUpperCase() == question.toUpperCase()

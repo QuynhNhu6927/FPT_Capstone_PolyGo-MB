@@ -24,11 +24,18 @@ class _MyGiftsState extends State<MyGifts> {
   @override
   void initState() {
     super.initState();
+
     _repo = GiftRepository(GiftService(ApiClient()));
-    _loadMyGifts();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final loc = AppLocalizations.of(context);
+      final lang = loc.locale.languageCode;
+
+      _loadMyGifts(lang: lang);
+    });
   }
 
-  Future<void> _loadMyGifts() async {
+  Future<void> _loadMyGifts({String? lang}) async {
     setState(() {
       _loading = true;
       _error = null;
@@ -46,7 +53,7 @@ class _MyGiftsState extends State<MyGifts> {
         return;
       }
 
-      final res = await _repo.getMyGifts(token: token, pageSize: 50);
+      final res = await _repo.getMyGifts(token: token, pageSize: 50, lang: lang ?? 'vi');
       if (!mounted) return;
 
       setState(() {

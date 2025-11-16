@@ -39,27 +39,37 @@ class AboutStreakDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // ICON FIRE
                 Container(
                   padding: EdgeInsets.all(sw(context, 12)),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFEBEE),
                     borderRadius: BorderRadius.circular(sw(context, 12)),
                   ),
-                  child: Icon(Icons.local_fire_department_rounded,
-                      size: sw(context, 40), color: Colors.redAccent),
+                  child: Icon(
+                    Icons.local_fire_department_rounded,
+                    size: sw(context, 40),
+                    color: Colors.redAccent,
+                  ),
                 ),
                 SizedBox(height: sh(context, 20)),
 
+                // TITLE
                 Text(
-                  loc.translate("about_streak_title") ?? "Chuỗi đăng nhập vào PolyGo!",
+                  loc.translate("about_streak_title") ??
+                      "Chuỗi đăng nhập vào PolyGo!",
                   textAlign: TextAlign.center,
                   style: t.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, fontSize: st(context, 24)),
+                    fontWeight: FontWeight.bold,
+                    fontSize: st(context, 24),
+                  ),
                 ),
                 SizedBox(height: sh(context, 16)),
 
+                // DESCRIPTION
                 Text(
-                  "Hãy ghé thăm PolyGo mỗi ngày để duy trì chuỗi của bạn và đạt được danh hiệu riêng!",
+                  loc.translate("about_streak_description") ??
+                      "Hãy ghé thăm PolyGo mỗi ngày để duy trì chuỗi của bạn và đạt được danh hiệu riêng!",
                   textAlign: TextAlign.center,
                   style: t.bodyLarge?.copyWith(height: 1.5),
                 ),

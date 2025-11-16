@@ -267,6 +267,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                               ),
                                             );
                                           } catch (_) {
+                                            if (mounted) Navigator.of(context, rootNavigator: true).pop();
                                             ScaffoldMessenger.of(widget.parentContext).showSnackBar(
                                               SnackBar(content: Text(loc.translate('cancel_too_late'))),
                                             );

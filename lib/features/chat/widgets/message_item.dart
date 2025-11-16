@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/date_separator.dart';
 import '../../../data/models/chat/conversation_message_model.dart';
 import 'chat_bubble.dart';
@@ -33,7 +34,7 @@ class MessageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentDate = DateTime.tryParse(message.sentAt)?.toLocal();
-
+    final loc = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -46,13 +47,14 @@ class MessageItem extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    formatDateSeparator(currentDate),
+                    formatDateSeparator(context, currentDate),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
                 ),
                 const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
               ],
@@ -91,18 +93,18 @@ class MessageItem extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('Xóa tin nhắn?'),
+                          title: Text(loc.translate("erase_mess")),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Hủy'),
+                              child: Text(loc.translate("cancel")),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 onDelete!(message.id);
                               },
-                              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                              child: Text(loc.translate("confirm"), style: TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),

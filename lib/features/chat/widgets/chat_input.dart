@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_localizations.dart';
+
 class ChatInputBar extends StatelessWidget {
   final bool isUploadingImages;
   final bool isDark;
@@ -31,6 +33,7 @@ class ChatInputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -58,7 +61,7 @@ class ChatInputBar extends StatelessWidget {
               controller: controller,
               enabled: !isUploadingImages,
               decoration: InputDecoration(
-                hintText: "Nhập tin nhắn...",
+                hintText:  loc.translate("type_mess"),
                 filled: true,
                 fillColor:
                 isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F3F3),

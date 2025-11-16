@@ -95,6 +95,7 @@ class EventRepository {
         int pageSize = 10,
         List<String>? languageIds,
         List<String>? interestIds,
+        String? name,
         bool? isFree,
       }) async {
     final res = await _service.getUpcomingEvents(
@@ -104,6 +105,7 @@ class EventRepository {
       pageSize: pageSize,
       languageIds: languageIds,
       interestIds: interestIds,
+      name: name,
       isFree: isFree,
     );
 

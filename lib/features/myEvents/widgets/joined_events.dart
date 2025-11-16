@@ -214,13 +214,13 @@ class _JoinedEventsState extends State<JoinedEvents> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildStatusButton(EventStatus.upcoming, "Sắp diễn ra"),
+                _buildStatusButton(EventStatus.upcoming, loc.translate("upcoming")),
                 const SizedBox(width: 8),
-                _buildStatusButton(EventStatus.live, "Đang diễn ra"),
+                _buildStatusButton(EventStatus.live, loc.translate("now_live")),
                 const SizedBox(width: 8),
-                _buildStatusButton(EventStatus.canceled, "Đã bị hủy"),
+                _buildStatusButton(EventStatus.canceled, loc.translate("cancelled")),
                 const SizedBox(width: 8),
-                _buildStatusButton(EventStatus.past, "Đã kết thúc"),
+                _buildStatusButton(EventStatus.past, loc.translate("ended")),
               ],
             ),
           ),
@@ -247,7 +247,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
                     focusNode: _searchFocusNode,
                     style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
-                      hintText: loc.translate("search"),
+                      hintText: loc.translate("search_placeholder"),
                       hintStyle: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[600]),
                       border: InputBorder.none,
                       isCollapsed: true,

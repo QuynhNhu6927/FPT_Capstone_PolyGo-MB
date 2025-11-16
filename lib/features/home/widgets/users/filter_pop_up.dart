@@ -48,11 +48,13 @@ class _FilterPopUpState extends State<FilterPopUp> {
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-
       if (token.isEmpty) throw Exception("Missing token");
 
-      final langsFuture = _languageRepo.getAllLanguages(token, lang: 'vi');
-      final interestsFuture = _interestRepo.getAllInterests(token, lang: 'vi');
+      final locale = Localizations.localeOf(context);
+      final langCode = locale.languageCode;
+
+      final langsFuture = _languageRepo.getAllLanguages(token, lang: langCode);
+      final interestsFuture = _interestRepo.getAllInterests(token, lang: langCode);
 
       final results = await Future.wait([langsFuture, interestsFuture]);
       final langs = results[0] as List<LanguageModel>;
@@ -105,8 +107,8 @@ class _FilterPopUpState extends State<FilterPopUp> {
                       icon: const Icon(Icons.close_rounded, size: 28),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const Text(
-                      'Bộ lọc',
+                    Text(
+                      loc.translate("filter"),
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 48),
@@ -126,8 +128,8 @@ class _FilterPopUpState extends State<FilterPopUp> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ngôn ngữ muốn học',
+                      Text(
+                        loc.translate("learning"),
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -147,8 +149,8 @@ class _FilterPopUpState extends State<FilterPopUp> {
                       const SizedBox(height: 16),
                       const Divider(thickness: 1),
 
-                      const Text(
-                        'Ngôn ngữ đã biết',
+                      Text(
+                        loc.translate("native_language"),
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -168,8 +170,8 @@ class _FilterPopUpState extends State<FilterPopUp> {
                       const SizedBox(height: 16),
                       const Divider(thickness: 1),
 
-                      const Text(
-                        'Sở thích',
+                      Text(
+                        loc.translate("interest"),
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -196,7 +198,7 @@ class _FilterPopUpState extends State<FilterPopUp> {
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.check_rounded),
-                  label: const Text('Áp dụng bộ lọc'),
+                  label: Text(loc.translate("apply_filters")),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(

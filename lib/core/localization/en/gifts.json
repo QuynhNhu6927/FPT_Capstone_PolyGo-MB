@@ -1,7 +1,6 @@
 {
   "load_gifts_error": "Error!",
   "no_accepted_gifts": "You do not have any accepted gifts",
-  "my_gifts": "My gifts",
   "unreceived": "Unreceived",
   "received": "Received",
   "failed_to_load_gifts": "Error",

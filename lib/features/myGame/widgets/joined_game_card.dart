@@ -1,10 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/wordsets/joined_word_set.dart';
-import '../../../data/models/wordsets/word_sets_model.dart';
 import '../../../routes/app_routes.dart';
 
 class JoinedGameCard extends StatelessWidget {
@@ -16,7 +15,7 @@ class JoinedGameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -115,7 +114,7 @@ class JoinedGameCard extends StatelessWidget {
                             color: textColor),
                       ),
                       Text(
-                        'Creator',
+                        loc.translate("creator"),
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ],
@@ -129,13 +128,13 @@ class JoinedGameCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Best score: ${wordSet.bestScore}',
+                      '${loc.translate("best_score")}: ${wordSet.bestScore}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      'Best Time: ${wordSet.bestTime}',
+                      '${loc.translate("best_time")}: ${wordSet.bestTime}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
@@ -156,7 +155,7 @@ class JoinedGameCard extends StatelessWidget {
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           String label = index == 0
-                              ? wordSet.difficulty
+                              ? loc.translate(wordSet.difficulty.toLowerCase())
                               : wordSet.language.name;
                           return Container(
                             padding: const EdgeInsets.symmetric(
@@ -197,8 +196,8 @@ class JoinedGameCard extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'View',
+                    child: Text(
+                      loc.translate("view"),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

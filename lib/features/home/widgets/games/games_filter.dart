@@ -25,7 +25,7 @@ class _WordSetFilterState extends State<WordSetFilter> {
 
   List<LanguageModel> _languages = [];
   final Set<String> _selectedLanguages = {};
-  List<InterestModel> _interest = [];
+  List<InterestModel> _interests = [];
   final Set<String> _selectedInterests = {};
   String? _selectedDifficulty;
 
@@ -50,14 +50,15 @@ class _WordSetFilterState extends State<WordSetFilter> {
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
 
-      final langs = await _languageRepo.getAllLanguages(token, lang: 'vi');
+      final currentLang = Localizations.localeOf(context).languageCode;
+
+      final langsFuture = _languageRepo.getAllLanguages(token, lang: currentLang);
+      final interestsFuture = _interestRepo.getAllInterests(token, lang: currentLang);
+
+      final results = await Future.wait([langsFuture, interestsFuture]);
       setState(() {
-        _languages = langs;
-        _loading = false;
-      });
-      final interests = await _interestRepo.getAllInterests(token, lang: 'vi');
-      setState(() {
-        _interest = interests;
+        _languages = results[0] as List<LanguageModel>;
+        _interests = results[1] as List<InterestModel>;
         _loading = false;
       });
     } catch (e) {
@@ -88,7 +89,6 @@ class _WordSetFilterState extends State<WordSetFilter> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -100,6 +100,7 @@ class _WordSetFilterState extends State<WordSetFilter> {
           color: Theme.of(context).scaffoldBackgroundColor,
           child: Column(
             children: [
+              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
@@ -126,7 +127,9 @@ class _WordSetFilterState extends State<WordSetFilter> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Ngôn ngữ", style: TextStyle(fontWeight: FontWeight.w600)),
+                      // Languages
+                      Text(loc.translate("language"),
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -141,13 +144,18 @@ class _WordSetFilterState extends State<WordSetFilter> {
                       ),
                       const SizedBox(height: 16),
                       const Divider(),
-                      const Text("Độ khó", style: TextStyle(fontWeight: FontWeight.w600)),
+
+                      // Difficulty
+                      Text(loc.translate("difficulty"),
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         children: _difficulties
                             .map((diff) => ChoiceChip(
-                          label: Text(diff),
+                          label: Text(
+                            loc.translate(diff.toLowerCase()) ?? diff,
+                          ),
                           selected: _selectedDifficulty == diff,
                           onSelected: (_) =>
                               setState(() => _selectedDifficulty = diff),
@@ -156,16 +164,19 @@ class _WordSetFilterState extends State<WordSetFilter> {
                       ),
                       const SizedBox(height: 16),
                       const Divider(),
-                      const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.w600)),
+
+                      // Interests
+                      Text(loc.translate("category"),
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _interest
-                            .map((interests) => FilterChip(
-                          label: Text(interests.name),
-                          selected: _selectedInterests.contains(interests.id),
-                          onSelected: (_) => _toggleInterest(interests.id),
+                        children: _interests
+                            .map((interest) => FilterChip(
+                          label: Text(interest.name),
+                          selected: _selectedInterests.contains(interest.id),
+                          onSelected: (_) => _toggleInterest(interest.id),
                         ))
                             .toList(),
                       ),
@@ -173,6 +184,7 @@ class _WordSetFilterState extends State<WordSetFilter> {
                   ),
                 ),
               ),
+              // Apply button
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -187,8 +199,8 @@ class _WordSetFilterState extends State<WordSetFilter> {
                           .toList(),
                       'difficulty': _selectedDifficulty,
                       'interests': _selectedInterests
-                          .map((id) => _interest.firstWhere((x) => x.id == id))
-                          .map((lang) => {'id': lang.id, 'name': lang.name})
+                          .map((id) => _interests.firstWhere((x) => x.id == id))
+                          .map((interest) => {'id': interest.id, 'name': interest.name})
                           .toList(),
                     });
                   },

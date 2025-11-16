@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/services/signalr/user_presence.dart';
 
 class CallingScreen extends StatefulWidget {
@@ -164,8 +165,12 @@ class _CallingScreenState extends State<CallingScreen> {
   void _endCallWithUI() async {
     await _cleanupCall();
     if (!mounted) return;
+    final loc = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cuộc gọi đã kết thúc'), duration: Duration(seconds: 2)),
+      SnackBar(
+        content: Text(loc.translate('call_ended')),
+        duration: const Duration(seconds: 2),
+      ),
     );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) Navigator.pop(context);
@@ -182,6 +187,7 @@ class _CallingScreenState extends State<CallingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -248,8 +254,8 @@ class _CallingScreenState extends State<CallingScreen> {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  "Calling...",
+                child: Text(
+                  loc.translate("calling"),
                   style: TextStyle(
                       color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                 ),
@@ -261,6 +267,7 @@ class _CallingScreenState extends State<CallingScreen> {
   }
 
   Widget _buildCallInfo() {
+    final loc = AppLocalizations.of(context);
     final firstLetter = widget.receiverName.isNotEmpty ? widget.receiverName[0] : '?';
     return Align(
       alignment: Alignment.topCenter,
@@ -271,7 +278,7 @@ class _CallingScreenState extends State<CallingScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              widget.isVideoCall ? "Video Call" : "Voice Call",
+              widget.isVideoCall ? loc.translate("video_call") : loc.translate("voice_call"),
               style: const TextStyle(color: Colors.white70, fontSize: 18),
             ),
             const SizedBox(height: 8),

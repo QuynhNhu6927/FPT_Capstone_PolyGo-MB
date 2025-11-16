@@ -270,16 +270,9 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                                   ),
                                                 );
                                               } catch (_) {
-                                                ScaffoldMessenger.of(
-                                                  widget.parentContext,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      loc.translate(
-                                                        'cancel_too_late',
-                                                      ),
-                                                    ),
-                                                  ),
+                                                if (mounted) Navigator.of(context, rootNavigator: true).pop();
+                                                ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+                                                  SnackBar(content: Text(loc.translate('cancel_too_late'))),
                                                 );
                                               }
                                             },
