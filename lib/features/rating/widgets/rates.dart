@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/models/events/event_my_rating_response.dart';
 import '../../../data/models/events/event_rating_item.dart';
@@ -112,9 +113,10 @@ class _RatesState extends State<Rates> {
       );
 
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Cập nhật đánh giá thành công!'),
+            content: Text(loc.translate("update_rating_success")),
           ),
         );
       }
@@ -124,9 +126,10 @@ class _RatesState extends State<Rates> {
       await _loadOtherRatings();
     } catch (e) {
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Cập nhật thất bại, vui lòng thử lại.'),
+            content: Text(loc.translate("error")),
           ),
         );
       }
@@ -150,7 +153,7 @@ class _RatesState extends State<Rates> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final colorPrimary = theme.colorScheme.primary;
     final backgroundColor = theme.colorScheme.background;
     final textColor = isDark ? Colors.white : Colors.black87;
@@ -167,7 +170,7 @@ class _RatesState extends State<Rates> {
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
-          child: Text("Không tải được thông tin event", style: theme.textTheme.bodyMedium),
+          child: Text(loc.translate("no_events_found"), style: theme.textTheme.bodyMedium),
         ),
       );
     }
@@ -195,9 +198,9 @@ class _RatesState extends State<Rates> {
               padding: EdgeInsets.symmetric(horizontal: sw(context, 20)),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: _eventDetail!.bannerUrl != null && _eventDetail!.bannerUrl!.isNotEmpty
+                child: _eventDetail!.bannerUrl.isNotEmpty
                     ? Image.network(
-                  _eventDetail!.bannerUrl!,
+                  _eventDetail!.bannerUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, __, ___) => Container(
@@ -227,7 +230,7 @@ class _RatesState extends State<Rates> {
                   // --- My rating  ---
                   if (_myRating != null && _myRating!.hasRating) ...[
                     Text(
-                      'Đánh giá của bạn',
+                      loc.translate("your_event_rating"),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: textColor,
@@ -250,13 +253,13 @@ class _RatesState extends State<Rates> {
                               _myRating!.comment,
                               style: TextStyle(color: textColor),
                             ),
-                            if (_myRating!.createdAt != null) ...[
-                              SizedBox(height: sh(context, 4)),
-                              Text(
-                                'Lúc: ${DateFormat('dd/MM/yyyy, HH:mm').format(_myRating!.createdAt!.toLocal())}',
-                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-                              ),
-                            ],
+                            ...[
+                            SizedBox(height: sh(context, 4)),
+                            Text(
+                              'Lúc: ${DateFormat('dd/MM/yyyy, HH:mm').format(_myRating!.createdAt.toLocal())}',
+                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            ),
+                          ],
                             SizedBox(height: sh(context, 8)),
                             Align(
                               alignment: Alignment.centerRight,
@@ -279,7 +282,7 @@ class _RatesState extends State<Rates> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       title: Text(
-                                        'Chỉnh sửa đánh giá',
+                                        loc.translate("fix_rating"),
                                         style: theme.textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: textColor,
@@ -317,7 +320,7 @@ class _RatesState extends State<Rates> {
                                             maxLines: 3,
                                             style: TextStyle(color: textColor),
                                             decoration: InputDecoration(
-                                              labelText: 'Bình luận',
+                                              labelText: loc.translate("your_event_rating"),
                                               labelStyle: TextStyle(
                                                 color: isDark ? Colors.grey[400] : Colors.grey[700],
                                               ),
@@ -347,7 +350,7 @@ class _RatesState extends State<Rates> {
                                         TextButton(
                                           onPressed: () => Navigator.pop(context),
                                           child: Text(
-                                            'Hủy',
+                                            loc.translate("cancel"),
                                             style: TextStyle(
                                               color: isDark ? Colors.grey[400] : Colors.grey[700],
                                               fontWeight: FontWeight.w500,
@@ -369,8 +372,8 @@ class _RatesState extends State<Rates> {
                                             ),
                                             elevation: 0,
                                           ),
-                                          child: const Text(
-                                            'Lưu',
+                                          child: Text(
+                                            loc.translate("confirm"),
                                             style: TextStyle(fontWeight: FontWeight.w600),
                                           ),
                                         ),
@@ -379,7 +382,7 @@ class _RatesState extends State<Rates> {
                                   );
                                 },
                                 child: Text(
-                                  'Sửa',
+                                  loc.translate("fix_rating"),
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.w600,
@@ -397,7 +400,7 @@ class _RatesState extends State<Rates> {
 
                   // --- Other ratings ---
                   Text(
-                    'Tất cả đánh giá',
+                    loc.translate("Others rating"),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: textColor,
@@ -446,7 +449,7 @@ class _RatesState extends State<Rates> {
                                 if (rate.createdAt != null) ...[
                                   SizedBox(height: sh(context, 4)),
                                   Text(
-                                    'Lúc: ${DateFormat('dd/MM/yyyy, HH:mm').format(rate.createdAt.toLocal())}',
+                                    '${loc.translate("at")}: ${DateFormat('dd/MM/yyyy, HH:mm').format(rate.createdAt.toLocal())}',
                                     style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
                                   ),
                                 ],

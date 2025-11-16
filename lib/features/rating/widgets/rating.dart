@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/events/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/apis/event_service.dart';
@@ -79,7 +80,7 @@ class _RatingWidgetState extends State<RatingWidget> {
     final t = Theme.of(context).textTheme;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final colorPrimary = theme.colorScheme.primary;
     final backgroundColor = theme.colorScheme.background;
     final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black87;
@@ -92,7 +93,7 @@ class _RatingWidgetState extends State<RatingWidget> {
 
     if (_eventDetail == null) {
       return Center(
-          child: Text("Không tải được thông tin event", style: t.bodyMedium)
+          child: Text(loc.translate("no_events_found"), style: t.bodyMedium)
       );
     }
 
@@ -186,8 +187,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                                 _selectedGiftName = result['giftName'] ?? '';
                                 _giftQuantity = result['quantity'] ?? 1;
                               });
-                              print('[RatingWidget] Gift selected: ${result['giftName']} '
-                                  '(ID: ${result['giftId']}) | Quantity: ${result['quantity']}');
                             }
                           },
                           style: OutlinedButton.styleFrom(
@@ -203,7 +202,7 @@ class _RatingWidgetState extends State<RatingWidget> {
                           ),
                           child: Text(
                             _selectedGift.isEmpty
-                                ? "Tặng quà"
+                                ? loc.translate("choose_gift")
                                 : "$_selectedGiftName x$_giftQuantity",
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
@@ -222,7 +221,7 @@ class _RatingWidgetState extends State<RatingWidget> {
                       maxLines: 4,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        labelText: "Viết nhận xét",
+                        labelText: loc.translate("your_event_rating"),
                         labelStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[700]),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(sw(context, 10))),
@@ -277,7 +276,7 @@ class _RatingWidgetState extends State<RatingWidget> {
 
                     if (msg == 'success.create') {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Gửi đánh giá thành công!")),
+                        SnackBar(content: Text(loc.translate("rating_success"))),
                       );
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -295,7 +294,7 @@ class _RatingWidgetState extends State<RatingWidget> {
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Đã có lỗi xảy ra")),
+                      SnackBar(content: Text(loc.translate("error"))),
                     );
                   }
                 },
@@ -306,8 +305,8 @@ class _RatingWidgetState extends State<RatingWidget> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(sw(context, 10))),
                 ),
-                child: const Text(
-                  "Gửi đánh giá",
+                child: Text(
+                  loc.translate("send_rating"),
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
               ),
@@ -321,6 +320,7 @@ class _RatingWidgetState extends State<RatingWidget> {
   }
 
   Widget _buildRatingStars(Color colorPrimary) {
+    final loc = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -331,7 +331,7 @@ class _RatingWidgetState extends State<RatingWidget> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              "Vui lòng chọn đánh giá",
+            loc.translate("please_choose_star"),
               style: TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),

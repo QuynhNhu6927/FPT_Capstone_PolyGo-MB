@@ -44,6 +44,15 @@
   "cancel": "Hủy",
   "rating": "Đánh giá",
   "wait": "Đợi",
-  "unregister_success": "Hủy thành công"
+  "unregister_success": "Hủy thành công",
+
+  "please_choose_star": "Vui lòng đánh giá",
+  "send_rating": "Gửi đánh giá",
+  "rating_success": "Đánh giá thành công",
+  "your_event_rating": "Đánh giá của bạn",
+  "choose_gift": "Chọn quà",
+  "update_rating_success": "Chỉnh sửa đánh giá thành công",
+  "fix_rating": "Chỉnh sửa",
+  "at": "Lúc"
 
 }

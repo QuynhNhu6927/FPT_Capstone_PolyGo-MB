@@ -44,6 +44,15 @@
   "cancel": "Cancel",
   "rating": "Rating",
   "wait": "Wait",
-  "unregister_success": "Unregister Success"
+  "unregister_success": "Unregister Success",
+
+  "please_choose_star": "Please rating",
+  "send_rating": "Send rating",
+  "rating_success": "Rating success",
+  "your_event_rating": "Your rating",
+  "choose_gift": "Choose gift",
+  "update_rating_success": "Update rating success",
+  "fix_rating": "Fix rating",
+  "at": "At"
 
 }

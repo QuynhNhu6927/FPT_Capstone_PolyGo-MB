@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/audioplayers.dart';
 import '../../../data/services/signalr/user_presence.dart';
 
 class CallingScreen extends StatefulWidget {
@@ -67,9 +68,13 @@ class _CallingScreenState extends State<CallingScreen> {
         if (receiverId != widget.receiverId) return;
 
         setState(() => isCallAccepted = true);
+        CallSoundManager().stopRingTone();
         await _initWebRTC(isCaller: true);
       },
-      onCallDeclined: (receiverId) => _endCallWithUI(),
+      onCallDeclined: (receiverId) {
+        CallSoundManager().stopRingTone();
+        _endCallWithUI();
+      },
       onCallEnded: () => _endCallWithUI(),
       onReceiveOffer: (sdp) async {
         await _initWebRTC(isCaller: false);
@@ -166,6 +171,7 @@ class _CallingScreenState extends State<CallingScreen> {
     await _cleanupCall();
     if (!mounted) return;
     final loc = AppLocalizations.of(context);
+    CallSoundManager().playEndCall();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(loc.translate('call_ended')),
@@ -257,7 +263,7 @@ class _CallingScreenState extends State<CallingScreen> {
                 child: Text(
                   loc.translate("calling"),
                   style: TextStyle(
-                      color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                      color: Colors.grey, fontSize: 28, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

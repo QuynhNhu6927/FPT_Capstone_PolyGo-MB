@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/audioplayers.dart';
 import '../../../data/services/signalr/user_presence.dart';
 import '../screens/calling_screen.dart';
 
@@ -40,9 +42,32 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
     }
   }
 
+  Future<bool> _requestCallPermissions(bool isVideoCall) async {
+    final micStatus = await Permission.microphone.request();
+    if (!micStatus.isGranted) return false;
+
+    if (isVideoCall) {
+      final camStatus = await Permission.camera.request();
+      if (!camStatus.isGranted) return false;
+    }
+
+    return true;
+  }
+
   Future<void> _handleCall() async {
+    CallSoundManager().playRingTone();
     final loc = AppLocalizations.of(context);
     try {
+      final granted = await _requestCallPermissions(false);
+      if (!granted) {
+        CallSoundManager().stopRingTone();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate('permission_denied'))),
+        );
+        return;
+      }
+
       final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
@@ -55,6 +80,7 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
       }
 
       if (!mounted) return;
+      CallSoundManager().playRingTone();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -75,8 +101,19 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
 
   // Trong _ConversationAppBarState
   Future<void> _handleVideoCall() async {
+    CallSoundManager().playRingTone();
     final loc = AppLocalizations.of(context);
     try {
+      final granted = await _requestCallPermissions(true);
+      if (!granted) {
+        CallSoundManager().stopRingTone();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate('permission_denied'))),
+        );
+        return;
+      }
+
       final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
@@ -89,6 +126,7 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
       }
 
       if (!mounted) return;
+      CallSoundManager().playRingTone();
       Navigator.push(
         context,
         MaterialPageRoute(

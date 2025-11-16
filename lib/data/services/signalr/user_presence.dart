@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config/api_constants.dart';
+import '../../../core/utils/audioplayers.dart';
 import '../../../features/chat/screens/calling_screen.dart';
 import '../../../features/chat/screens/incoming_call.dart';
 import '../../../main.dart';
@@ -247,6 +248,7 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
         // Đảm bảo chạy trên main thread
         scheduleMicrotask(() {
           if (!mounted) return;
+          CallSoundManager().playComingCall();
           globalNavigatorKey.currentState?.push(
             MaterialPageRoute(
               builder: (_) => IncomingCallScreen(
@@ -255,6 +257,7 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
                 callerAvatar: callerAvatar ?? '',
                 isVideoCall: isVideoCall,
                 onAccept: () async {
+                  CallSoundManager().stopComingCall();
                   if (!mounted) return;
                   globalNavigatorKey.currentState?.pop();
                   await UserPresenceManager().service.respondCall(callerId, true);
@@ -273,6 +276,7 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
                   );
                 },
                 onDecline: () async {
+                  CallSoundManager().stopComingCall();
                   if (!mounted) return;
                   globalNavigatorKey.currentState?.pop();
                   await UserPresenceManager().service.respondCall(callerId, false);
