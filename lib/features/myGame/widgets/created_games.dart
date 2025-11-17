@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/wordsets/created_wordsets.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/repositories/wordset_repository.dart';
@@ -84,7 +85,15 @@ class _CreatedGamesState extends State<CreatedGames> {
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
 
-      final response = await _repository.getCreatedWordSetsPaged(token);
+      final locale = Localizations.localeOf(context).languageCode;
+
+      final response = await _repository.getCreatedWordSetsPaged(
+        token,
+        lang: locale,
+        name: _searchQuery.isEmpty ? null : _searchQuery,
+        languageIds: _filterLanguages.map((e) => e['id']!).toList(),
+        difficulty: _filterDifficulty,
+      );
 
       if (!mounted) return;
       setState(() {
@@ -131,6 +140,7 @@ class _CreatedGamesState extends State<CreatedGames> {
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 1 : 2;
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
 
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_hasError) {
@@ -193,7 +203,7 @@ class _CreatedGamesState extends State<CreatedGames> {
                                   : Colors.black87,
                             ),
                             decoration: InputDecoration(
-                              hintText: "Search...",
+                              hintText:  loc.translate("search_placeholder"),
                               hintStyle: TextStyle(
                                 color: Theme.of(context).brightness == Brightness.dark
                                     ? Colors.grey
@@ -265,7 +275,7 @@ class _CreatedGamesState extends State<CreatedGames> {
                               }
                             },
                             icon: const Icon(Icons.filter_alt_outlined, size: 18),
-                            label: const Text("Filter"),
+                            label: Text(loc.translate("filter")),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                               Theme.of(context).colorScheme.primaryContainer,

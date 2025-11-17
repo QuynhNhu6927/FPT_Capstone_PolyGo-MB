@@ -49,8 +49,10 @@ class _EventFilterState extends State<EventFilter> {
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
 
-      final langsFuture = _languageRepo.getAllLanguages(token, lang: 'vi');
-      final interestsFuture = _interestRepo.getAllInterests(token, lang: 'vi');
+      final currentLang = Localizations.localeOf(context).languageCode;
+
+      final langsFuture = _languageRepo.getAllLanguages(token, lang: currentLang);
+      final interestsFuture = _interestRepo.getAllInterests(token, lang: currentLang);
 
       final results = await Future.wait([langsFuture, interestsFuture]);
       final langs = results[0] as List<LanguageModel>;
@@ -123,8 +125,8 @@ class _EventFilterState extends State<EventFilter> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ngôn ngữ',
+                      Text(
+                        loc.translate("language"),
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -143,8 +145,8 @@ class _EventFilterState extends State<EventFilter> {
                       ),
                       const SizedBox(height: 16),
                       const Divider(thickness: 1),
-                      const Text(
-                        'Sở thích',
+                      Text(
+                        loc.translate("interest"),
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -163,8 +165,8 @@ class _EventFilterState extends State<EventFilter> {
                       ),
                       const Divider(thickness: 1),
                       SizedBox(height: 8),
-                      const Text(
-                        'Hình thức',
+                      Text(
+                        loc.translate("format"),
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
 
@@ -173,12 +175,12 @@ class _EventFilterState extends State<EventFilter> {
                         spacing: 8,
                         children: [
                           ChoiceChip(
-                            label: const Text("Miễn phí"),
+                            label: Text(loc.translate("free") ?? "Miễn phí"),
                             selected: _selectedIsFree == true,
                             onSelected: (_) => setState(() => _selectedIsFree = true),
                           ),
                           ChoiceChip(
-                            label: const Text("Trả phí"),
+                            label: Text(loc.translate("paid") ?? "Miễn phí"),
                             selected: _selectedIsFree == false,
                             onSelected: (_) => setState(() => _selectedIsFree = false),
                           ),

@@ -23,19 +23,15 @@ class _AllBadgesState extends State<AllBadges> {
   @override
   void initState() {
     super.initState();
-    _loadBadges();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final loc = AppLocalizations.of(context);
+      final lang = loc.locale.languageCode;
+
+      _loadBadges(lang: lang);
+    });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final locale = Localizations.localeOf(context);
-    if (_currentLocale == null ||
-        _currentLocale!.languageCode != locale.languageCode) {
-      _currentLocale = locale;
-      _loadBadges(lang: locale.languageCode);
-    }
-  }
 
   Future<void> _loadBadges({String? lang}) async {
     final prefs = await SharedPreferences.getInstance();

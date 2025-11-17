@@ -1,7 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/audioplayers.dart';
 import '../../../data/services/signalr/user_presence.dart';
 import '../screens/calling_screen.dart';
 
@@ -39,20 +42,45 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
     }
   }
 
+  Future<bool> _requestCallPermissions(bool isVideoCall) async {
+    final micStatus = await Permission.microphone.request();
+    if (!micStatus.isGranted) return false;
+
+    if (isVideoCall) {
+      final camStatus = await Permission.camera.request();
+      if (!camStatus.isGranted) return false;
+    }
+
+    return true;
+  }
+
   Future<void> _handleCall() async {
+    CallSoundManager().playRingTone();
+    final loc = AppLocalizations.of(context);
     try {
+      final granted = await _requestCallPermissions(false);
+      if (!granted) {
+        CallSoundManager().stopRingTone();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate('permission_denied'))),
+        );
+        return;
+      }
+
       final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
       if (!isReceiverOnline) {
-        if (!mounted) return; // check mounted trước khi dùng context
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Người dùng hiện đang offline")),
+          SnackBar(content: Text(loc.translate('user_offline'))),
         );
         return;
       }
 
       if (!mounted) return;
+      CallSoundManager().playRingTone();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -64,29 +92,41 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
         ),
       );
     } catch (e) {
-      debugPrint("❌ Error checking user online status: $e");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Không thể kiểm tra trạng thái người dùng")),
+        SnackBar(content: Text(loc.translate('cannot_check_status'))),
       );
     }
   }
 
   // Trong _ConversationAppBarState
   Future<void> _handleVideoCall() async {
+    CallSoundManager().playRingTone();
+    final loc = AppLocalizations.of(context);
     try {
+      final granted = await _requestCallPermissions(true);
+      if (!granted) {
+        CallSoundManager().stopRingTone();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate('permission_denied'))),
+        );
+        return;
+      }
+
       final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
       if (!isReceiverOnline) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Người dùng hiện đang offline")),
+          SnackBar(content: Text(loc.translate('user_offline'))),
         );
         return;
       }
 
       if (!mounted) return;
+      CallSoundManager().playRingTone();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -99,10 +139,9 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
         ),
       );
     } catch (e) {
-      debugPrint("❌ Error checking user online status: $e");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Không thể kiểm tra trạng thái người dùng")),
+        SnackBar(content: Text(loc.translate('cannot_check_status'))),
       );
     }
   }
@@ -112,16 +151,16 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final bgColor = isDark ? Colors.black : Colors.white;
     final shadowColor = isDark
         ? Colors.grey.withOpacity(0.1)
         : Colors.black.withOpacity(0.08);
 
     final formattedLastActive = widget.isOnline
-        ? 'Đang hoạt động'
+        ? loc.translate('online')
         : (widget.lastActiveAt.isNotEmpty
-        ? 'Lần cuối: ${_formatLastActive(widget.lastActiveAt)}'
+        ? '${loc.translate('last_seen')}: ${_formatLastActive(widget.lastActiveAt)}' // thay 'Lần cuối:'
         : '');
 
     return Container(

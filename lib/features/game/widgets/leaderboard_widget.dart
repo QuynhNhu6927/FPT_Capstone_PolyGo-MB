@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/wordsets/leaderboard_model.dart';
 import '../../../data/repositories/wordset_repository.dart';
 import '../../../data/services/apis/wordset_service.dart';
@@ -63,6 +64,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = theme.textTheme;
+    final loc = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final colorPrimary = theme.colorScheme.primary;
 
@@ -82,7 +84,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
         if (leaderboard == null || leaderboard.items.isEmpty) {
           return Center(
             child: Text(
-              "No leaderboard data yet.",
+              loc.translate("no_data_board"),
               style: t.bodyMedium?.copyWith(color: Colors.grey),
             ),
           );
@@ -111,7 +113,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Leaderboard",
+                  loc.translate("leaderboard"),
                   style: t.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: st(context, 20),
@@ -262,7 +264,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                                                             borderRadius: BorderRadius.circular(sw(context, 4)),
                                                           ),
                                                           child: Text(
-                                                            'YOU',
+                                                            loc.translate("you"),
                                                             style: t.bodySmall?.copyWith(
                                                               color: Colors.white,
                                                               fontWeight: FontWeight.bold,

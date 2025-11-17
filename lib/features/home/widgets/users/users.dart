@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/models/user/user_all_response.dart';
 import '../../../../data/models/user/user_matching_response.dart';
 import '../../../../data/repositories/user_repository.dart';
@@ -236,7 +237,7 @@ class _UsersState extends State<Users> {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 2 : width < 1000 ? 3 : 4;
-
+    final loc = AppLocalizations.of(context);
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -305,7 +306,7 @@ class _UsersState extends State<Users> {
                           }
                         },
                         icon: const Icon(Icons.filter_alt_outlined),
-                        label: const Text('Filter'),
+                        label: Text(loc.translate("filter")),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.colorScheme.primaryContainer,
                           foregroundColor: theme.colorScheme.onPrimaryContainer,
@@ -374,7 +375,7 @@ class _UsersState extends State<Users> {
                   if (_isShowingMatching && !_hasActiveFilter) ...[
                     const SizedBox(height: 12),
                     Text(
-                      "Những người phù hợp với bạn",
+                      loc.translate("users_matching_you") ?? "Những sự kiện phù hợp với bạn",
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.primary,

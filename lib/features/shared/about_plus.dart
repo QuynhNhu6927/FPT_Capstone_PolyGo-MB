@@ -38,41 +38,52 @@ class AboutPlusDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(sw(context, 16)),
               boxShadow: const [
                 BoxShadow(
-                    color: Color(0x11000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 8)),
+                  color: Color(0x11000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // ICON BOX
                 Container(
                   padding: EdgeInsets.all(sw(context, 12)),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF4E5),
                     borderRadius: BorderRadius.circular(sw(context, 12)),
                   ),
-                  child: Icon(Icons.star_rounded,
-                      size: sw(context, 40), color: Colors.amber[700]),
+                  child: Icon(
+                    Icons.star_rounded,
+                    size: sw(context, 40),
+                    color: Colors.amber[700],
+                  ),
                 ),
                 SizedBox(height: sh(context, 20)),
 
+                // TITLE
                 Text(
                   loc.translate("about_plus_title") ??
                       "Thành viên Plus của PolyGo",
                   textAlign: TextAlign.center,
                   style: t.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, fontSize: st(context, 24)),
+                    fontWeight: FontWeight.bold,
+                    fontSize: st(context, 24),
+                  ),
                 ),
                 SizedBox(height: sh(context, 16)),
 
+                // DESCRIPTION
                 Text(
-                  "Nhãn dành riêng cho thành viên Plus!",
+                  loc.translate("about_plus_description") ??
+                      "Nhãn dành riêng cho thành viên Plus!",
                   textAlign: TextAlign.center,
                   style: t.bodyLarge?.copyWith(height: 1.5),
                 ),
                 SizedBox(height: sh(context, 32)),
 
+                // BUTTON
                 AppButton(
                   text: loc.translate("register_now") ?? "Đăng ký ngay",
                   onPressed: () {

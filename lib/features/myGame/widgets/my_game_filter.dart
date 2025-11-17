@@ -42,8 +42,8 @@ class _MyGameFilterState extends State<MyGameFilter> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
-
-      final langs = await _languageRepo.getAllLanguages(token, lang: 'vi');
+      final currentLang = Localizations.localeOf(context).languageCode;
+      final langs = await _languageRepo.getAllLanguages(token, lang: currentLang);
       setState(() {
         _languages = langs;
         _loading = false;
@@ -104,7 +104,7 @@ class _MyGameFilterState extends State<MyGameFilter> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Ngôn ngữ", style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(loc.translate("language"), style: TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -119,13 +119,15 @@ class _MyGameFilterState extends State<MyGameFilter> {
                       ),
                       const SizedBox(height: 16),
                       const Divider(),
-                      const Text("Độ khó", style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(loc.translate("difficulty"), style: TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         children: _difficulties
                             .map((diff) => ChoiceChip(
-                          label: Text(diff),
+                          label: Text(
+                            loc.translate(diff.toLowerCase()) ?? diff,
+                          ),
                           selected: _selectedDifficulty == diff,
                           onSelected: (_) =>
                               setState(() => _selectedDifficulty = diff),

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/wordsets/created_wordsets.dart';
 import '../../../routes/app_routes.dart';
 
@@ -14,6 +15,7 @@ class MyGameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     final cardBackground = isDark
@@ -92,13 +94,13 @@ class MyGameCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Word Count: ${wordSet.wordCount}',
+                      '${loc.translate("words")}: ${wordSet.wordCount}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      'Time: ${wordSet.estimatedTimeInMinutes}',
+                      '${loc.translate("est")}: ${wordSet.estimatedTimeInMinutes}',
                       style: TextStyle(fontSize: 12, color: secondaryText),
                     ),
                   ),
@@ -119,7 +121,7 @@ class MyGameCard extends StatelessWidget {
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           String label = index == 0
-                              ? wordSet.difficulty
+                              ? loc.translate(wordSet.difficulty.toLowerCase())
                               : wordSet.language.name;
                           return Container(
                             padding: const EdgeInsets.symmetric(
@@ -160,8 +162,8 @@ class MyGameCard extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'View',
+                    child: Text(
+                      loc.translate("view"),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

@@ -50,5 +50,20 @@
   "enter_introduction": "Nhập giới thiệu",
   "update_profile_button": "Xác nhận",
   "update_profile_success": "Cập nhập thông tin thành công",
-  "update_profile_failed": "Cập nhập thông tin thất bại"
+  "update_profile_failed": "Cập nhập thông tin thất bại",
+
+  "detail": "Chi tiết",
+  "no_gifts_available": "Bạn chưa có quà tặng nào",
+  "no_badges_available": "Bạn chưa có thành tựu nào",
+  "my_badges": "Thành tựu",
+  "my_gifts": "Quà tặng",
+
+  "friends": "Bạn bè",
+  "posts": "Bài đăng",
+
+  "plus_member": "Plus",
+  "days": "ngày",
+
+  "logout": "Đăng xuất",
+  "update_profile_title": "Đổi thông tin"
 }

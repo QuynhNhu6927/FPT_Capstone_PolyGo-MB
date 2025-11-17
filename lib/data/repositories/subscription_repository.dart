@@ -6,7 +6,7 @@ import '../models/subscription/subscription_current_response.dart';
 import '../models/subscription/subscription_plan_list_response.dart';
 import '../models/subscription/subscription_request.dart';
 import '../models/subscription/subscription_response.dart';
-import '../models/transaction/wallet_transaction_list_response.dart';
+import '../models/transaction/wallet_transaction_model.dart';
 import '../services/apis/subscription_service.dart';
 
 class SubscriptionRepository {
@@ -76,21 +76,5 @@ class SubscriptionRepository {
     }
   }
 
-  Future<WalletTransactionListResponse?> getWalletTransactions({
-    required String token,
-    int pageNumber = 1,
-    int pageSize = 10,
-  }) async {
-    try {
-      final res = await _service.getWalletTransactions(
-        token: token,
-        pageNumber: pageNumber,
-        pageSize: pageSize,
-      );
-      return res.data;
-    } catch (e) {
-      rethrow;
-    }
-  }
 
 }

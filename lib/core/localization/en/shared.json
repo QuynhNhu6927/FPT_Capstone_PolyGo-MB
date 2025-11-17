@@ -2,9 +2,23 @@
   "error_no_connection": "Lost connection!",
   "retry": "Try again",
 
+  "search_placeholder": "Search...",
+
   "bottom_me": "Me",
   "bottom_shop": "Shop",
   "bottom_my_events": "My events",
-  "bottom_home": "Home"
+  "bottom_home": "Home",
+
+  "about_merit_title": "Merit Score",
+  "merit_range_high": "•70 - 100: You are an active and trustworthy member",
+  "merit_range_mid": "•51 - 69: You have multiple warnings, please be careful",
+  "merit_range_low": "•0 - 50: You are untrustworthy and will be temporarily banned",
+
+  "about_plus_title": "Plus member",
+  "about_plus_description": "Tag for Plus member only!",
+  "register_now": "Register for Plus",
+
+  "about_streak_title": "Login streak in PolyGo!",
+  "about_streak_description": "Visit PolyGo every day to maintain your streak and earn your own title!"
 
 }

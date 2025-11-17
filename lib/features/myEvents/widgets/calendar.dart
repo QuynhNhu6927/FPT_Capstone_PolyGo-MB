@@ -268,9 +268,14 @@ class _CalendarState extends State<Calendar> {
   }
 
   Widget _buildEventCard(JoinedEventModel event, bool isDark) {
+    final localStart = event.startAt.toLocal();
     final formattedDate =
-        "${event.startAt.day.toString().padLeft(2, '0')}/${event.startAt.month.toString().padLeft(2, '0')}/${event.startAt.year} "
-        "${event.startAt.hour.toString().padLeft(2, '0')}:${event.startAt.minute.toString().padLeft(2, '0')}";
+        "${localStart.day.toString().padLeft(2, '0')}/"
+        "${localStart.month.toString().padLeft(2, '0')}/"
+        "${localStart.year} "
+        "${localStart.hour.toString().padLeft(2, '0')}h"
+        "${localStart.minute.toString().padLeft(2, '0')}";
+
 
     final cardBackground = isDark
         ? const LinearGradient(

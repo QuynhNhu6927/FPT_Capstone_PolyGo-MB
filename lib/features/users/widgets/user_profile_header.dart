@@ -19,11 +19,7 @@ class UserProfileHeader extends StatefulWidget {
   final dynamic user;
   final AppLocalizations loc;
 
-  const UserProfileHeader({
-    super.key,
-    required this.user,
-    required this.loc,
-  });
+  const UserProfileHeader({super.key, required this.user, required this.loc});
 
   @override
   State<UserProfileHeader> createState() => _UserProfileHeaderState();
@@ -51,13 +47,13 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
 
       await repo.sendFriendRequest(token, widget.user.id);
       setState(() => _friendStatus = "Sent");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Friend request sent!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Friend request sent!')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -76,9 +72,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
         const SnackBar(content: Text('Friend request cancelled!')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -99,9 +95,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -122,9 +118,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -145,9 +141,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -192,17 +188,58 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
           // ---------------- Avatar + Name ----------------
           Row(
             children: [
-              CircleAvatar(
-                radius: 36,
-                backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? NetworkImage(avatarUrl)
-                    : null,
-                backgroundColor: Colors.grey[300],
-                child: (avatarUrl == null || avatarUrl.isEmpty)
-                    ? const Icon(Icons.person, color: Colors.white, size: 36)
-                    : null,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                        ? NetworkImage(avatarUrl)
+                        : null,
+                    backgroundColor: Colors.grey[300],
+                    child: (avatarUrl == null || avatarUrl.isEmpty)
+                        ? const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 36,
+                          )
+                        : null,
+                  ),
+
+                  // ===== LV badge =====
+                  if (experiencePoints != null)
+                    Positioned(
+                      bottom: -4,
+                      right: -4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xff4facfe),
+                              Color(0xff00f2fe),
+                            ],
+                          ),
+                        ),
+                        child: Text(
+                          "LV ${experiencePoints! ~/ 100}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
+
               const SizedBox(width: 16),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,34 +251,35 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                         fontSize: 20,
                       ),
                     ),
-                    if (experiencePoints != null)
-                      Text("$experiencePoints EXP", style: t.bodyMedium),
+
+                    if (widget.user.gender != null && widget.user.gender!.isNotEmpty)
+                      Wrap(
+                        children: [
+                          Text(
+                            widget.user.gender!,
+                            style: t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
-            ],
+            ]
           ),
 
           const SizedBox(height: 16),
 
           // ---------------- Introduction ----------------
           if (introduction.isNotEmpty) ...[
-            Text(
-              widget.loc.translate("introduction"),
-              style: t.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
             const SizedBox(height: 8),
-            Text(
-              introduction,
-              style: t.bodyMedium?.copyWith(height: 1.4),
-            ),
+            Text(introduction, style: t.bodyMedium?.copyWith(height: 1.4)),
             const SizedBox(height: 6),
           ],
 
           // ---------- Tags Row ----------
           if ((widget.user != null && experiencePoints != null) ||
               (widget.user.planType == 'Plus')
-              // (widget.user.streakDays != null && widget.user.streakDays! > 0)
+          // (widget.user.streakDays != null && widget.user.streakDays! > 0)
           ) ...[
             SizedBox(height: sh(context, 12)),
             SingleChildScrollView(
@@ -264,10 +302,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
-                              Colors.orangeAccent,
-                              Colors.yellow,
-                            ],
+                            colors: [Colors.orangeAccent, Colors.yellow],
                           ),
                           borderRadius: BorderRadius.circular(sw(context, 16)),
                         ),
@@ -309,27 +344,43 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                         decoration: BoxDecoration(
                           gradient: merit >= 80
                               ? const LinearGradient(
-                            colors: [Color(0xFF4CAF50), Color(0xFF81C784)], // xanh lá đậm -> xanh lá nhạt
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
+                                  colors: [
+                                    Color(0xFF4CAF50),
+                                    Color(0xFF81C784),
+                                  ],
+                                  // xanh lá đậm -> xanh lá nhạt
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
                               : merit >= 40
                               ? const LinearGradient(
-                            colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)], // vàng đậm -> vàng nhạt
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
+                                  colors: [
+                                    Color(0xFFFFC107),
+                                    Color(0xFFFFEB3B),
+                                  ],
+                                  // vàng đậm -> vàng nhạt
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
                               : const LinearGradient(
-                            colors: [Color(0xFFF44336), Color(0xFFE57373)], // đỏ đậm -> đỏ nhạt
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                                  colors: [
+                                    Color(0xFFF44336),
+                                    Color(0xFFE57373),
+                                  ],
+                                  // đỏ đậm -> đỏ nhạt
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
                           borderRadius: BorderRadius.circular(sw(context, 16)),
                         ),
 
                         child: Row(
                           children: [
-                            const Icon(Icons.verified_user, size: 16, color: Colors.white),
+                            const Icon(
+                              Icons.verified_user,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: sw(context, 4)),
                             Text(
                               "$merit",
@@ -354,14 +405,14 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : FriendButton(
-                  status: _friendStatus,
-                  loc: widget.loc,
-                  onSendRequest: _handleSendFriendRequest,
-                  onCancelRequest: _handleCancelFriendRequest,
-                  onAcceptRequest: _handleAcceptFriendRequest,
-                  onRejectRequest: _handleRejectFriendRequest,
-                  onUnfriend: _handleUnfriend,
-                ),
+                        status: _friendStatus,
+                        loc: widget.loc,
+                        onSendRequest: _handleSendFriendRequest,
+                        onCancelRequest: _handleCancelFriendRequest,
+                        onAcceptRequest: _handleAcceptFriendRequest,
+                        onRejectRequest: _handleRejectFriendRequest,
+                        onUnfriend: _handleUnfriend,
+                      ),
               ),
               const SizedBox(width: 12),
 
@@ -371,7 +422,8 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => SentGiftsDialog(receiverId: widget.user.id),
+                      builder: (context) =>
+                          SentGiftsDialog(receiverId: widget.user.id),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -399,7 +451,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                       try {
                         final prefs = await SharedPreferences.getInstance();
                         final token = prefs.getString('token') ?? '';
-                        final repo = ConversationRepository(ConversationService(ApiClient()));
+                        final repo = ConversationRepository(
+                          ConversationService(ApiClient()),
+                        );
 
                         final conversation = await repo.getConversationByUser(
                           token: token,
@@ -415,20 +469,22 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                               'conversationId': conversation.id,
                               'userName': conversation.user.name,
                               'avatarHeader': conversation.user.avatarUrl ?? '',
-                              'lastActiveAt': conversation.user.lastActiveAt ?? '',
+                              'lastActiveAt':
+                                  conversation.user.lastActiveAt ?? '',
                               'isOnline': conversation.user.isOnline,
                             },
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Không thể mở đoạn chat.")),
+                            const SnackBar(
+                              content: Text("Không thể mở đoạn chat."),
+                            ),
                           );
                         }
                       } catch (e, s) {
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Lỗi: $e")),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text("Lỗi: $e")));
                       } finally {
                         setState(() => _isLoading = false);
                       }

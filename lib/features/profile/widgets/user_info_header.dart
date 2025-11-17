@@ -64,6 +64,30 @@ class UserInfoHeader extends StatelessWidget {
                           )
                         : null,
                   ),
+                  Positioned(
+                    bottom: -4,
+                    right: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xff4facfe),
+                            Color(0xff00f2fe),
+                          ],
+                        ),
+                      ),
+                      child: const Text(
+                        "LV 1",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -80,14 +104,14 @@ class UserInfoHeader extends StatelessWidget {
                         fontSize: st(context, 20),
                       ),
                     ),
-                  if (merit != null && experiencePoints != null)
                     SizedBox(height: sh(context, 4)),
-                  if (merit != null && experiencePoints != null)
+                  if (user.gender != null && user.gender!.isNotEmpty)
                     Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 4,
                       children: [
-                        Text("$experiencePoints EXP", style: t.bodyMedium),
+                        Text(
+                          user.gender!,
+                          style: t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                 ],
@@ -135,23 +159,73 @@ class UserInfoHeader extends StatelessWidget {
           ],
         ),
 
+        SizedBox(height: sh(context, 16)),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final maxExp = 1000;
+            final currentExp = experiencePoints ?? 0;
+            final progress = (currentExp / maxExp).clamp(0.0, 1.0);
+
+            final maxColorWidth = constraints.maxWidth * 0.5;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                // Nền
+                Container(
+                  height: 14,
+                  width: constraints.maxWidth,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+
+                // Phần màu luôn bắt đầu từ bên trái
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    height: 14,
+                    width: maxColorWidth * progress,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color(0xff4facfe),
+                          Color(0xff00f2fe),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Text EXP
+                Text(
+                  "$currentExp / $maxExp EXP",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+
         // ---------- Introduction Section ----------
         if (introduction != null && introduction.isNotEmpty) ...[
-          SizedBox(height: sh(context, 16)),
-          Text(
-            loc.translate("introduction"),
-            style: t.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: st(context, 16),
-            ),
-          ),
-          SizedBox(height: sh(context, 6)),
+
+          SizedBox(height: sh(context, 8)),
           Text(
             introduction,
             style: t.bodyMedium?.copyWith(fontSize: st(context, 14)),
           ),
           SizedBox(height: sh(context, 6)),
         ],
+
         // ---------- Tags Row ----------
         if ((merit != null && experiencePoints != null) ||
             (user.planType == 'Plus') ||
@@ -161,6 +235,70 @@ class UserInfoHeader extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+
+                // Merit tag (NEW UI)
+                if (merit != null)
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => const AboutMeritDialog(),
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: sw(context, 12),
+                        vertical: sh(context, 6),
+                      ),
+                      margin: EdgeInsets.only(right: sw(context, 8)),
+                      decoration: BoxDecoration(
+                        gradient: merit >= 70
+                        // GREEN 70–100
+                            ? const LinearGradient(
+                          colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                            : merit >= 51
+                        // YELLOW 51–69
+                            ? const LinearGradient(
+                          colors: [Color(0xFFFFC107), Color(0xFFFFE082)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                        // RED 0–50
+                            : const LinearGradient(
+                          colors: [Color(0xFFE53935), Color(0xFFEF9A9A)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(sw(context, 16)),
+                      ),
+
+                      child: Row(
+                        children: [
+                          Icon(
+                            merit >= 70
+                                ? Icons.verified_user
+                                : merit >= 51
+                                ? Icons.error
+                                : Icons.block,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: sw(context, 4)),
+                          Text(
+                            "$merit",
+                            style: t.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 // PlanType tag
                 if (user.planType == 'Plus')
                   GestureDetector(
@@ -193,7 +331,7 @@ class UserInfoHeader extends StatelessWidget {
                           ),
                           SizedBox(width: sw(context, 4)),
                           Text(
-                            "Plus Member",
+                            loc.translate("plus_member"),
                             style: t.bodyMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -204,57 +342,6 @@ class UserInfoHeader extends StatelessWidget {
                     ),
                   ),
 
-                // Merit tag
-                if (merit != null)
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => const AboutMeritDialog(),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: sw(context, 12),
-                        vertical: sh(context, 6),
-                      ),
-                      margin: EdgeInsets.only(right: sw(context, 8)),
-                      decoration: BoxDecoration(
-                        gradient: merit >= 80
-                            ? const LinearGradient(
-                          colors: [Color(0xFF4CAF50), Color(0xFF81C784)], // xanh lá đậm -> xanh lá nhạt
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                            : merit >= 40
-                            ? const LinearGradient(
-                          colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)], // vàng đậm -> vàng nhạt
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                            : const LinearGradient(
-                          colors: [Color(0xFFF44336), Color(0xFFE57373)], // đỏ đậm -> đỏ nhạt
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(sw(context, 16)),
-                      ),
-
-                      child: Row(
-                        children: [
-                          const Icon(Icons.verified_user, size: 16, color: Colors.white),
-                          SizedBox(width: sw(context, 4)),
-                          Text(
-                            "$merit",
-                            style: t.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 // StreakDays tag
                 if (user.streakDays != null && user.streakDays! > 0)
                   GestureDetector(
@@ -289,7 +376,7 @@ class UserInfoHeader extends StatelessWidget {
                           ),
                           SizedBox(width: sw(context, 4)),
                           Text(
-                            "${user.streakDays} days",
+                            "${user.streakDays} ${loc.translate("days")}",
                             style: t.bodyMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -303,6 +390,7 @@ class UserInfoHeader extends StatelessWidget {
             ),
           ),
         ],
+
       ],
     );
   }

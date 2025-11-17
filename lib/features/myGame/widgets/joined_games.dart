@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/wordsets/joined_word_set.dart';
 import '../../../core/api/api_client.dart';
 import '../../../data/repositories/wordset_repository.dart';
@@ -83,8 +84,13 @@ class _JoinedGamesState extends State<JoinedGames> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
-
-      final response = await _repository.getPlayedWordSetsPaged(token);
+      final locale = Localizations.localeOf(context).languageCode;
+      final response = await _repository.getPlayedWordSetsPaged(token,
+        lang: locale,
+        name: _searchQuery.isEmpty ? null : _searchQuery,
+        languageIds: _filterLanguages.map((e) => e['id']!).toList(),
+        difficulty: _filterDifficulty,
+      );
 
       if (!mounted) return;
       setState(() {
@@ -131,7 +137,7 @@ class _JoinedGamesState extends State<JoinedGames> {
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 1 : 2;
     final theme = Theme.of(context);
-
+    final loc = AppLocalizations.of(context);
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_hasError) {
       return Padding(
@@ -193,7 +199,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                                   : Colors.black87,
                             ),
                             decoration: InputDecoration(
-                              hintText: "Search...",
+                              hintText:  loc.translate("search_placeholder"),
                               hintStyle: TextStyle(
                                 color: Theme.of(context).brightness == Brightness.dark
                                     ? Colors.grey
@@ -265,7 +271,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                               }
                             },
                             icon: const Icon(Icons.filter_alt_outlined, size: 18),
-                            label: const Text("Filter"),
+                            label: Text(loc.translate("filter")),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                               Theme.of(context).colorScheme.primaryContainer,

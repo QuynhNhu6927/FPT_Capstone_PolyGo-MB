@@ -73,7 +73,7 @@ class _SentGiftsDialogState extends State<SentGiftsDialog> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("✅ ${res?.giftName} sent successfully!"),
+          content: Text("${res?.giftName} sent successfully!"),
           duration: const Duration(seconds: 2),
         ),
       );

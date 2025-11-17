@@ -10,9 +10,11 @@ class MeResponse {
   final String role;
   final bool autoRenewSubscription;
   final int streakDays;
+  final int withdrawTimes;
   final bool isNew;
   final String planType;
   final double balance;
+  final DateTime? nextWithdrawResetAt;
   final DateTime? lastLoginAt;
 
   MeResponse({
@@ -27,9 +29,11 @@ class MeResponse {
     required this.role,
     required this.autoRenewSubscription,
     required this.streakDays,
+    required this.withdrawTimes,
     required this.isNew,
     required this.planType,
     required this.balance,
+    this.nextWithdrawResetAt,
     this.lastLoginAt,
   });
 
@@ -52,6 +56,9 @@ class MeResponse {
       streakDays: (json['streakDays'] is int)
           ? json['streakDays'] as int
           : int.tryParse(json['streakDays']?.toString() ?? '0') ?? 0,
+      withdrawTimes: (json['withdrawTimes'] is int)
+          ? json['withdrawTimes'] as int
+          : int.tryParse(json['streakDays']?.toString() ?? '0') ?? 0,
       isNew: json['isNew'] == true,
       planType: json['planType']?.toString() ?? '',
       balance: (json['balance'] is num)
@@ -59,6 +66,9 @@ class MeResponse {
           : double.tryParse(json['balance']?.toString() ?? '0') ?? 0.0,
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.tryParse(json['lastLoginAt'])
+          : null,
+      nextWithdrawResetAt: json['nextWithdrawResetAt'] != null
+          ? DateTime.tryParse(json['nextWithdrawResetAt'])
           : null,
     );
   }

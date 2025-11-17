@@ -2,9 +2,23 @@
   "error_no_connection": "Mất kết nối!",
   "retry": "Thử lại",
 
+  "search_placeholder": "Tìm kiếm...",
+
   "bottom_me": "Cá nhân",
   "bottom_shop": "Cửa hàng",
   "bottom_my_events": "Sự kiện",
-  "bottom_home": "Trang chủ"
+  "bottom_home": "Trang chủ",
+
+  "about_merit_title": "Điểm uy tín",
+  "merit_range_high": "•70 - 100: Bạn là thành viên hoạt động sôi nổi và đáng tin cậy",
+  "merit_range_mid": "•51 - 69: Bạn bị cảnh cáo nhiều lần, hãy cẩn thận hơn",
+  "merit_range_low": "•0 - 50: Bạn không đáng tin cậy và sẽ bị cấm trong một thời gian",
+
+  "about_plus_title": "Thành viên Plus",
+  "about_plus_description": "Nhãn dành riêng cho thành viên Plus!",
+  "register_now": "Đăng ký ngay",
+
+  "about_streak_title": "Chuỗi đăng nhập vào PolyGo!",
+  "about_streak_description": "Hãy ghé thăm PolyGo mỗi ngày để duy trì chuỗi của bạn và đạt được danh hiệu riêng!"
 
 }

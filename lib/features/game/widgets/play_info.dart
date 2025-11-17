@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../data/models/wordsets/start_wordset_response.dart';
 
@@ -100,31 +101,89 @@ class _PlayInfoRowWidgetState extends State<PlayInfoRowWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: sw(context, 16), vertical: sw(context, 16)),
+        padding: EdgeInsets.symmetric(
+          horizontal: sw(context, 16),
+          vertical: sw(context, 16),
+        ),
         constraints: const BoxConstraints(maxWidth: 700),
-        child: Row(
-          children: [
-            _infoCard(context, "Time", _formatTime(elapsedSeconds), Icons.timer),
-            const SizedBox(width: 8),
-            ValueListenableBuilder<int>(
-              valueListenable: widget.progressNotifier,
-              builder: (_, progress, __) =>
-                  _infoCard(context, "Progress", "$progress/${widget.startData.totalWords}", Icons.track_changes),
-            ),
-            const SizedBox(width: 8),
-            ValueListenableBuilder<int>(
-              valueListenable: widget.mistakesNotifier,
-              builder: (_, mistakes, __) => _infoCard(context, "Mistakes", "$mistakes", Icons.close),
-            ),
-            const SizedBox(width: 8),
-            ValueListenableBuilder<int>(
-              valueListenable: widget.hintsNotifier,
-              builder: (_, hints, __) => _infoCard(context, "Hints", "$hints", Icons.lightbulb_outline),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isSmall = constraints.maxWidth < 600; // threshold
+
+            if (!isSmall) {
+              // -------------------------
+              // 4 ô trên cùng 1 hàng
+              // -------------------------
+              return Row(
+                children: [
+                  _infoCard(context, loc.translate("time"), _formatTime(elapsedSeconds), Icons.timer),
+                  const SizedBox(width: 8),
+                  ValueListenableBuilder<int>(
+                    valueListenable: widget.progressNotifier,
+                    builder: (_, progress, __) => _infoCard(
+                        context, loc.translate("progress"), "$progress/${widget.startData.totalWords}", Icons.track_changes),
+                  ),
+                  const SizedBox(width: 8),
+                  ValueListenableBuilder<int>(
+                    valueListenable: widget.mistakesNotifier,
+                    builder: (_, mistakes, __) =>
+                        _infoCard(context, loc.translate("mistakes"), "$mistakes", Icons.close),
+                  ),
+                  const SizedBox(width: 8),
+                  ValueListenableBuilder<int>(
+                    valueListenable: widget.hintsNotifier,
+                    builder: (_, hints, __) =>
+                        _infoCard(context, loc.translate("hints"), "$hints", Icons.lightbulb_outline),
+                  ),
+                ],
+              );
+            }
+
+            // -----------------------------------------
+            // Màn nhỏ → chia 2 hàng, mỗi hàng 2 ô
+            // -----------------------------------------
+            return Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _infoCard(context, loc.translate("time"), _formatTime(elapsedSeconds), Icons.timer)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: widget.progressNotifier,
+                        builder: (_, progress, __) =>
+                            _infoCard(context, loc.translate("progress"), "$progress/${widget.startData.totalWords}", Icons.track_changes),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: widget.mistakesNotifier,
+                        builder: (_, mistakes, __) =>
+                            _infoCard(context, loc.translate("mistakes"), "$mistakes", Icons.close),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: widget.hintsNotifier,
+                        builder: (_, hints, __) =>
+                            _infoCard(context, loc.translate("hints"), "$hints", Icons.lightbulb_outline),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

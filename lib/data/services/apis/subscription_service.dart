@@ -9,7 +9,7 @@ import '../../models/subscription/subscription_current_response.dart';
 import '../../models/subscription/subscription_plan_list_response.dart';
 import '../../models/subscription/subscription_request.dart';
 import '../../models/subscription/subscription_response.dart';
-import '../../models/transaction/wallet_transaction_list_response.dart';
+import '../../models/transaction/wallet_transaction_model.dart';
 
 class SubscriptionService {
   final ApiClient apiClient;
@@ -165,40 +165,6 @@ class SubscriptionService {
     } on DioError catch (e) {
       if (e.response != null && e.response?.data != null) {
         return ApiResponse<SubscriptionAutoRenewResponse>(
-          data: null,
-          message: e.response?.data['message'] ?? e.message,
-          statusCode: e.response?.statusCode,
-        );
-      }
-      rethrow;
-    }
-  }
-
-  Future<ApiResponse<WalletTransactionListResponse>> getWalletTransactions({
-    required String token,
-    int pageNumber = 1,
-    int pageSize = 10,
-  }) async {
-    try {
-      final response = await apiClient.get(
-        ApiConstants.transactions,
-        queryParameters: {
-          'pageNumber': pageNumber.toString(),
-          'pageSize': pageSize.toString(),
-        },
-        headers: {
-          ApiConstants.headerAuthorization: 'Bearer $token',
-        },
-      );
-
-      final json = response.data as Map<String, dynamic>;
-      return ApiResponse.fromJson(
-        json,
-            (data) => WalletTransactionListResponse.fromJson(json),
-      );
-    } on DioError catch (e) {
-      if (e.response != null && e.response?.data != null) {
-        return ApiResponse<WalletTransactionListResponse>(
           data: null,
           message: e.response?.data['message'] ?? e.message,
           statusCode: e.response?.statusCode,

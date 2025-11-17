@@ -4,7 +4,7 @@ import '../../shared/app_error_state.dart';
 import '../widgets/shop_menu_bar.dart';
 import '../widgets/subscriptions.dart';
 import '../widgets/gifts.dart';
-import '../widgets/wallet.dart';
+import '../widgets/wallet/wallet.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
