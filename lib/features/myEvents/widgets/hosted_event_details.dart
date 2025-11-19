@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
+import '../../../core/utils/render_utils.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/events/event_details_model.dart';
 import '../../../data/models/events/hosted_event_model.dart';
@@ -313,11 +314,12 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                   ),
                   const SizedBox(height: 20),
 
-                  Text(
+                  RenderUtils.selectableMarkdownText(
+                    context,
                     widget.event.description.isNotEmpty
                         ? widget.event.description
                         : loc.translate('no_description'),
-                    style: t.bodyMedium?.copyWith(
+                    style: TextStyle(
                       fontSize: st(context, 14),
                       height: 1.4,
                       color: textColor,

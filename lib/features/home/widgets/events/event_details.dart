@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../core/utils/responsive.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/utils/render_utils.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/events/event_model.dart';
 import '../../../../data/repositories/auth_repository.dart';
@@ -239,11 +240,12 @@ class _EventDetailState extends State<EventDetail> {
               ),
               const SizedBox(height: 20),
 
-              Text(
+              RenderUtils.selectableMarkdownText(
+                context,
                 event.description.isNotEmpty
                     ? event.description
                     : loc.translate('no_description'),
-                style: t.bodyMedium?.copyWith(
+                style: TextStyle(
                   fontSize: st(context, 14),
                   height: 1.4,
                   color: textColor,

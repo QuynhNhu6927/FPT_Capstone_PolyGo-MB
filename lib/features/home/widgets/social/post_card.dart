@@ -4,10 +4,10 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:polygo_mobile/features/home/widgets/social/react_popup.dart';
 import 'package:polygo_mobile/features/home/widgets/social/update_post_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/audioplayers.dart';
+import '../../../../core/utils/render_utils.dart';
 import '../../../../data/models/post/post_model.dart';
 import '../../../../data/repositories/post_repository.dart';
 import '../../../../data/services/apis/post_service.dart';
@@ -215,6 +215,7 @@ class _PostCardState extends State<PostCard> {
     final double footerTextSize = screenWidth > 380 ? 16 : 14;
     final double footerSpacing = screenWidth > 380 ? 25 : 20;
     final loc = AppLocalizations.of(context);
+
     final Gradient cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -372,9 +373,8 @@ class _PostCardState extends State<PostCard> {
               if (widget.contentText != null && widget.contentText!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(widget.contentText!, style: TextStyle(fontSize: 14, color: textColor)),
+                  child: RenderUtils.selectableMarkdownText(context, widget.contentText),
                 ),
-
               // Content image with tap & long press
               if (widget.post.imageUrls.isNotEmpty)
                 LayoutBuilder(
