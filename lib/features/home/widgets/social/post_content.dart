@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
+import 'package:polygo_mobile/features/home/widgets/social/postCard/post/post_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -11,7 +12,7 @@ import '../../../../data/services/apis/auth_service.dart';
 import '../../../../data/services/apis/post_service.dart';
 import '../../../shared/app_error_state.dart';
 import 'create_post_dialog.dart';
-import 'post_card.dart';
+import 'post_card_old.dart';
 
 class PostContent extends StatefulWidget {
   final String searchQuery;

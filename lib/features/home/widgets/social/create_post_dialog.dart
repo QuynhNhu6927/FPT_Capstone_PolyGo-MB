@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_client.dart';
@@ -203,10 +204,13 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                             margin: const EdgeInsets.only(bottom: 14),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.file(
-                                File(img.path),
-                                fit: BoxFit.cover,
-                              ),
+                                child: Image.file(
+                                  File(img.path),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 200,
+                                )
+
                             ),
                           ),
                           Positioned(
@@ -241,13 +245,40 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
 
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile>? picked = await picker.pickMultiImage();
+    final List<XFile>? picked = await picker.pickMultiImage(
+      maxWidth: 1080,
+      maxHeight: 1080,
+      imageQuality: 70,
+    );
+
     if (picked != null) {
+      List<XFile> compressedImages = [];
+
+      for (var img in picked) {
+        // Nén thêm bằng flutter_image_compress
+        final compressedBytes = await FlutterImageCompress.compressWithFile(
+          img.path,
+          minWidth: 1080,
+          minHeight: 1080,
+          quality: 70,
+        );
+
+        if (compressedBytes != null) {
+          // Lưu ảnh đã nén tạm vào File
+          final tempFile = File('${Directory.systemTemp.path}/${img.name}');
+          await tempFile.writeAsBytes(compressedBytes);
+          compressedImages.add(XFile(tempFile.path));
+        } else {
+          compressedImages.add(img);
+        }
+      }
+
       setState(() {
-        _images.addAll(picked);
+        _images.addAll(compressedImages);
       });
     }
   }
+
 
   Future<void> _handlePost() async {
     // Kiểm tra nếu nội dung trống

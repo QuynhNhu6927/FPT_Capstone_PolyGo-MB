@@ -2,29 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../../core/localization/app_localizations.dart';
-import '../../../../../core/utils/responsive.dart';
-import '../../../../core/api/api_client.dart';
-import '../../../../core/utils/render_utils.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../data/models/events/event_model.dart';
-import '../../../../data/repositories/auth_repository.dart';
-import '../../../../data/repositories/event_repository.dart';
-import '../../../../data/services/apis/auth_service.dart';
-import '../../../../data/services/apis/event_service.dart';
-import '../../../../routes/app_routes.dart';
-import '../../../shared/share_event_dialog.dart';
+import '../../../../../../core/api/api_client.dart';
+import '../../../../../../core/localization/app_localizations.dart';
+import '../../../../../../core/utils/render_utils.dart';
+import '../../../../../../core/utils/responsive.dart';
+import '../../../../../../core/widgets/app_button.dart';
+import '../../../../../../data/models/events/event_model.dart';
+import '../../../../../../data/repositories/auth_repository.dart';
+import '../../../../../../data/repositories/event_repository.dart';
+import '../../../../../../data/services/apis/auth_service.dart';
+import '../../../../../../data/services/apis/event_service.dart';
+import '../../../../../../routes/app_routes.dart';
 
-class EventDetail extends StatefulWidget {
-  final EventModel event;
+class SharedEventDetail extends StatefulWidget {
+  final String sharedEventId;
   final ValueChanged<EventModel>? onEventUpdated;
-  const EventDetail({super.key, required this.event, this.onEventUpdated});
+
+  const SharedEventDetail({
+    super.key,
+    required this.sharedEventId,
+    this.onEventUpdated,
+  });
 
   @override
-  State<EventDetail> createState() => _EventDetailState();
+  State<SharedEventDetail> createState() => _SharedEventDetailState();
 }
 
-class _EventDetailState extends State<EventDetail> {
+class _SharedEventDetailState extends State<SharedEventDetail> {
+  EventModel? event;
+  bool _loading = true;
   double _balance = 0;
   String _userPlanType = "Free";
   String _userId = '';
@@ -33,6 +39,7 @@ class _EventDetailState extends State<EventDetail> {
   void initState() {
     super.initState();
     _loadUser();
+    _fetchEvent();
   }
 
   Future<void> _loadUser() async {
@@ -53,33 +60,60 @@ class _EventDetailState extends State<EventDetail> {
     }
   }
 
+  Future<void> _fetchEvent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    if (token.isEmpty) return;
+
+    try {
+      final repo = EventRepository(EventService(ApiClient()));
+      final res = await repo.getEventDetail(token: token, eventId: widget.sharedEventId);
+      if (!mounted) return;
+      setState(() {
+        event = res;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching event details")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final event = widget.event;
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final t = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
 
+    if (_loading || event == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
-    final isPastEvent = event.startAt.isBefore(DateTime.now());
+    final isPastEvent = event!.startAt.isBefore(DateTime.now());
     bool isDisabled = false;
     String buttonText = loc.translate('join');
 
-    if (_userPlanType == "Free" && event.planType == "Plus") {
+    if (_userPlanType == "Free" && event!.planType == "Plus") {
       isDisabled = true;
       buttonText = "Plus Only";
-    } else if (event.isParticipant) {
+    } else if (event!.isParticipant) {
       isDisabled = true;
       buttonText = loc.translate('joined');
     }
 
-    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
+    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event!.startAt);
     final durationFormatted =
-        "${event.expectedDurationInMinutes ~/ 60}h ${event.expectedDurationInMinutes % 60}m";
+        "${event!.expectedDurationInMinutes ~/ 60}h ${event!.expectedDurationInMinutes % 60}m";
 
     Future<bool?> _showPaidEventWarning() {
       return showDialog<bool>(
@@ -133,13 +167,13 @@ class _EventDetailState extends State<EventDetail> {
                   Expanded(
                     child: Row(
                       children: [
-                        if (event.planType == "Plus") ...[
+                        if (event?.planType == "Plus") ...[
                           const SizedBox(width: 6),
                           Icon(Icons.star, size: 20, color: Colors.amber),
                         ],
                         Flexible(
                           child: Text(
-                            event.title,
+                            event!.title,
                             style: t.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: st(context, 18),
@@ -166,9 +200,9 @@ class _EventDetailState extends State<EventDetail> {
 
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: event.bannerUrl.isNotEmpty
+                child: event!.bannerUrl.isNotEmpty
                     ? Image.network(
-                  event.bannerUrl,
+                  event!.bannerUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, __, ___) => Container(
@@ -193,11 +227,11 @@ class _EventDetailState extends State<EventDetail> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: _userId != event.host.id ? () {
+                    onTap: _userId != event?.host.id ? () {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.userProfile,
-                        arguments: {'id': event.host.id},
+                        arguments: {'id': event?.host.id},
                       );
                     } : null,
                     child: Row(
@@ -205,12 +239,10 @@ class _EventDetailState extends State<EventDetail> {
                         CircleAvatar(
                           radius: sw(context, 28),
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: event.host.avatarUrl != null &&
-                              event.host.avatarUrl!.isNotEmpty
-                              ? NetworkImage(event.host.avatarUrl!)
+                          backgroundImage: (event?.host.avatarUrl ?? '').isNotEmpty
+                              ? NetworkImage(event!.host.avatarUrl!)
                               : null,
-                          child: (event.host.avatarUrl == null ||
-                              event.host.avatarUrl!.isEmpty)
+                          child: (event?.host.avatarUrl ?? '').isEmpty
                               ? const Icon(Icons.person, size: 36, color: Colors.white70)
                               : null,
                         ),
@@ -219,7 +251,7 @@ class _EventDetailState extends State<EventDetail> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              event.host.name,
+                              event!.host.name,
                               style: t.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontSize: st(context, 15),
@@ -244,8 +276,8 @@ class _EventDetailState extends State<EventDetail> {
 
               RenderUtils.selectableMarkdownText(
                 context,
-                event.description.isNotEmpty
-                    ? event.description
+                event!.description.isNotEmpty
+                    ? event?.description
                     : loc.translate('no_description'),
                 style: TextStyle(
                   fontSize: st(context, 14),
@@ -260,7 +292,7 @@ class _EventDetailState extends State<EventDetail> {
                 context,
                 Icons.language,
                 loc.translate('language'),
-                event.language.name,
+                event!.language.name,
                 textColor,
                 secondaryText,
               ),
@@ -268,8 +300,8 @@ class _EventDetailState extends State<EventDetail> {
                 context,
                 Icons.category_outlined,
                 loc.translate('categories'),
-                event.categories.isNotEmpty
-                    ? event.categories.map((e) => e.name).join(', ')
+                event!.categories.isNotEmpty
+                    ? event!.categories.map((e) => e.name).join(', ')
                     : loc.translate('none'),
                 textColor,
                 secondaryText,
@@ -278,7 +310,7 @@ class _EventDetailState extends State<EventDetail> {
                 context,
                 Icons.people_alt_outlined,
                 loc.translate('participants'),
-                "${event.numberOfParticipants}/${event.capacity}",
+                "${event?.numberOfParticipants}/${event?.capacity}",
                 textColor,
                 secondaryText,
               ),
@@ -302,7 +334,7 @@ class _EventDetailState extends State<EventDetail> {
                 context,
                 Icons.monetization_on_outlined,
                 loc.translate('fee'),
-                event.fee > 0 ? "${event.fee}đ" : loc.translate('free'),
+                event!.fee > 0 ? "${event?.fee}đ" : loc.translate('free'),
                 textColor,
                 secondaryText,
               ),
@@ -319,14 +351,7 @@ class _EventDetailState extends State<EventDetail> {
                     variant: ButtonVariant.outline,
                     size: ButtonSize.md,
                     icon: const Icon(Icons.share_outlined, size: 18),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => ShareEventDialog(
-                          targetId: event.id,
-                        ),
-                      );
-                    },
+                    onPressed: () {},
                   ),
                   if (!isPastEvent) ...[
                     SizedBox(width: sw(context, 12)),
@@ -351,14 +376,14 @@ class _EventDetailState extends State<EventDetail> {
                           try {
                             await repository.registerEvent(
                               token: token,
-                              eventId: event.id,
+                              eventId: event!.id,
                               password: password,
                             );
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(loc.translate("event_register_success"))),
                             );
-                            widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
+                            widget.onEventUpdated?.call(event!.copyWith(isParticipant: true));
                             Navigator.pop(context);
                           } catch (e) {
                             final errorString = e.toString();
@@ -373,12 +398,12 @@ class _EventDetailState extends State<EventDetail> {
                           }
                         }
 
-                        if (event.fee > 0) {
+                        if (event!.fee > 0) {
                           final confirmPaid = await _showPaidEventWarning();
                           if (confirmPaid != true) return;
                         }
 
-                        if (event.isPublic) {
+                        if (event!.isPublic) {
                           await registerEvent('');
                           return;
                         }
@@ -424,12 +449,12 @@ class _EventDetailState extends State<EventDetail> {
                                         await EventRepository(EventService(ApiClient()))
                                             .registerEvent(
                                           token: token,
-                                          eventId: event.id,
+                                          eventId: event!.id,
                                           password: controller.text,
                                         );
 
                                         if (!mounted) return;
-                                        widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
+                                        widget.onEventUpdated?.call(event!.copyWith(isParticipant: true));
                                         Navigator.of(context, rootNavigator: true).pop();
                                         Navigator.pop(context);
 

@@ -80,6 +80,14 @@ class PostModel {
   final List<PostReaction> reactions;
   final String? myReaction;
 
+  // Added fields
+  final bool isShare;
+  final String? shareType;
+  final String? sharedPostId;
+  final String? sharedEventId;
+  final SharedPostModel? sharedPost;
+  final SharedEventModel? sharedEvent;
+
   PostModel({
     required this.id,
     required this.content,
@@ -92,6 +100,12 @@ class PostModel {
     required this.comments,
     required this.reactions,
     this.myReaction,
+    required this.isShare,
+    this.shareType,
+    this.sharedPostId,
+    this.sharedEventId,
+    this.sharedPost,
+    this.sharedEvent,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -104,18 +118,29 @@ class PostModel {
       isMyPost: json['isMyPost'] ?? false,
       commentsCount: json['commentsCount'] ?? 0,
       reactionsCount: json['reactionsCount'] ?? 0,
-      comments: (json['comments'] as List<dynamic>?)
-          ?.map((e) => PostComment.fromJson(e))
-          .toList() ??
-          [],
-      reactions: (json['reactions'] as List<dynamic>?)
-          ?.map((e) => PostReaction.fromJson(e))
-          .toList() ??
-          [],
+      comments: (json['comments'] as List<dynamic>? ?? [])
+          .map((e) => PostComment.fromJson(e))
+          .toList(),
+      reactions: (json['reactions'] as List<dynamic>? ?? [])
+          .map((e) => PostReaction.fromJson(e))
+          .toList(),
       myReaction: json['myReaction'],
+
+      // new fields
+      isShare: json['isShare'] ?? false,
+      shareType: json['shareType'],
+      sharedPostId: json['sharedPostId'],
+      sharedEventId: json['sharedEventId'],
+      sharedPost: json['sharedPost'] != null
+          ? SharedPostModel.fromJson(json['sharedPost'])
+          : null,
+      sharedEvent: json['sharedEvent'] != null
+          ? SharedEventModel.fromJson(json['sharedEvent'])
+          : null,
     );
   }
 }
+
 class PostPaginationResponse {
   final List<PostModel> items;
   final int totalItems;
@@ -164,31 +189,63 @@ class PostListResponse {
   }
 }
 
-extension PostModelCopy on PostModel {
-  PostModel copyWith({
-    String? content,
-    List<String>? imageUrls,
-    DateTime? createdAt,
-    PostUser? creator,
-    int? commentsCount,
-    int? reactionsCount,
-    bool? isMyPost,
-    List<PostComment>? comments,
-    List<PostReaction>? reactions,
-    String? myReaction,
-  }) {
-    return PostModel(
-      id: id,
-      content: content ?? this.content,
-      imageUrls: imageUrls ?? this.imageUrls,
-      createdAt: createdAt ?? this.createdAt,
-      creator: creator ?? this.creator,
-      commentsCount: commentsCount ?? this.commentsCount,
-      reactionsCount: reactionsCount ?? this.reactionsCount,
-      isMyPost: isMyPost ?? this.isMyPost,
-      comments: comments ?? this.comments,
-      reactions: reactions ?? this.reactions,
-      myReaction: myReaction ?? this.myReaction,
+class SharedPostModel {
+  final String id;
+  final String content;
+  final List<String> imageUrls;
+  final DateTime createdAt;
+  final PostUser creator;
+
+  SharedPostModel({
+    required this.id,
+    required this.content,
+    required this.imageUrls,
+    required this.createdAt,
+    required this.creator,
+  });
+
+  factory SharedPostModel.fromJson(Map<String, dynamic> json) {
+    return SharedPostModel(
+      id: json['id'] ?? '',
+      content: json['content'] ?? '',
+      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      createdAt: DateTime.parse(json['createdAt']),
+      creator: PostUser.fromJson(json['creator']),
+    );
+  }
+}
+
+class SharedEventModel {
+  final String id;
+  final String title;
+  final String description;
+  final DateTime startAt;
+  final double fee;
+  final String bannerUrl;
+  final String status;
+  final PostUser host;
+
+  SharedEventModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.startAt,
+    required this.fee,
+    required this.bannerUrl,
+    required this.status,
+    required this.host,
+  });
+
+  factory SharedEventModel.fromJson(Map<String, dynamic> json) {
+    return SharedEventModel(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      startAt: DateTime.parse(json['startAt']),
+      fee: (json['fee'] ?? 0).toDouble(),
+      bannerUrl: json['bannerUrl'] ?? '',
+      status: json['status'] ?? '',
+      host: PostUser.fromJson(json['host']),
     );
   }
 }

@@ -9,7 +9,8 @@ import '../../../../data/repositories/post_repository.dart';
 import '../../../../data/services/apis/auth_service.dart';
 import '../../../../data/services/apis/post_service.dart';
 import '../../home/widgets/social/create_post_dialog.dart';
-import '../../home/widgets/social/post_card.dart';
+import '../../home/widgets/social/postCard/post/post_card.dart';
+import '../../home/widgets/social/post_card_old.dart';
 import '../../shared/app_error_state.dart';
 
 class MyPostContent extends StatefulWidget {

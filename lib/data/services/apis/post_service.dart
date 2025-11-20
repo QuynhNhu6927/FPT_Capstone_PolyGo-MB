@@ -5,6 +5,7 @@ import '../../models/api_response.dart';
 import '../../models/post/comment_model.dart';
 import '../../models/post/post_model.dart';
 import '../../models/post/react_model.dart';
+import '../../models/post/share_request_model.dart';
 import '../../models/post/update_comment_model.dart';
 import '../../models/post/update_post_model.dart';
 
@@ -45,6 +46,37 @@ class PostService {
         );
       }
       rethrow;
+    }
+  }
+
+  Future<ApiResponse<PostModel>> sharePost({
+    required String token,
+    required SharePostRequest request,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.sharePosts,
+        data: request.toJson(),
+        headers: {
+          ApiConstants.headerAuthorization: "Bearer $token",
+          ApiConstants.headerContentType: ApiConstants.contentTypeJson,
+        },
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      final post = PostModel.fromJson(json['data']);
+
+      return ApiResponse(
+        data: post,
+        message: json['message'] ?? 'Success',
+        statusCode: response.statusCode,
+      );
+    } on DioError catch (e) {
+      return ApiResponse<PostModel>(
+        data: null,
+        message: e.response?.data['message'] ?? e.message,
+        statusCode: e.response?.statusCode,
+      );
     }
   }
 

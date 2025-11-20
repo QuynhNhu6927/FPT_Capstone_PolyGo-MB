@@ -2,6 +2,7 @@ import '../models/api_response.dart';
 import '../models/post/comment_model.dart';
 import '../models/post/post_model.dart';
 import '../models/post/react_model.dart';
+import '../models/post/share_request_model.dart';
 import '../models/post/update_comment_model.dart';
 import '../models/post/update_post_model.dart';
 import '../services/apis/post_service.dart';
@@ -72,6 +73,17 @@ class PostRepository {
         content: content,
         imageUrls: imageUrls,
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<PostModel>> sharePost({
+    required String token,
+    required SharePostRequest request,
+  }) async {
+    try {
+      return await _service.sharePost(token: token, request: request);
     } catch (e) {
       rethrow;
     }

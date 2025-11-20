@@ -11,6 +11,7 @@ import '../../../data/models/events/hosted_event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../rating/screens/rates_screen.dart';
+import '../../shared/share_event_dialog.dart';
 import 'hosted_user_list.dart';
 
 class HostedEventDetails extends StatefulWidget {
@@ -425,10 +426,14 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                           size: ButtonSize.md,
                           icon: const Icon(Icons.share_outlined, size: 18),
                           onPressed: () {
-                            // Chức năng share chưa cần
+                            showDialog(
+                              context: context,
+                              builder: (_) => ShareEventDialog(
+                                targetId: widget.event.id,
+                              ),
+                            );
                           },
                         ),
-
                         // View rating button (chỉ hiển thị khi Completed)
                         if (widget.event.status == 'Completed')
                           Padding(

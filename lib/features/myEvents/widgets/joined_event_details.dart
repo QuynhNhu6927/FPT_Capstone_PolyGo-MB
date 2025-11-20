@@ -11,6 +11,7 @@ import '../../../data/repositories/event_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../rating/screens/rates_screen.dart';
 import '../../rating/screens/rating_screen.dart';
+import '../../shared/share_event_dialog.dart';
 import 'hosted_user_list.dart';
 
 class JoinedEventDetails extends StatefulWidget {
@@ -577,7 +578,11 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                             size: ButtonSize.md,
                             icon: const Icon(Icons.share_outlined, size: 18),
                             onPressed: () {
-                              // TODO: handle share
+                              showDialog(
+                                context: context,
+                                builder: (_) =>
+                                    ShareEventDialog(targetId: widget.event.id),
+                              );
                             },
                           );
                           break;
@@ -672,14 +677,18 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                       if (eventStatus != 'completed' && actionButton != null) {
                         buttons.insert(
                           0,
-                          AppButton(
-                            variant: ButtonVariant.outline,
-                            size: ButtonSize.md,
-                            icon: const Icon(Icons.share_outlined, size: 18),
-                            onPressed: () {
-                              // TODO: handle share
-                            },
-                          ),
+                            AppButton(
+                              variant: ButtonVariant.outline,
+                              size: ButtonSize.md,
+                              icon: const Icon(Icons.share_outlined, size: 18),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) =>
+                                      ShareEventDialog(targetId: widget.event.id),
+                                );
+                              },
+                            ),
                         );
                         buttons.insert(1, const SizedBox(width: 12));
                       }
