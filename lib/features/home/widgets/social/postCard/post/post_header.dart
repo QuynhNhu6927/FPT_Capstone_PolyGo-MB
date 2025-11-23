@@ -6,6 +6,7 @@ import '../../../../../../data/models/post/post_model.dart';
 import '../../../../../../data/repositories/post_repository.dart';
 import '../../../../../../data/services/apis/post_service.dart';
 import '../../../../../../routes/app_routes.dart';
+import '../../report_post_dialog.dart';
 import '../../update_post_dialog.dart';
 
 class PostHeader extends StatelessWidget {
@@ -97,7 +98,9 @@ class PostHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () {
+          onTap: post.isMyPost
+              ? null
+              : () {
             Navigator.pushNamed(
               context,
               AppRoutes.userProfile,
@@ -209,7 +212,23 @@ class PostHeader extends StatelessWidget {
             PopupMenuItem(value: "delete", child: Text(loc.translate("delete"))),
           ],
         )
-            : Icon(Icons.flag_outlined, color: isDark ? Colors.white54 : Colors.grey),
+            : GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (_) => ReportPostDialog(
+                postId: post.id,
+                onSubmit: () {
+
+                },
+              ),
+            );
+          },
+          child: Icon(
+            Icons.flag_outlined,
+            color: isDark ? Colors.white54 : Colors.grey,
+          ),
+        ),
       ],
     );
   }

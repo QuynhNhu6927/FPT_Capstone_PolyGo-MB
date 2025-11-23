@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/features/users/widgets/plus_frame.dart';
+import 'package:polygo_mobile/features/users/widgets/report_user_dialog.dart';
 import 'package:polygo_mobile/features/users/widgets/sent_gifts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -288,6 +289,24 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                         ],
                       ),
                   ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ReportUserDialog(
+                      userId: widget.user.id,
+                      onSubmit: () {
+
+                      },
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.flag_outlined,
+                  color: isDark ? Colors.white54 : Colors.grey[700],
+                  size: 20,
                 ),
               ),
             ],

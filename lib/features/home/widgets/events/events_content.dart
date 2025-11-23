@@ -56,13 +56,21 @@ class _EventsContentState extends State<EventsContent> {
 
   void _handleScroll() {
     final offset = _scrollController.offset;
+
     if (offset > _lastOffset && offset - _lastOffset > 10) {
       if (_showFilterBar) setState(() => _showFilterBar = false);
     } else if (offset < _lastOffset && _lastOffset - offset > 10) {
       if (!_showFilterBar) setState(() => _showFilterBar = true);
     }
     _lastOffset = offset;
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (_shouldLoadUpcoming) return;
+      _loadMatchingEvents(lang: _currentLocale?.languageCode);
+    }
   }
+
 
   @override
   void didUpdateWidget(covariant EventsContent oldWidget) {
@@ -106,6 +114,11 @@ class _EventsContentState extends State<EventsContent> {
     });
   }
 
+  int _matchingEventsPage = 1;
+  final int _matchingEventsPageSize = 10;
+  bool _isLoadingMore = false;
+  bool _hasMoreMatchingEvents = true;
+
   Future<void> _loadMatchingEvents({bool reset = false, String? lang}) async {
     if (reset) {
       setState(() {
@@ -113,34 +126,35 @@ class _EventsContentState extends State<EventsContent> {
         _hasError = false;
         _matchingEvents.clear();
         _searchMatchingEvents.clear();
+        _matchingEventsPage = 1;
+        _hasMoreMatchingEvents = true;
       });
     }
+
+    if (!_hasMoreMatchingEvents || _isLoadingMore) return;
+
+    _isLoadingMore = true;
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       if (token.isEmpty) throw Exception("Missing token");
 
-      List<EventModel> allItems = [];
-      int page = 1;
-      const int pageSize = 50;
-
-      while (true) {
-        final response = await _repository.getMatchingEventsPaged(
-          token,
-          lang: lang ?? 'vi',
-          pageNumber: page,
-          pageSize: pageSize,
-        );
-        allItems.addAll(response.items);
-        if (page >= response.totalPages) break;
-        page++;
-      }
+      final response = await _repository.getMatchingEventsPaged(
+        token,
+        lang: lang ?? 'vi',
+        pageNumber: _matchingEventsPage,
+        pageSize: _matchingEventsPageSize,
+      );
 
       if (!mounted) return;
+
       setState(() {
-        _matchingEvents = allItems;
+        _matchingEvents.addAll(response.items);
         _applyLocalSearch(widget.searchQuery);
+
+        _hasMoreMatchingEvents = _matchingEventsPage < response.totalPages;
+        _matchingEventsPage++;
         _loading = false;
       });
     } catch (_) {
@@ -149,6 +163,8 @@ class _EventsContentState extends State<EventsContent> {
         _hasError = true;
         _loading = false;
       });
+    } finally {
+      _isLoadingMore = false;
     }
   }
 

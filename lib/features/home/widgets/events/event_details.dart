@@ -13,6 +13,7 @@ import '../../../../data/repositories/event_repository.dart';
 import '../../../../data/services/apis/auth_service.dart';
 import '../../../../data/services/apis/event_service.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../myEvents/widgets/joined/report_event_dialog.dart';
 import '../../../shared/share_event_dialog.dart';
 
 class EventDetail extends StatefulWidget {
@@ -65,7 +66,12 @@ class _EventDetailState extends State<EventDetail> {
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
-    final isPastEvent = event.startAt.isBefore(DateTime.now());
+    final now = DateTime.now();
+    final isPastRegisterDeadline = event.registerDeadline.isBefore(now);
+
+    final shouldHideJoinButton =
+        isPastRegisterDeadline && (event.allowLateRegister == false);
+
     bool isDisabled = false;
     String buttonText = loc.translate('join');
 
@@ -84,31 +90,110 @@ class _EventDetailState extends State<EventDetail> {
     Future<bool?> _showPaidEventWarning() {
       return showDialog<bool>(
         context: context,
-        builder: (_) => AlertDialog(
-          title: Text(loc.translate("paid_event_warning")),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(loc.translate("paid_event_confirmation")),
-              const SizedBox(height: 12),
-              Text(
-                "${loc.translate("available_balance")}: $_balanceđ",
-                style: TextStyle(fontWeight: FontWeight.bold),
+        barrierDismissible: false, // Không cho tắt bằng tap ngoài
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final loc = AppLocalizations.of(context);
+
+          // Format số tiền kiểu Việt Nam
+          String formatVND(double amount) {
+            final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 2);
+            String formatted = formatter.format(amount);
+            if (formatted.endsWith(',00')) formatted = formatted.replaceAll(',00', '');
+            return '$formatted đ';
+          }
+
+          return StatefulBuilder(
+            builder: (context, setState) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? const LinearGradient(
+                    colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                      : const LinearGradient(
+                    colors: [Colors.white, Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Tiêu đề
+                    Text(
+                      loc.translate("paid_event_warning"),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Nội dung
+                    Text(
+                      loc.translate("paid_event_confirmation"),
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[300] : Colors.grey[800],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Số dư khả dụng
+                    Text(
+                      "${loc.translate("available_balance")}: ${formatVND(_balance)}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.grey[200] : Colors.grey[900],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Nút hủy / xác nhận
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(loc.translate("cancel")),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(loc.translate("confirm")),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(loc.translate("cancel")),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(loc.translate("confirm")),
-            ),
-          ],
-        ),
+          );
+        },
       );
     }
 
@@ -190,16 +275,21 @@ class _EventDetailState extends State<EventDetail> {
               const SizedBox(height: 16),
 
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+
+                  /// LEFT — Avatar + host info
                   GestureDetector(
-                    onTap: _userId != event.host.id ? () {
+                    onTap: _userId != event.host.id
+                        ? () {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.userProfile,
                         arguments: {'id': event.host.id},
                       );
-                    } : null,
+                    }
+                        : null,
                     child: Row(
                       children: [
                         CircleAvatar(
@@ -238,19 +328,49 @@ class _EventDetailState extends State<EventDetail> {
                       ],
                     ),
                   ),
+
+                  /// RIGHT — Report icon (only when user != host)
+                  if (_userId.isNotEmpty && _userId != event.host.id)
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => ReportEventDialog(
+                            eventId: event.id,
+                            onSubmit: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.flag_outlined,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
+                    ),
+
                 ],
               ),
+
               const SizedBox(height: 20),
 
-              RenderUtils.selectableMarkdownText(
-                context,
-                event.description.isNotEmpty
-                    ? event.description
-                    : loc.translate('no_description'),
-                style: TextStyle(
-                  fontSize: st(context, 14),
-                  height: 1.4,
-                  color: textColor,
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: st(context, 14) * 1.4 * 4 + 8,
+                ),
+                child: SingleChildScrollView(
+                  child: RenderUtils.selectableMarkdownText(
+                    context,
+                    event.description.isNotEmpty
+                        ? event.description
+                        : loc.translate('no_description'),
+                    style: TextStyle(
+                      fontSize: st(context, 14),
+                      height: 1.4,
+                      color: textColor,
+                    ),
+                  ),
                 ),
               ),
 
@@ -300,9 +420,26 @@ class _EventDetailState extends State<EventDetail> {
               ),
               _buildInfoRow(
                 context,
+                Icons.event_available_outlined,
+                loc.translate('register_deadline'),
+                DateFormat('dd MMM yyyy, HH:mm').format(event.registerDeadline),
+                textColor,
+                secondaryText,
+              ),
+
+              _buildInfoRow(
+                context,
+                Icons.lock_clock_outlined,
+                loc.translate('allow_late_register'),
+                event.allowLateRegister ? loc.translate('yes') : loc.translate('no'),
+                textColor,
+                secondaryText,
+              ),
+              _buildInfoRow(
+                context,
                 Icons.monetization_on_outlined,
                 loc.translate('fee'),
-                event.fee > 0 ? "${event.fee}đ" : loc.translate('free'),
+                event.fee > 0 ? formatCurrency(event.fee) : loc.translate('free'),
                 textColor,
                 secondaryText,
               ),
@@ -328,7 +465,7 @@ class _EventDetailState extends State<EventDetail> {
                       );
                     },
                   ),
-                  if (!isPastEvent) ...[
+                  if (!shouldHideJoinButton) ...[
                     SizedBox(width: sw(context, 12)),
                     AppButton(
                       text: buttonText,
@@ -389,75 +526,144 @@ class _EventDetailState extends State<EventDetail> {
                           barrierDismissible: false,
                           builder: (context) {
                             String? errorText;
+                            final isDark = Theme.of(context).brightness == Brightness.dark;
+                            final loc = AppLocalizations.of(context);
+
                             return StatefulBuilder(builder: (context, setState) {
-                              return AlertDialog(
-                                title: Text(loc.translate("enter_event_password")),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
-                                      controller: controller,
-                                      obscureText: true,
-                                      decoration: InputDecoration(
-                                        hintText: loc.translate("password"),
-                                        border: const OutlineInputBorder(),
-                                        errorText: errorText,
-                                      ),
+                              return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    gradient: isDark
+                                        ? const LinearGradient(
+                                      colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    )
+                                        : const LinearGradient(
+                                      colors: [Colors.white, Colors.white],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                  ],
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.08),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Tiêu đề
+                                      Text(
+                                        loc.translate("enter_event_password"),
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Input
+                                      TextField(
+                                        controller: controller,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                          hintText: loc.translate("password"),
+                                          hintStyle: TextStyle(
+                                              color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          errorText: errorText,
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Nút hành động
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: Text(loc.translate("cancel")),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF2563EB),
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            onPressed: () async {
+                                              if (controller.text.isEmpty) {
+                                                setState(() {
+                                                  errorText = loc.translate("password_required");
+                                                });
+                                                return;
+                                              }
+
+                                              try {
+                                                final prefs = await SharedPreferences.getInstance();
+                                                final token = prefs.getString('token') ?? '';
+                                                await EventRepository(EventService(ApiClient()))
+                                                    .registerEvent(
+                                                  token: token,
+                                                  eventId: event.id,
+                                                  password: controller.text,
+                                                );
+
+                                                if (!mounted) return;
+                                                widget.onEventUpdated?.call(
+                                                    widget.event.copyWith(isParticipant: true));
+
+                                                // ❗ Đóng dialog password và dialog EventDetail nếu cần
+                                                Navigator.of(context, rootNavigator: true).pop();
+                                                Navigator.pop(context);
+
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                      content: Text(
+                                                          loc.translate("event_register_success"))),
+                                                );
+                                              } catch (e) {
+                                                final err = e.toString();
+                                                if (err.contains("Error.InvalidEventPassword")) {
+                                                  setState(() {
+                                                    errorText = loc.translate("wrong_password");
+                                                  });
+                                                } else {
+                                                  if (!mounted) return;
+                                                  setState(() {
+                                                    errorText = loc.translate("wrong_password");
+                                                  });
+                                                }
+                                              }
+                                            },
+                                            child: Text(loc.translate("confirm")),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(loc.translate("cancel")),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      if (controller.text.isEmpty) {
-                                        setState(() {
-                                          errorText = loc.translate("password_required");
-                                        });
-                                        return;
-                                      }
-
-                                      try {
-                                        await EventRepository(EventService(ApiClient()))
-                                            .registerEvent(
-                                          token: token,
-                                          eventId: event.id,
-                                          password: controller.text,
-                                        );
-
-                                        if (!mounted) return;
-                                        widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
-                                        Navigator.of(context, rootNavigator: true).pop();
-                                        Navigator.pop(context);
-
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(loc.translate("event_register_success"))),
-                                        );
-
-                                      } catch (e) {
-                                        final err = e.toString();
-                                        if (err.contains("Error.InvalidEventPassword")) {
-                                          setState(() {
-                                            errorText = loc.translate("wrong_password");
-                                          });
-                                        } else {
-                                          if (!mounted) return;
-                                          setState(() {
-                                            errorText = loc.translate("wrong_password");
-                                          });
-                                        }
-                                      }
-                                    },
-                                    child: Text(loc.translate("confirm")),
-                                  ),
-                                ],
                               );
                             });
                           },
                         );
+
                       },
                     ),
                   ],
@@ -541,3 +747,16 @@ extension EventModelCopy on EventModel {
     );
   }
 }
+
+String formatCurrency(num amount) {
+  bool hasDecimal = (amount % 1) != 0;
+
+  final formatter = NumberFormat.currency(
+    locale: "vi_VN",
+    decimalDigits: hasDecimal ? 2 : 0,
+    symbol: "đ",
+  );
+
+  return formatter.format(amount).replaceAll(" ", " "); // Fix khoảng trắng đặc biệt
+}
+

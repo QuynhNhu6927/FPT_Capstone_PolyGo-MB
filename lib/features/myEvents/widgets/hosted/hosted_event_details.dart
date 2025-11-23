@@ -13,6 +13,7 @@ import '../../../../data/repositories/event_repository.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../rating/screens/rates_screen.dart';
 import '../../../shared/share_event_dialog.dart';
+import '../hosted/cancel_event_dialog.dart';
 import 'hosted_user_list.dart';
 
 class HostedEventDetails extends StatefulWidget {
@@ -53,6 +54,11 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
 
     final durationFormatted =
         "${widget.event.expectedDurationInMinutes ~/ 60}h ${widget.event.expectedDurationInMinutes % 60}m";
+
+    final double fontSize = st(context, 14);
+    final double lineHeight = 1.4;
+    final int maxLines = 4;
+    final double maxHeight = fontSize * lineHeight * maxLines + 8; // + padding nhỏ
 
     return Dialog(
       elevation: 12,
@@ -179,252 +185,35 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                       icon: Icon(Icons.more_vert, color: secondaryText),
                       position: PopupMenuPosition.under,
                       offset: const Offset(-16, 8),
-                      onSelected: (value) async {
+                      onSelected: (value) {
                         if (value == 'cancel') {
-                          final reasonController = TextEditingController();
-                          String? errorText;
-
-                          await showDialog(
+                          showDialog(
                             context: context,
-                            barrierDismissible: false,
-                            builder: (dialogContext) {
-                              final isDark =
-                                  Theme.of(context).brightness ==
-                                  Brightness.dark;
-                              final textColor = isDark
-                                  ? Colors.white
-                                  : Colors.black;
-                              final Gradient cardBackground = isDark
-                                  ? const LinearGradient(
-                                      colors: [
-                                        Color(0xFF1E1E1E),
-                                        Color(0xFF2C2C2C),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    )
-                                  : const LinearGradient(
-                                      colors: [Colors.white, Colors.white],
-                                    );
-
-                              return Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: cardBackground,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 12),
-                                      StatefulBuilder(
-                                        builder: (context, setStateDialog) {
-                                          return Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                loc.translate('confirm_cancel'),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleMedium
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: textColor,
-                                                    ),
-                                              ),
-                                              const SizedBox(height: 12),
-                                              TextField(
-                                                controller: reasonController,
-                                                maxLines: 3,
-                                                style: TextStyle(
-                                                  color: textColor,
-                                                ),
-                                                decoration: InputDecoration(
-                                                  hintText: loc.translate(
-                                                    'cancel_reason_placeholder',
-                                                  ),
-                                                  hintStyle: TextStyle(
-                                                    color: isDark
-                                                        ? Colors.grey[500]
-                                                        : Colors.grey[400],
-                                                  ),
-                                                  errorText: errorText,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          6,
-                                                        ),
-                                                  ),
-                                                  contentPadding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 8,
-                                                      ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: isDark
-                                                              ? Colors
-                                                                    .grey[700]!
-                                                              : Colors
-                                                                    .grey[400]!,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              6,
-                                                            ),
-                                                      ),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                            dialogContext,
-                                                          ),
-                                                      child: Text(
-                                                        loc.translate('no'),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    ElevatedButton(
-                                                      onPressed: () async {
-                                                        final reason =
-                                                            reasonController
-                                                                .text
-                                                                .trim();
-
-                                                        if (reason.isEmpty) {
-                                                          setStateDialog(() {
-                                                            errorText = loc
-                                                                .translate(
-                                                                  'enter_reason_first',
-                                                                );
-                                                          });
-                                                          return;
-                                                        }
-
-                                                        try {
-                                                          final res = await widget
-                                                              .eventRepository
-                                                              .cancelEvent(
-                                                                token: widget
-                                                                    .token,
-                                                                eventId: widget
-                                                                    .event
-                                                                    .id,
-                                                                reason: reason,
-                                                              );
-
-                                                          if (!mounted) return;
-
-                                                          Navigator.of(
-                                                            context,
-                                                            rootNavigator: true,
-                                                          ).pop();
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-
-                                                          widget.onCancel
-                                                              ?.call();
-
-                                                          ScaffoldMessenger.of(
-                                                            widget
-                                                                .parentContext,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                res?.message ??
-                                                                    loc.translate(
-                                                                      'cancel_success',
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        } catch (_) {
-                                                          setStateDialog(() {
-                                                            errorText = loc
-                                                                .translate(
-                                                                  'cancel_too_late',
-                                                                );
-                                                          });
-                                                        }
-                                                      },
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.redAccent,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                6,
-                                                              ),
-                                                        ),
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 20,
-                                                              vertical: 12,
-                                                            ),
-                                                      ),
-                                                      child: Text(
-                                                        loc.translate('yes'),
-                                                        style: const TextStyle(
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
+                            builder: (_) => CancelEventDialog(
+                              isHost: true,
+                              token: widget.token,
+                              eventId: widget.event.id,
+                              eventRepository: widget.eventRepository,
+                              parentContext: context,
+                              onCancelSuccess: widget.onCancel,
+                            ),
                           );
                         }
                       },
-                      itemBuilder: (ctx) => [
+                      itemBuilder: (_) => [
                         PopupMenuItem(
                           value: 'cancel',
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.cancel_outlined,
-                                color: Colors.redAccent,
-                                size: 20,
-                              ),
+                              const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 20),
                               const SizedBox(width: 8),
-                              Text(
-                                loc.translate('cancel'),
-                                style: const TextStyle(
-                                  color: Colors.redAccent,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text('Cancel', style: const TextStyle(color: Colors.redAccent)),
                             ],
                           ),
                         ),
                       ],
                     ),
+
                   // Nút thống kê, chỉ hiển thị khi Completed
                   if (widget.event.status == 'Completed')
                     Padding(
@@ -453,15 +242,20 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
               ),
               const SizedBox(height: 20),
 
-              RenderUtils.selectableMarkdownText(
-                context,
-                widget.event.description.isNotEmpty
-                    ? widget.event.description
-                    : loc.translate('no_description'),
-                style: TextStyle(
-                  fontSize: st(context, 14),
-                  height: 1.4,
-                  color: textColor,
+              Container(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: SingleChildScrollView(
+                  child: RenderUtils.selectableMarkdownText(
+                    context,
+                    widget.event.description.isNotEmpty
+                        ? widget.event.description
+                        : loc.translate('no_description'),
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      height: lineHeight,
+                      color: textColor,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

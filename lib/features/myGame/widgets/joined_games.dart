@@ -370,7 +370,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                 : MasonryGridView.count(
                     controller: _scrollController,
                     crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 12,
+                    mainAxisSpacing: 0,
                     crossAxisSpacing: 12,
                     itemCount: _filteredWordSets.length,
                     itemBuilder: (context, index) =>

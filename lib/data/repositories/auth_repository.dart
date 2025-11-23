@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../models/auth/change_password_request.dart';
 import '../models/auth/me_response.dart';
 import '../models/auth/register_request.dart';
@@ -14,8 +16,14 @@ class AuthRepository {
   Future<void> sendOtp({required String mail, required int verificationType}) async {
     try {
       await _service.sendOtp(mail: mail, verificationType: verificationType);
-    } catch (e) {
-      // throw Exception('Send OTP failed: $e');
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        final error = e.response!.data['message'] as String?;
+        if (error == "Error.MailAlreadyExists") {
+          throw Exception("mail_exists");
+        }
+      }
+      rethrow;
     }
   }
 
@@ -23,8 +31,16 @@ class AuthRepository {
   Future<void> register(RegisterRequest req) async {
     try {
       await _service.register(req);
-    } catch (e) {
-      // throw Exception('Register failed: $e');
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        final error = e.response!.data['message'] as String?;
+        if (error == "Error.InvalidOtp") {
+          throw Exception("invalid_otp");
+        } else if (error == "Error.MailAlreadyExists") {
+          throw Exception("mail_exists");
+        }
+      }
+      rethrow;
     }
   }
 

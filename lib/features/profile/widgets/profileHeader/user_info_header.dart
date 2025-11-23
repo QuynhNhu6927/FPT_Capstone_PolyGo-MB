@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/core/localization/app_localizations.dart';
+import 'package:polygo_mobile/features/profile/widgets/profileHeader/setting_dialog.dart';
 import 'package:polygo_mobile/features/profile/widgets/shiny_avatar.dart';
 import 'package:polygo_mobile/routes/app_routes.dart';
 import '../../../../../core/utils/responsive.dart';
@@ -428,122 +429,6 @@ class UserInfoHeader extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class SettingsFullScreenDialog extends StatelessWidget {
-  final AppLocalizations loc;
-  final bool isDark;
-  final VoidCallback onShowUpdateInfoForm;
-  final Future<void> Function() onReloadUser;
-  final VoidCallback onLogout;
-
-  const SettingsFullScreenDialog({
-    super.key,
-    required this.loc,
-    required this.isDark,
-    required this.onShowUpdateInfoForm,
-    required this.onReloadUser,
-    required this.onLogout,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final background = isDark ? Colors.black : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.black87;
-
-    return Scaffold(
-      backgroundColor: background,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          loc.translate("settings"),
-          style: TextStyle(color: textColor),
-        ),
-        iconTheme: IconThemeData(color: textColor),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              children: [
-                ListTile(
-                  leading: Icon(Icons.person, color: textColor),
-                  title: Text(
-                    loc.translate("personal_info"),
-                    style: TextStyle(color: textColor),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onShowUpdateInfoForm();
-                  },
-                ),
-                const SizedBox(height: 12), // khoảng cách giữa các mục
-                ListTile(
-                  leading: Icon(Icons.language, color: textColor),
-                  title: Text(
-                    loc.translate("languages_interests"),
-                    style: TextStyle(color: textColor),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, AppRoutes.updateProfile).then((
-                      updated,
-                    ) {
-                      if (updated == true) onReloadUser();
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-                ListTile(
-                  leading: Icon(Icons.lock, color: textColor),
-                  title: Text(
-                    loc.translate("change_password"),
-                    style: TextStyle(color: textColor),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  onTap: () {
-                    Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierColor: Colors.black54,
-                      builder: (_) => Dialog(
-                        insetPadding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                        ),
-                        backgroundColor: Colors.transparent,
-                        child: const ChangePasswordForm(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          // Logout luôn ở dưới cùng
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: Text(
-                loc.translate("logout"),
-                style: const TextStyle(color: Colors.redAccent),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                onLogout();
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

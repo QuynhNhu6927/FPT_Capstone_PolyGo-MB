@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
 import '../widgets/shop_menu_bar.dart';
-import '../widgets/subscriptions.dart';
+import '../widgets/subscription/subscriptions.dart';
 import '../widgets/gifts.dart';
 import '../widgets/wallet/wallet.dart';
 

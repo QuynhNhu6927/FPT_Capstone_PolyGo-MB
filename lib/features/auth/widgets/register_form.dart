@@ -40,6 +40,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   String? _otpMessage;
   bool _otpSuccess = false;
+  String? _emailError;
 
   int _otpCountdown = 0;
   Timer? _otpTimer;
@@ -92,21 +93,28 @@ class _RegisterFormState extends State<RegisterForm> {
       );
       setState(() {
         _showOtpField = true;
-        _otpMessage = AppLocalizations.of(context).translate("otp_sent_success");
+        _otpMessage =
+            AppLocalizations.of(context).translate("otp_sent_success");
         _otpSuccess = true;
+        _emailError = null; // reset lỗi
       });
       _startOtpCountdown();
     } catch (e) {
       setState(() {
-        _otpMessage = AppLocalizations.of(context).translate("otp_sent_failed");
-        _otpSuccess = false;
+        if (e.toString().contains("mail_exists")) {
+          _emailError = "Tài khoản đã tồn tại";
+        } else {
+          _otpMessage =
+              AppLocalizations.of(context).translate("otp_sent_failed");
+          _otpSuccess = false;
+        }
       });
     } finally {
       setState(() => _isSendingOtp = false);
     }
   }
 
-  String? _passwordValidator(String? v) {
+    String? _passwordValidator(String? v) {
     final loc = AppLocalizations.of(context);
     if (v == null || v.isEmpty) return AppLocalizations.of(context).translate("null");
     if (v.length < 6) return AppLocalizations.of(context).translate("min_6_char");
@@ -152,6 +160,15 @@ class _RegisterFormState extends State<RegisterForm> {
       if (!mounted) return;
       Navigator.pushNamed(context, AppRoutes.login);
     } catch (e) {
+      setState(() {
+        if (e.toString().contains("invalid_otp")) {
+          _otpMessage = "OTP không đúng hoặc hết hạn";
+          _otpSuccess = false;
+        } else if (e.toString().contains("mail_exists")) {
+          _emailError = "Tài khoản đã tồn tại";
+        }
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).translate("register_failed")),
@@ -261,6 +278,16 @@ class _RegisterFormState extends State<RegisterForm> {
                             errorStyle: const TextStyle(height: 0),
                           ),
                         ),
+                        if (_emailError != null) ...[
+                          SizedBox(height: sh(context, 4)),
+                          Text(
+                            _emailError!,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: st(context, 12),
+                            ),
+                          ),
+                        ],
                         if (_otpMessage != null) ...[
                           SizedBox(height: sh(context, 4)),
                           Text(
@@ -272,7 +299,7 @@ class _RegisterFormState extends State<RegisterForm> {
                           ),
                         ]
                       ],
-                    ),
+                    )
                   ),
                   SizedBox(width: sw(context, 8)),
                   SizedBox(
@@ -344,6 +371,11 @@ class _RegisterFormState extends State<RegisterForm> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(sw(context, 10)),
+                  ),
+                  errorMaxLines: 3,
+                  errorStyle: TextStyle(
+                    fontSize: st(context, 12),
+                    overflow: TextOverflow.visible,
                   ),
                 ),
                 validator: _passwordValidator,

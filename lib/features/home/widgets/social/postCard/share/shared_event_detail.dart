@@ -13,6 +13,7 @@ import '../../../../../../data/repositories/event_repository.dart';
 import '../../../../../../data/services/apis/auth_service.dart';
 import '../../../../../../data/services/apis/event_service.dart';
 import '../../../../../../routes/app_routes.dart';
+import '../../../../../myEvents/widgets/joined/report_event_dialog.dart';
 
 class SharedEventDetail extends StatefulWidget {
   final String sharedEventId;
@@ -224,6 +225,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
               const SizedBox(height: 16),
 
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   GestureDetector(
@@ -270,6 +272,25 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                       ],
                     ),
                   ),
+                  if (_userId.isNotEmpty && _userId != event?.host.id)
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => ReportEventDialog(
+                            eventId: event!.id,
+                            onSubmit: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.flag_outlined,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 20),

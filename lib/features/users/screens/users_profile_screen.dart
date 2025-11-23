@@ -16,6 +16,8 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _hasError = false;
   bool _isRetrying = false;
+  bool _loadPosts = false;
+  final ScrollController _scrollController = ScrollController();
 
   void _onChildError() {
     if (!_hasError) {
@@ -37,6 +39,28 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      if (!_loadPosts &&
+          _scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 100) {
+        // scroll gần cuối thì load post
+        setState(() {
+          _loadPosts = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
@@ -47,6 +71,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: _hasError
             ? AppErrorState(onRetry: _onRetry)
             : SingleChildScrollView(
+          controller: _scrollController, // gắn controller
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -73,7 +98,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 color: Colors.grey.withOpacity(0.3),
                 thickness: 1,
               ),
-              if (widget.userId != null)
+              if (widget.userId != null && _loadPosts)
                 UserPostContent(userId: widget.userId!),
             ],
           ),
