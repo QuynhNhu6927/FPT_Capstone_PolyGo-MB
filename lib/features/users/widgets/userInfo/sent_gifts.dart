@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/api/api_client.dart';
-import '../../../core/localization/app_localizations.dart';
-import '../../../core/utils/responsive.dart';
-import '../../../data/models/gift/gift_present_request.dart';
-import '../../../data/models/gift/gift_present_response.dart';
-import '../../../data/repositories/gift_repository.dart';
-import '../../../data/services/apis/gift_service.dart';
-import '../../rating/widgets/inven_gifts.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/responsive.dart';
+import '../../../../data/models/gift/gift_present_request.dart';
+import '../../../../data/models/gift/gift_present_response.dart';
+import '../../../../data/repositories/gift_repository.dart';
+import '../../../../data/services/apis/gift_service.dart';
+import '../../../rating/widgets/inven_gifts.dart';
 
 class SentGiftsDialog extends StatefulWidget {
   final String receiverId;

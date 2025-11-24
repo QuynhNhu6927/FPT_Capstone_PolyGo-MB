@@ -125,14 +125,13 @@ class EventRepository {
     return res.data!;
   }
 
-  Future<EventRegisterResponse?> registerEvent({
+  Future<EventRegisterResponse> registerEvent({
     required String token,
     required String eventId,
     String password = '',
   }) async {
     final request = EventRegisterRequest(eventId: eventId, password: password);
-    final res = await _service.registerEvent(token: token, request: request);
-    return res.data;
+    return await _service.registerEvent(token: token, request: request);
   }
 
   Future<HostPayoutResponse?> claimHostPayout({
@@ -239,11 +238,13 @@ class EventRepository {
     required String token,
     required String eventId,
     required String userId,
+    required bool allowRejoin,
     String reason = '',
   }) async {
     final request = EventKickRequest(
       eventId: eventId,
       userId: userId,
+      allowRejoin: allowRejoin,
       reason: reason,
     );
 

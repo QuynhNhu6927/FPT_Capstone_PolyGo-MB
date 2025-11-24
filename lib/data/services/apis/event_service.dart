@@ -90,7 +90,7 @@ class EventService {
   }
 
 
-  Future<ApiResponse<EventRegisterResponse>> registerEvent({
+  Future<EventRegisterResponse> registerEvent({
     required String token,
     required EventRegisterRequest request,
   }) async {
@@ -102,12 +102,23 @@ class EventService {
       );
 
       final json = response.data as Map<String, dynamic>;
-      return ApiResponse.fromJson(
-        json,
-            (data) => EventRegisterResponse.fromJson(data),
-      );
+      return EventRegisterResponse.fromJson(json);
+
     } on DioError catch (e) {
-      rethrow;
+      // Nếu server trả về response với body
+      if (e.response?.data != null && e.response!.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        final message = data['message'] ?? '';
+
+        if (message == 'Error.InvalidEventPassword') {
+          throw InvalidEventPasswordException();
+        } else if (message == 'Error.KickedFromEvent') {
+          throw KickedFromEventException();
+        } else if (message == 'Error.InsufficientBalance') {
+          throw InsufficientBalanceException();
+        }
+      }
+      rethrow; // các lỗi khác vẫn throw ra ngoài
     }
   }
 
@@ -439,3 +450,7 @@ class EventService {
   }
 
 }
+
+class InvalidEventPasswordException implements Exception {}
+class KickedFromEventException implements Exception {}
+class InsufficientBalanceException implements Exception {}

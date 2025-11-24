@@ -171,7 +171,7 @@ class ParticipantModel {
   final String name;
   final int role;
   final int status;
-  final String avatarUrl;
+  final String? avatarUrl;
   final DateTime registeredAt;
   final String? userEventRatingId;
 
@@ -191,7 +191,7 @@ class ParticipantModel {
       name: json['name'],
       role: json['role'],
       status: json['status'],
-      avatarUrl: json['avatarUrl'],
+      avatarUrl: json['avatarUrl'] ?? '',
       registeredAt: DateTime.parse(json['registeredAt']),
       userEventRatingId: json['userEventRatingId'],
     );

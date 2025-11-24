@@ -14,7 +14,10 @@ class ReportDetailDialog extends StatelessWidget {
     required this.isDark,
   });
 
-  String formatDateTime(DateTime dt) => DateFormat('dd/MM/yyyy HH:mm').format(dt);
+  String formatDateTime(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    return DateFormat.yMMMd(locale).add_Hm().format(dt.toLocal());
+  }
 
   Color statusColor(String? status) {
     switch (status?.toLowerCase()) {
@@ -110,7 +113,7 @@ class ReportDetailDialog extends StatelessWidget {
             children.add(buildMarkdownItem(icon: Icons.description, title: "Description", content: report.description!));
           }
           if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(report.createdAt!)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'event':
@@ -124,7 +127,7 @@ class ReportDetailDialog extends StatelessWidget {
             children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
           }
           if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(report.createdAt!)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'post':
@@ -137,7 +140,7 @@ class ReportDetailDialog extends StatelessWidget {
             children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
           }
           if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(report.createdAt!)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'user':
@@ -147,7 +150,7 @@ class ReportDetailDialog extends StatelessWidget {
             children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
           }
           if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(report.createdAt!)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
           break;
 
         default:

@@ -3,21 +3,23 @@ class EventKickRequest {
   final String eventId;
   final String userId;
   final String reason;
+  final bool allowRejoin;
 
   EventKickRequest({
     required this.eventId,
     required this.userId,
     required this.reason,
+    required this.allowRejoin,
   });
 
   Map<String, dynamic> toJson() => {
     'eventId': eventId,
     'userId': userId,
     'reason': reason,
+    'allowRejoin': allowRejoin,
   };
 }
 
-// event_kick_response.dart
 class EventKickResponse {
   final String message;
 

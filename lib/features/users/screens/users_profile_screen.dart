@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
-import '../widgets/users_profile.dart';
+import '../widgets/userInfo/users_profile.dart';
 import '../widgets/user_post_content.dart'; // import widget bài viết
 
 class UserProfileScreen extends StatefulWidget {
@@ -42,17 +42,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      if (screenWidth >= 1024) {
+        setState(() {
+          _loadPosts = true;
+        });
+      }
+    });
+
     _scrollController.addListener(() {
       if (!_loadPosts &&
           _scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 100) {
-        // scroll gần cuối thì load post
         setState(() {
           _loadPosts = true;
         });
       }
     });
   }
+
 
   @override
   void dispose() {

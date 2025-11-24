@@ -102,7 +102,7 @@ class _MyEventsState extends State<MyEvents> {
       if (token.isEmpty) throw Exception("Missing token");
 
       final events = await _repository.getHostedEvents(
-        lang: lang ?? 'vi',
+        lang: _currentLocale?.languageCode ?? 'vi',
         pageNumber: 1,
         pageSize: 50,
         languageIds: _filterLanguages.map((e) => e['id']!).toList(),

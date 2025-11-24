@@ -37,6 +37,15 @@ class HostedEventDetails extends StatefulWidget {
 }
 
 class _HostedEventDetailsState extends State<HostedEventDetails> {
+
+  int currentParticipantCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    currentParticipantCount = widget.event.numberOfParticipants;
+  }
+
   @override
   Widget build(BuildContext context) {
     late List<ParticipantModel> participants;
@@ -282,7 +291,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                 context,
                 Icons.people_alt_outlined,
                 loc.translate('participants'),
-                "${widget.event.numberOfParticipants}/${widget.event.capacity}",
+                "$currentParticipantCount/${widget.event.capacity}",
                 textColor,
                 secondaryText,
                 onTapValue: () async {
@@ -303,11 +312,16 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                         token: widget.token,
                         eventId: widget.event.id,
                         eventRepository: widget.eventRepository,
+                        onKick: (kickedUserId) {
+                          setState(() {
+                            currentParticipantCount--;
+                          });
+                        },
                       ),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(loc.translate('error_occurred'))),
+                      SnackBar(content: Text('Error: $e')),
                     );
                   }
                 },

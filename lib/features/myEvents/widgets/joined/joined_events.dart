@@ -91,9 +91,11 @@ class _JoinedEventsState extends State<JoinedEvents> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context);
-    if ((_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) && _id != null) {
+    if (_currentLocale == null || _currentLocale!.languageCode != locale.languageCode) {
       _currentLocale = locale;
-      _loadJoinedEvents(lang: locale.languageCode);
+      if (_id != null) {
+        _loadJoinedEvents(lang: locale.languageCode);
+      }
     }
   }
 
@@ -123,7 +125,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
       if (token.isEmpty) throw Exception("Missing token");
 
       final events = await _repository.getJoinedEvents(
-        lang: lang ?? 'vi',
+        lang: _currentLocale?.languageCode ?? 'vi',
         pageNumber: 1,
         pageSize: 50,
         languageIds: _filterLanguages.map((e) => e['id']!).toList(),

@@ -72,7 +72,8 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
   }
 
   String formatDateTime(DateTime dt) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(dt);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    return DateFormat.yMMMd(locale).add_Hm().format(dt.toLocal());
   }
 
   Color statusColor(String? status, bool isDark) {

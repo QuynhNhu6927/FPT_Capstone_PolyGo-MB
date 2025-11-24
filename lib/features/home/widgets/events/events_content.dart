@@ -114,12 +114,19 @@ class _EventsContentState extends State<EventsContent> {
     });
   }
 
+  int _getPageSize(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 900) return 40;
+    return 10;
+  }
+
   int _matchingEventsPage = 1;
-  final int _matchingEventsPageSize = 10;
   bool _isLoadingMore = false;
   bool _hasMoreMatchingEvents = true;
 
   Future<void> _loadMatchingEvents({bool reset = false, String? lang}) async {
+    final pageSize = _getPageSize(context);
+
     if (reset) {
       setState(() {
         _loading = true;
@@ -144,7 +151,7 @@ class _EventsContentState extends State<EventsContent> {
         token,
         lang: lang ?? 'vi',
         pageNumber: _matchingEventsPage,
-        pageSize: _matchingEventsPageSize,
+        pageSize: pageSize,
       );
 
       if (!mounted) return;
@@ -199,7 +206,7 @@ class _EventsContentState extends State<EventsContent> {
         token,
         lang: lang ?? 'vi',
         pageNumber: 1,
-        pageSize: 50,
+        pageSize: 500,
         languageIds: languageIds,
         interestIds: interestIds,
         isFree: _selectedIsFree,

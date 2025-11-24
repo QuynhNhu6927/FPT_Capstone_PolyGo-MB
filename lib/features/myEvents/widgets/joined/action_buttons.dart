@@ -57,7 +57,21 @@ class ActionButtons extends StatelessWidget {
           size: ButtonSize.md,
           icon: const Icon(Icons.meeting_room_outlined, size: 18),
           variant: ButtonVariant.primary,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.eventWaiting,
+              arguments: {
+                'eventId': event.id,
+                'eventTitle': event.title,
+                'eventStatus': event.status,
+                'isHost': currentUserId == event.host.id,
+                'hostId': event.host.id,
+                'hostName': event.host.name,
+                'initialMic': true,
+              },
+            );
+          },
         );
         break;
       case 'completed':
@@ -84,39 +98,42 @@ class ActionButtons extends StatelessWidget {
     if (eventStatus == 'completed') {
       buttons.add(const SizedBox(width: 12));
       if (isHost || (hasRating ?? false)) {
-        buttons.add(AppButton(
-          text: 'Rating',
-          size: ButtonSize.md,
-          variant: ButtonVariant.outline,
-          icon: const Icon(Icons.star_outline, size: 18),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => RatesScreen(eventId: event.id)),
-            );
-          },
-        ));
+        buttons.add(
+          AppButton(
+            text: 'Rating',
+            size: ButtonSize.md,
+            variant: ButtonVariant.outline,
+            icon: const Icon(Icons.star_outline, size: 18),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RatesScreen(eventId: event.id),
+                ),
+              );
+            },
+          ),
+        );
       } else {
-        buttons.add(AppButton(
-          text: 'Rate',
-          size: ButtonSize.md,
-          variant: ButtonVariant.primary,
-          icon: const Icon(Icons.star_rate_outlined, size: 18),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => RatingScreen(eventId: event.id)),
-            );
-          },
-        ));
+        buttons.add(
+          AppButton(
+            text: 'Rate',
+            size: ButtonSize.md,
+            variant: ButtonVariant.primary,
+            icon: const Icon(Icons.star_rate_outlined, size: 18),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RatingScreen(eventId: event.id),
+                ),
+              );
+            },
+          ),
+        );
       }
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: buttons,
-    );
+    return Row(mainAxisAlignment: MainAxisAlignment.end, children: buttons);
   }
 }

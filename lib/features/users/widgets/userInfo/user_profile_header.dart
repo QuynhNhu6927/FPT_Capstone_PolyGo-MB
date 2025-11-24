@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:polygo_mobile/features/users/widgets/plus_frame.dart';
+import 'package:polygo_mobile/features/users/widgets/userInfo/plus_frame.dart';
 import 'package:polygo_mobile/features/users/widgets/report_user_dialog.dart';
-import 'package:polygo_mobile/features/users/widgets/sent_gifts.dart';
+import 'package:polygo_mobile/features/users/widgets/userInfo/sent_gifts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/localization/app_localizations.dart';
-import '../../../../data/repositories/friend_repository.dart';
-import '../../../core/utils/responsive.dart';
-import '../../../data/repositories/conversation_repository.dart';
-import '../../../data/services/apis/conversation_service.dart';
-import '../../../data/services/apis/friend_service.dart';
-import '../../../../core/api/api_client.dart';
-import '../../../routes/app_routes.dart';
-import '../../shared/about_plus.dart';
-import 'friend_button.dart';
+import '../../../../../core/localization/app_localizations.dart';
+import '../../../../../data/repositories/friend_repository.dart';
+import '../../../../core/utils/responsive.dart';
+import '../../../../data/repositories/conversation_repository.dart';
+import '../../../../data/services/apis/conversation_service.dart';
+import '../../../../data/services/apis/friend_service.dart';
+import '../../../../../core/api/api_client.dart';
+import '../../../../routes/app_routes.dart';
+import '../../../shared/about_plus.dart';
+import '../friend_button.dart';
 
 class UserProfileHeader extends StatefulWidget {
   final dynamic user;

@@ -11,7 +11,6 @@ class EventRegisterRequest {
   };
 }
 
-// models/events/event_register_response.dart
 class EventRegisterResponse {
   final String message;
 

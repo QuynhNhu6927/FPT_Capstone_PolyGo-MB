@@ -55,7 +55,6 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
   }
 
   Future<void> _handleCall() async {
-    CallSoundManager().playRingTone();
     final loc = AppLocalizations.of(context);
     try {
       final granted = await _requestCallPermissions(false);
@@ -101,7 +100,6 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
 
   // Trong _ConversationAppBarState
   Future<void> _handleVideoCall() async {
-    CallSoundManager().playRingTone();
     final loc = AppLocalizations.of(context);
     try {
       final granted = await _requestCallPermissions(true);

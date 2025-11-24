@@ -115,13 +115,6 @@ class FriendSocialSection extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: sw(context, 12)),
-            _buildSection(
-              icon: Icons.dashboard_rounded,
-              label: loc.translate("dashboard"),
-              iconColor: Colors.purpleAccent.shade200,
-              onTap: () {},
-            ),
           ],
         ),
       ),

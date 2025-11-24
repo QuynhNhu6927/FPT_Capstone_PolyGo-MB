@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/events/event_details_model.dart';
 import '../../../../data/repositories/event_repository.dart';
 import '../../../../routes/app_routes.dart';
@@ -40,10 +41,7 @@ class _HostedUserListState extends State<HostedUserList> {
 
   void _handleKick(String userId) {
     setState(() {
-      final index = participants.indexWhere((u) => u.id == userId);
-      if (index != -1) {
-        participants[index] = participants[index].copyWith(status: 3);
-      }
+      participants.removeWhere((u) => u.id == userId);
     });
     widget.onKick?.call(userId);
   }
@@ -107,7 +105,7 @@ class _HostedUserListState extends State<HostedUserList> {
   Widget _buildUserCard(BuildContext context, ParticipantModel user) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasAvatar = user.avatarUrl.isNotEmpty;
+    final hasAvatar = (user.avatarUrl ?? '').isNotEmpty;
     final isLocked = user.status == 3;
 
     return GestureDetector(
@@ -145,60 +143,147 @@ class _HostedUserListState extends State<HostedUserList> {
                         aspectRatio: 1,
                         child: hasAvatar
                             ? Image.network(
-                          user.avatarUrl,
+                          user.avatarUrl!,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person,
-                                size: 80, color: Colors.white70),
+                            color: Colors.grey[400],
+                            child: const Center(
+                              child: Icon(
+                                Icons.person,
+                                size: 80,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         )
                             : Container(
+                          width: double.infinity,
+                          height: double.infinity,
                           color: Colors.grey[400],
                           child: const Center(
-                            child: Icon(Icons.person,
-                                size: 80, color: Colors.white70),
+                            child: Icon(
+                              Icons.person,
+                              size: 80,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                      if (widget.hostId != user.id && !isLocked)
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: GestureDetector(
+
+
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            user.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+
+                        if (widget.hostId != user.id && !isLocked)
+                          GestureDetector(
                             onTap: () async {
                               final reasonController = TextEditingController();
+                              bool allowRejoin = true;
 
                               final confirmed = await showDialog<bool>(
                                 context: context,
-                                builder: (_) => AlertDialog(
-                                  title: const Text('Xác nhận kick'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text('Bạn có chắc muốn kick ${user.name}?'),
-                                      const SizedBox(height: 12),
-                                      TextField(
-                                        controller: reasonController,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Lý do',
-                                          border: OutlineInputBorder(),
+                                builder: (context) {
+                                  final theme = Theme.of(context);
+                                  final isDark = theme.brightness == Brightness.dark;
+                                  final textColor = isDark ? Colors.white : Colors.black;
+
+                                  final Gradient cardBackground = isDark
+                                      ? const LinearGradient(
+                                    colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                      : const LinearGradient(
+                                    colors: [Colors.white, Colors.white],
+                                  );
+
+                                  return StatefulBuilder(
+                                    builder: (context, setState) => Dialog(
+                                      backgroundColor: Colors.transparent,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          gradient: cardBackground,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              "Kick người dùng",
+                                              style: theme.textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+
+                                            TextField(
+                                              controller: reasonController,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Lý do',
+                                                border: OutlineInputBorder(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    "Cho phép quay lại (Allow Rejoin)",
+                                                    style: TextStyle(color: textColor),
+                                                  ),
+                                                ),
+                                                Switch(
+                                                  value: allowRejoin,
+                                                  onChanged: (v) => setState(() => allowRejoin = v),
+                                                ),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 16),
+
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(false),
+                                                  child: const Text("Hủy"),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                AppButton(
+                                                  text: "Kick",
+                                                  onPressed: () => Navigator.of(context).pop(true),
+                                                  size: ButtonSize.sm,
+                                                  variant: ButtonVariant.primary,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context, false),
-                                      child: const Text('Hủy'),
                                     ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pop(context, true),
-                                      child: const Text('Kick'),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               );
 
                               if (confirmed == true) {
@@ -207,6 +292,7 @@ class _HostedUserListState extends State<HostedUserList> {
                                     token: widget.token,
                                     eventId: widget.eventId,
                                     userId: user.id,
+                                    allowRejoin: allowRejoin,
                                     reason: reasonController.text.isNotEmpty
                                         ? reasonController.text
                                         : 'Vi phạm quy định',
@@ -219,48 +305,20 @@ class _HostedUserListState extends State<HostedUserList> {
                                 }
                               }
                             },
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.redAccent,
-                                shape: BoxShape.circle,
-                              ),
-                              child:
-                              const Icon(Icons.close, size: 16, color: Colors.white),
+                            child: const Icon(
+                              Icons.remove_circle_outline_sharp,
+                              size: 18,
+                              color: Colors.red,
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: Text(
-                      user.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                      ],
                     ),
                   ),
+
                 ],
               ),
             ),
           ),
-          if (isLocked)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.45),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Icon(Icons.lock, color: Colors.white, size: 40),
-                ),
-              ),
-            ),
         ],
       ).animate().fadeIn(duration: 300.ms),
     );

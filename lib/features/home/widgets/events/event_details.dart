@@ -90,7 +90,7 @@ class _EventDetailState extends State<EventDetail> {
     Future<bool?> _showPaidEventWarning() {
       return showDialog<bool>(
         context: context,
-        barrierDismissible: false, // Không cho tắt bằng tap ngoài
+        barrierDismissible: true,
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           final loc = AppLocalizations.of(context);
@@ -472,8 +472,9 @@ class _EventDetailState extends State<EventDetail> {
                       variant: ButtonVariant.primary,
                       size: ButtonSize.md,
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      onPressed: isDisabled ? null : () async {
-
+                      onPressed: isDisabled
+                          ? null
+                          : () async {
                         final prefs = await SharedPreferences.getInstance();
                         final token = prefs.getString('token') ?? '';
                         if (token.isEmpty) {
@@ -483,7 +484,8 @@ class _EventDetailState extends State<EventDetail> {
                           return;
                         }
 
-                        Future<void> registerEvent(String password) async {
+                        Future<void> registerEvent(String password,
+                            {bool closeTwoDialogs = false}) async {
                           final repository = EventRepository(EventService(ApiClient()));
                           try {
                             await repository.registerEvent(
@@ -491,22 +493,59 @@ class _EventDetailState extends State<EventDetail> {
                               eventId: event.id,
                               password: password,
                             );
+
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(loc.translate("event_register_success"))),
-                            );
-                            widget.onEventUpdated?.call(widget.event.copyWith(isParticipant: true));
-                            Navigator.pop(context);
-                          } catch (e) {
-                            final errorString = e.toString();
-                            if (errorString.contains("Error.InvalidEventPassword")) {
-                              throw "wrong_password";
+                            widget.onEventUpdated
+                                ?.call(widget.event.copyWith(isParticipant: true));
+
+                            //  Đóng dialog
+                            if (closeTwoDialogs) {
+                              Navigator.of(context, rootNavigator: true).pop(); // password dialog
+                              Navigator.pop(context); // event detail dialog
                             } else {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(errorString)),
-                              );
+                              Navigator.pop(context); // chỉ event detail dialog
                             }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                  Text(loc.translate("event_register_success"))),
+                            );
+                          } on InvalidEventPasswordException {
+                            throw "wrong_password";
+                          } on KickedFromEventException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.translate("event_register_kicked"))),
+                            );
+                          } on InsufficientBalanceException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.translate("insufficient_balance"))),
+                            );
+                          } catch (_) {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.translate("system_error"))),
+                            );
                           }
                         }
 
@@ -526,7 +565,8 @@ class _EventDetailState extends State<EventDetail> {
                           barrierDismissible: false,
                           builder: (context) {
                             String? errorText;
-                            final isDark = Theme.of(context).brightness == Brightness.dark;
+                            final isDark =
+                                Theme.of(context).brightness == Brightness.dark;
                             final loc = AppLocalizations.of(context);
 
                             return StatefulBuilder(builder: (context, setState) {
@@ -559,18 +599,18 @@ class _EventDetailState extends State<EventDetail> {
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Tiêu đề
                                       Text(
                                         loc.translate("enter_event_password"),
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        style:
+                                        Theme.of(context).textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
-                                          color: isDark ? Colors.white : Colors.black87,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black87,
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-
-                                      // Input
                                       TextField(
                                         controller: controller,
                                         obscureText: true,
@@ -587,8 +627,6 @@ class _EventDetailState extends State<EventDetail> {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-
-                                      // Nút hành động
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
@@ -616,36 +654,10 @@ class _EventDetailState extends State<EventDetail> {
                                               }
 
                                               try {
-                                                final prefs = await SharedPreferences.getInstance();
-                                                final token = prefs.getString('token') ?? '';
-                                                await EventRepository(EventService(ApiClient()))
-                                                    .registerEvent(
-                                                  token: token,
-                                                  eventId: event.id,
-                                                  password: controller.text,
-                                                );
-
-                                                if (!mounted) return;
-                                                widget.onEventUpdated?.call(
-                                                    widget.event.copyWith(isParticipant: true));
-
-                                                // ❗ Đóng dialog password và dialog EventDetail nếu cần
-                                                Navigator.of(context, rootNavigator: true).pop();
-                                                Navigator.pop(context);
-
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                      content: Text(
-                                                          loc.translate("event_register_success"))),
-                                                );
+                                                await registerEvent(controller.text,
+                                                    closeTwoDialogs: true);
                                               } catch (e) {
-                                                final err = e.toString();
-                                                if (err.contains("Error.InvalidEventPassword")) {
-                                                  setState(() {
-                                                    errorText = loc.translate("wrong_password");
-                                                  });
-                                                } else {
-                                                  if (!mounted) return;
+                                                if (e == "wrong_password") {
                                                   setState(() {
                                                     errorText = loc.translate("wrong_password");
                                                   });
@@ -663,10 +675,10 @@ class _EventDetailState extends State<EventDetail> {
                             });
                           },
                         );
-
                       },
                     ),
                   ],
+
                 ],
               )
 
@@ -757,6 +769,6 @@ String formatCurrency(num amount) {
     symbol: "đ",
   );
 
-  return formatter.format(amount).replaceAll(" ", " "); // Fix khoảng trắng đặc biệt
+  return formatter.format(amount).replaceAll(" ", " ");
 }
 
