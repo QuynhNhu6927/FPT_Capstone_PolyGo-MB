@@ -37,8 +37,8 @@ class AboutStreakDialog extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
-      streakLabel = loc.translate("Good streak") ?? "Good streak";
-      noteLabel = loc.translate("Keep going every day!") ?? "Keep going every day!";
+      streakLabel = loc.translate("good_streak") ?? "Good streak";
+      noteLabel = loc.translate("keep_going") ?? "Keep going every day!";
     } else if (streakDay >= 3) {
       bgGradient = const LinearGradient(
         colors: [Color(0xFFFFC107), Color(0xFFFFE082)],
@@ -46,8 +46,8 @@ class AboutStreakDialog extends StatelessWidget {
         end: Alignment.bottomRight,
       );
       streakLabel =
-          loc.translate("Normal streak") ?? "Normal streak";
-      noteLabel = loc.translate("You can reach a higher streak soon!") ??
+          loc.translate("normal_streak") ?? "Normal streak";
+      noteLabel = loc.translate("you_can_reach") ??
           "You can reach a higher streak soon!";
     } else {
       bgGradient = const LinearGradient(
@@ -55,8 +55,8 @@ class AboutStreakDialog extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
-      streakLabel = loc.translate("Low streak") ?? "Low streak";
-      noteLabel = loc.translate("Try to be active daily!") ?? "Try to be active daily!";
+      streakLabel = loc.translate("low_streak") ?? "Low streak";
+      noteLabel = loc.translate("try_active") ?? "Try to be active daily!";
     }
 
     return Center(
@@ -105,7 +105,7 @@ class AboutStreakDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "$streakDay-DAY STREAK",
+                          "$streakDay ${loc.translate('-DAY STREAK')}",
                           style: t.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: st(context, 20),
@@ -129,7 +129,7 @@ class AboutStreakDialog extends StatelessWidget {
 
                 // ==== LONGEST STREAK TEXT ====
                 Text(
-                  "Your longest streak day: $longestStreak",
+                  "${loc.translate("longest_streak")} $longestStreak",
                   style: t.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: st(context, 20),

@@ -163,10 +163,12 @@ class _ConversationListState extends State<ConversationList> {
         SnackBar(content: Text("Lỗi khi tải cuộc trò chuyện: $e")),
       );
     } finally {
-      if (mounted) setState(() {
+      if (mounted) {
+        setState(() {
         _isLoading = false;
         _isInit = false;
       });
+      }
     }
   }
 
@@ -199,7 +201,7 @@ class _ConversationListState extends State<ConversationList> {
                     _loadConversations(loadMore: false);
                   },
                   decoration: InputDecoration(
-                    hintText: loc.translate("search_placeholder"),
+                    hintText: loc.translate("search_conversation_placeholder"),
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF3F4F6),

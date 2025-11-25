@@ -1,0 +1,24 @@
+{
+
+  "call_ended": "Cuộc gọi đã kết thúc",
+  "calling": "Đang kết nối...",
+  "video_call": "Cuộc gọi video",
+  "conversation_list": "Danh sách cuộc trò chuyện",
+  "video_from": "Cuộc gọi video từ",
+  "voice_from": "Cuộc gọi thoại từ",
+  "type_mess": "Nhập tin nhắn...",
+  "loading...": "Đang tải...",
+  "permission_denied": "Yêu cầu bị từ chối, vui lòng thử lại!",
+  "user_offline": "Người dùng đang không hoạt động, hãy quay lại sau",
+  "cannot_check_status": "Lỗi hệ thống! Vui lòng thử lại sau!",
+  "online": "Đang hoạt động",
+  "last_seen": "Lần cuối",
+  "search_conversation_placeholder": "Tìm cuộc trò chuyện...",
+  "load_more": "Tải thêm",
+  "you_sent": "Bạn",
+  "sent_one_image": "đã gửi 1 ảnh",
+  "sent_multiple_images": "đã gửi nhiều ảnh",
+  "sent_audio": "đã gửi tin nhắn thoại",
+  "erase_mess": "Xóa tin nhắn"
+
+}

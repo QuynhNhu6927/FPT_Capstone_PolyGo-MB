@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../../../../../../core/localization/app_localizations.dart';
 import '../../../../../../core/utils/render_utils.dart';
 
 class PostContent extends StatelessWidget {
@@ -71,7 +72,7 @@ class _LimitedMarkdownState extends State<LimitedMarkdown> {
         styleSheet: markdownStyle,
       );
     }
-
+    final loc = AppLocalizations.of(context);
     final endIndex = tp.getPositionForOffset(Offset(tp.width, tp.height)).offset;
     final visibleText = decoded.substring(0, endIndex).trim();
 
@@ -85,8 +86,8 @@ class _LimitedMarkdownState extends State<LimitedMarkdown> {
         ),
         GestureDetector(
           onTap: () => setState(() => _expanded = true),
-          child: const Text(
-            "xem thêm",
+          child: Text(
+            loc.translate("read_more"),
             style: TextStyle(
               color: Color(0xFF2563EB),
               fontWeight: FontWeight.bold,

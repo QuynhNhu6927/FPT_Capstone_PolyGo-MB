@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../widgets/rates.dart';
 import '../widgets/rating.dart';
 
@@ -19,6 +20,7 @@ class _RatesScreenState extends State<RatesScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context);
 
     return SafeArea(
       child: Scaffold(
@@ -26,7 +28,7 @@ class _RatesScreenState extends State<RatesScreen> {
         appBar: AppBar(
           scrolledUnderElevation: 0,
           surfaceTintColor: Colors.transparent,
-          title: const Text("Đánh giá sự kiện"),
+          title: Text(loc.translate('rating_event')),
           centerTitle: true,
         ),
         body: Rates(eventId: widget.eventId),

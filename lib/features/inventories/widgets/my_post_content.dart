@@ -8,6 +8,7 @@ import '../../../../data/repositories/auth_repository.dart';
 import '../../../../data/repositories/post_repository.dart';
 import '../../../../data/services/apis/auth_service.dart';
 import '../../../../data/services/apis/post_service.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../home/widgets/social/create_post_dialog.dart';
 import '../../home/widgets/social/postCard/post/post_card.dart';
 import '../../home/widgets/social/post_card_old.dart';
@@ -68,8 +69,9 @@ class _MyPostContentState extends State<MyPostContent> {
     if (result == true) {
       await _loadPosts();
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Tạo bài viết thành công!")),
+          SnackBar(content: Text(loc.translate('create_post_success'))),
         );
       }
     }
@@ -123,13 +125,25 @@ class _MyPostContentState extends State<MyPostContent> {
     final theme = Theme.of(context);
     final t = Theme.of(context).textTheme;
     final isDark = theme.brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context);
+
+    String _timeAgo(DateTime dateTime) {
+      final diff = DateTime.now().difference(dateTime);
+      if (diff.inSeconds < 60) return loc.translate("just_now");
+      if (diff.inMinutes < 60) return '${diff.inMinutes} ${loc.translate("minutes_ago")}';
+      if (diff.inHours < 24) return '${diff.inHours} ${loc.translate("hours_ago")}';
+      if (diff.inDays < 7) return '${diff.inDays} ${loc.translate("days_ago")}';
+      if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} ${loc.translate("weeks_ago")}';
+      if (diff.inDays < 365) return '${(diff.inDays / 30).floor()} ${loc.translate("months_ago")}';
+      return '${(diff.inDays / 365).floor()} ${loc.translate("year_ago")}';
+    }
 
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         title: Text(
-          "Bài viết của tôi",
+          loc.translate('my_posts'),
           style: t.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -159,8 +173,7 @@ class _MyPostContentState extends State<MyPostContent> {
                 post: post,
                 avatarUrl: post.creator.avatarUrl,
                 userName: post.creator.name,
-                timeAgo:
-                "${DateTime.now().difference(post.createdAt).inHours} giờ trước",
+                timeAgo: _timeAgo(post.createdAt),
                 contentText: post.content,
                 contentImage: post.imageUrls.isNotEmpty
                     ? post.imageUrls.first
@@ -184,6 +197,7 @@ class _MyPostContentState extends State<MyPostContent> {
   Widget _buildCreatePostBox(BuildContext context, bool isDark, TextTheme t) {
     final Color textColor = isDark ? Colors.white70 : Colors.black87;
     final Color secondaryText = isDark ? Colors.white54 : Colors.grey[700]!;
+    final loc = AppLocalizations.of(context);
 
     final Gradient cardBackground = isDark
         ? const LinearGradient(
@@ -212,7 +226,7 @@ class _MyPostContentState extends State<MyPostContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Hôm nay bạn muốn chia sẻ gì?",
+            loc.translate("share_your_though"),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -245,7 +259,7 @@ class _MyPostContentState extends State<MyPostContent> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      "Chia sẻ cảm nghĩ của bạn...",
+                      loc.translate("share_your_though"),
                       style: TextStyle(color: secondaryText, fontSize: 14),
                     ),
                   ),

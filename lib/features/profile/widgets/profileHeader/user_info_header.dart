@@ -155,7 +155,7 @@ class UserInfoHeader extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Introduction: ",
+                  text: loc.translate("introduction: "),
                   style: t.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: st(context, 14),

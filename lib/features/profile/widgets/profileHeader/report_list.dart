@@ -6,7 +6,6 @@ import '../../../../../core/api/api_client.dart';
 import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../core/utils/responsive.dart';
 import '../../../../data/models/report/report_request.dart';
-import '../../../../data/models/report/view_report_model.dart';
 import '../../../../data/repositories/report_repository.dart';
 import '../../../../data/services/apis/report_service.dart';
 import 'report_detail_dialog.dart';
@@ -173,7 +172,7 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${loc.translate("you_reported")} ${report.reportType} với lý do: ${report.reason}',
+                      '${loc.translate("you_reported")} ${report.reportType} ${loc.translate("with_reason:")} ${report.reason}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isDark ? Colors.white : Colors.black87,

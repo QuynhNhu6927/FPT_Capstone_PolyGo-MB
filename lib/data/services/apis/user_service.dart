@@ -74,22 +74,28 @@ class UserService {
     }
   }
 
-  Future<ApiResponse<UserMatchingResponse>> getMatchingUsers(String token, {String lang = 'vi'}) async {
-    try {
-      final response = await apiClient.get(
-        ApiConstants.userMatching,
-        queryParameters: {'lang': lang},
-        headers: {
-          ApiConstants.headerAuthorization: 'Bearer $token',
-        },
-      );
+  Future<ApiResponse<UserMatchingResponse>> getMatchingUsers(
+      String token, {
+        String lang = 'vi',
+        int pageNumber = 1,
+        int pageSize = 20,
+      }) async {
+    final response = await apiClient.get(
+      ApiConstants.userMatching,
+      queryParameters: {
+        'lang': lang,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+      },
+      headers: {
+        ApiConstants.headerAuthorization: 'Bearer $token',
+      },
+    );
 
-      final json = response.data as Map<String, dynamic>;
-      return ApiResponse.fromJson(json, (data) => UserMatchingResponse.fromJson(data));
-    } on DioError catch (e) {
-      rethrow;
-    }
+    final json = response.data as Map<String, dynamic>;
+    return ApiResponse.fromJson(json, (data) => UserMatchingResponse.fromJson(data));
   }
+
 
   Future<ApiResponse<UserAllResponse>> getAllUsers(
       String token, {

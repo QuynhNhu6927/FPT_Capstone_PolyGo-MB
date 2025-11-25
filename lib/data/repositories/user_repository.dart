@@ -36,10 +36,22 @@ class UserRepository {
     }
   }
 
-  Future<List<UserMatchingItem>> getMatchingUsers(String token, {String lang = 'vi'}) async {
-    final response = await _service.getMatchingUsers(token, lang: lang);
-    return response.data?.items ?? [];
+  Future<UserMatchingResponse> getMatchingUsers(
+      String token, {
+        String lang = 'vi',
+        int pageNumber = 1,
+        int pageSize = 20,
+      }) async {
+    final response = await _service.getMatchingUsers(
+      token,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+
+    return response.data!;
   }
+
 
   Future<List<UserItem>> getAllUsers(
       String token, {

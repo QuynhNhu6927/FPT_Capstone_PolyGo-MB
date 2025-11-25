@@ -52,6 +52,8 @@ class _SentGiftsDialogState extends State<SentGiftsDialog> {
 
   Future<void> _sendGift() async {
     if (_selectedGiftId == null) return;
+    final loc = AppLocalizations.of(context);
+
     setState(() => _sending = true);
 
     try {
@@ -73,7 +75,7 @@ class _SentGiftsDialogState extends State<SentGiftsDialog> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("${res?.giftName} sent successfully!"),
+          content: Text("${res?.giftName} ${loc.translate('sent_successfully')}"),
           duration: const Duration(seconds: 2),
         ),
       );

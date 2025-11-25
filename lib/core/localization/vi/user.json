@@ -1,0 +1,37 @@
+{
+
+  "sent_successfully": "Gửi thành công",
+  "send_gift": "Gửi quà",
+  "choose_gift": "Chọn quà",
+  "message_optional": "Lời nhắn...",
+  "send_anonymously": "Gửi ẩn danh",
+  "send": "Gửi",
+  "gift_sent_success": "Quà đã được gửi thành công",
+  "no_badges": "Chưa có huy hiệu nào",
+  "Friend request sent!": "Đã gửi lời mời kết bạn!",
+  "Unfriended successfully": "Hủy kết bạn thành công",
+  "Friend request rejected!": "Đã từ chối lời mời kết bạn!",
+  "Friend request accepted!": "Đã chấp nhận lời mời kết bạn!",
+  "Friend request cancelled!": "Đã hủy lời mời kết bạn!",
+  "interests": "Sở thích",
+  "Do you want to remove this friend?": "Bạn có muốn hủy kết bạn không?",
+  "Unfriend": "Hủy kết bạn",
+  "Accept": "Chấp nhận",
+  "Reject": "Từ chối",
+  "Do you want to accept this friend request?": "Bạn có muốn chấp nhận lời mời kết bạn không?",
+  "Friend Request": "Lời mời kết bạn",
+  "report_fake": "Giả mạo",
+  "report_spam": "Spam, quảng cáo, lừa đảo",
+  "report_negative": "Hành vi tiêu cực",
+  "report_illegal": "Vi phạm pháp luật, chính sách PolyGo",
+  "report_other": "Lý do khác",
+
+  "report_description_placeholder": "Mô tả chi tiết vấn đề",
+  "select_reason_first": "Vui lòng chọn ít nhất một lý do",
+  "enter_other_reason": "Vui lòng nhập lý do khác",
+  "report_submitted": "Báo cáo của bạn đã được gửi",
+  "report_failed": "Gửi báo cáo thất bại",
+
+  "already_report_user": "Bạn đã báo cáo người dùng này rồi, chúng tôi sẽ giải quyết sớm nhất có thể"
+
+}

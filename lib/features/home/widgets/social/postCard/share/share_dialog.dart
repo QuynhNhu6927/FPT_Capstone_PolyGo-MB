@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../../core/localization/app_localizations.dart';
 import '../../../../../../core/utils/audioplayers.dart';
 import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../data/models/post/post_model.dart';
@@ -40,6 +41,7 @@ class _SharePostDialogState extends State<SharePostDialog> {
 
   Future<void> _sharePost() async {
     setState(() => _loading = true);
+    final loc = AppLocalizations.of(context);
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -74,12 +76,12 @@ class _SharePostDialogState extends State<SharePostDialog> {
         Navigator.of(context).pop(response.data);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? "Share failed")),
+          SnackBar(content: Text(response.message ?? loc.translate("share_post_failed"))),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text(loc.translate("share_error"))),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -88,6 +90,8 @@ class _SharePostDialogState extends State<SharePostDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final Color textColor = isDark ? Colors.white70 : Colors.black87;
@@ -129,7 +133,7 @@ class _SharePostDialogState extends State<SharePostDialog> {
                     controller: _contentController,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: "Thêm nội dung (tùy chọn)...",
+                      hintText: loc.translate("share_caption"),
                       hintStyle: TextStyle(color: secondaryText),
                       filled: true,
                       fillColor:
@@ -149,7 +153,7 @@ class _SharePostDialogState extends State<SharePostDialog> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton(
-                text: "Chia sẻ",
+                text: loc.translate("share"),
                 onPressed: _loading ? null : _sharePost,
                 size: ButtonSize.sm,
                 variant: ButtonVariant.primary,

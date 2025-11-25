@@ -1,0 +1,37 @@
+{
+
+  "sent_successfully": "Sent successfully",
+  "send_gift": "Send gift",
+  "choose_gift": "Choose a gift",
+  "message_optional": "Message (optional)",
+  "send_anonymously": "Send anonymously",
+  "send": "Send",
+  "gift_sent_success": "Gift sent successfully",
+  "no_badges": "No badges available",
+  "Friend request sent!": "Friend request sent!",
+  "Unfriended successfully": "Unfriended successfully",
+  "Friend request rejected!": "Friend request rejected!",
+  "Friend request accepted!": "Friend request accepted!",
+  "Friend request cancelled!": "Friend request cancelled!",
+  "interests": "Interests",
+  "Do you want to remove this friend?": "Do you want to remove this friend?",
+  "Unfriend": "Unfriend",
+  "Accept": "Accept",
+  "Reject": "Reject",
+  "Do you want to accept this friend request?": "Do you want to accept this friend request?",
+  "Friend Request": "Friend Request",
+  "report_fake": "Fake profile",
+  "report_spam": "Spam, advertisement, scam",
+  "report_negative": "Negative behavior",
+  "report_illegal": "Illegal actions, PolyGo policy violation",
+  "report_other": "Other",
+
+  "report_description_placeholder": "Describe the issue",
+  "select_reason_first": "Please select at least one reason",
+  "enter_other_reason": "Please enter the other reason",
+  "report_submitted": "Your report has been submitted",
+  "report_failed": "Failed to submit report",
+
+  "already_report_user": "You already report this user, our support team will resolve soon"
+
+}

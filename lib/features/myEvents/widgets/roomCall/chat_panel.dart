@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/services/signalr/webrtc_controller.dart';
 
 class ChatPanel extends StatefulWidget {
@@ -48,6 +49,7 @@ class _ChatPanelState extends State<ChatPanel> {
     final cardColor = theme.cardColor;
     final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
     final secondaryTextColor = theme.textTheme.bodySmall?.color ?? Colors.black45;
+    final loc = AppLocalizations.of(context);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
@@ -77,7 +79,7 @@ class _ChatPanelState extends State<ChatPanel> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Chat",
+                    loc.translate('chat'),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -94,7 +96,7 @@ class _ChatPanelState extends State<ChatPanel> {
               child: widget.messages.isEmpty
                   ? Center(
                 child: Text(
-                  "Chưa có tin nhắn nào",
+                  loc.translate('no_message_yet'),
                   style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               )
@@ -179,7 +181,7 @@ class _ChatPanelState extends State<ChatPanel> {
                       controller: widget.controller,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText: "Nhập tin nhắn...",
+                        hintText: loc.translate('messaging...'),
                         hintStyle: TextStyle(color: secondaryTextColor),
                         border: InputBorder.none,
                         isDense: true,

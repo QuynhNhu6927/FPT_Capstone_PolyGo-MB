@@ -102,7 +102,7 @@ class _RegisterFormState extends State<RegisterForm> {
     } catch (e) {
       setState(() {
         if (e.toString().contains("mail_exists")) {
-          _emailError = "Tài khoản đã tồn tại";
+          _emailError = AppLocalizations.of(context).translate("mail_exists");
         } else {
           _otpMessage =
               AppLocalizations.of(context).translate("otp_sent_failed");
@@ -116,7 +116,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
     String? _passwordValidator(String? v) {
     final loc = AppLocalizations.of(context);
-    if (v == null || v.isEmpty) return AppLocalizations.of(context).translate("null");
+    if (v == null || v.isEmpty) return AppLocalizations.of(context).translate("null_warning");
     if (v.length < 6) return AppLocalizations.of(context).translate("min_6_char");
     final upperCase = RegExp(r'[A-Z]');
     final number = RegExp(r'\d');
@@ -162,10 +162,10 @@ class _RegisterFormState extends State<RegisterForm> {
     } catch (e) {
       setState(() {
         if (e.toString().contains("invalid_otp")) {
-          _otpMessage = "OTP không đúng hoặc hết hạn";
+          _otpMessage = AppLocalizations.of(context).translate("invalid_otp");
           _otpSuccess = false;
         } else if (e.toString().contains("mail_exists")) {
-          _emailError = "Tài khoản đã tồn tại";
+          _emailError = AppLocalizations.of(context).translate("mail_exists");
         }
       });
 
@@ -241,14 +241,14 @@ class _RegisterFormState extends State<RegisterForm> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  hintText: "Nguyễn Văn A",
+                  hintText: loc.translate("name_example"),
                   prefixIcon: Icon(Icons.person_outline, size: sw(context, 20)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(sw(context, 10)),
                   ),
                 ),
                 validator: (v) =>
-                (v == null || v.isEmpty) ? loc.translate("null") : null,
+                (v == null || v.isEmpty) ? loc.translate("null_warning") : null,
               ),
               SizedBox(height: sh(context, 16)),
 
@@ -325,7 +325,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       )
                           : Text(
                         _otpCountdown > 0
-                            ? "Resend in $_otpCountdown s"
+                            ? "$_otpCountdown s"
                             : loc.translate("send_otp"),
                         style: TextStyle(
                           fontSize: st(context, 14),
@@ -349,7 +349,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       borderRadius: BorderRadius.circular(sw(context, 10)),
                     ),
                   ),
-                  validator: (v) => (v == null || v.isEmpty) ? loc.translate("null") : null,
+                  validator: (v) => (v == null || v.isEmpty) ? loc.translate("null_warning") : null,
                 ),
                 SizedBox(height: sh(context, 16)),
               ],
@@ -403,7 +403,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   ),
                 ),
                 validator: (v) =>
-                (v != _passwordController.text) ? loc.translate("not_match") : null,
+                (v != _passwordController.text) ? loc.translate("not_match_password") : null,
               ),
               SizedBox(height: sh(context, 12)),
 
@@ -426,7 +426,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
               AppButton(
                 text: _isLoading
-                    ? loc.translate("signing_up")
+                    ? loc.translate("signing_up...")
                     : loc.translate("signup_button"),
                 onPressed: _isLoading ? null : _onSubmit,
                 size: ButtonSize.lg,

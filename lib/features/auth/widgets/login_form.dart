@@ -198,24 +198,8 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: sh(context, 12)),
 
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Flexible(
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (v) => setState(() => _rememberMe = v!),
-                        ),
-                        Flexible(
-                          child: Text(
-                            loc.translate("remember_me"),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   AppButton(
                     text: loc.translate("forgot_password"),
                     variant: ButtonVariant.link,
@@ -266,7 +250,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: sh(context, 24)),
               Text.rich(
                 TextSpan(
-                  text: loc.translate("no_account") + ' ',
+                  text: '${loc.translate("no_account")} ',
                   style: t.bodyMedium?.copyWith(
                       color: Colors.grey, fontSize: st(context, 14)),
                   children: [

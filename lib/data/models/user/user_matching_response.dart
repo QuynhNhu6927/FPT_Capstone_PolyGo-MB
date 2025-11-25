@@ -1,15 +1,34 @@
 class UserMatchingResponse {
   final List<UserMatchingItem> items;
+  final int totalItems;
+  final int currentPage;
+  final int totalPages;
+  final int pageSize;
+  final bool hasPreviousPage;
+  final bool hasNextPage;
 
-  UserMatchingResponse({required this.items});
+  UserMatchingResponse({
+    required this.items,
+    required this.totalItems,
+    required this.currentPage,
+    required this.totalPages,
+    required this.pageSize,
+    required this.hasPreviousPage,
+    required this.hasNextPage,
+  });
 
   factory UserMatchingResponse.fromJson(Map<String, dynamic> json) {
-
-    final items = (json['items'] as List<dynamic>?)
-        ?.map((e) => UserMatchingItem.fromJson(e))
-        .toList() ??
-        [];
-    return UserMatchingResponse(items: items);
+    return UserMatchingResponse(
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((e) => UserMatchingItem.fromJson(e))
+          .toList(),
+      totalItems: json['totalItems'] ?? 0,
+      currentPage: json['currentPage'] ?? 1,
+      totalPages: json['totalPages'] ?? 1,
+      pageSize: json['pageSize'] ?? 0,
+      hasPreviousPage: json['hasPreviousPage'] ?? false,
+      hasNextPage: json['hasNextPage'] ?? false,
+    );
   }
 }
 

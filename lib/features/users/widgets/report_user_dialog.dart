@@ -13,11 +13,7 @@ class ReportUserDialog extends StatefulWidget {
   final String userId;
   final VoidCallback? onSubmit;
 
-  const ReportUserDialog({
-    super.key,
-    required this.userId,
-    this.onSubmit,
-  });
+  const ReportUserDialog({super.key, required this.userId, this.onSubmit});
 
   @override
   State<ReportUserDialog> createState() => _ReportUserDialogState();
@@ -26,13 +22,13 @@ class ReportUserDialog extends StatefulWidget {
 class _ReportUserDialogState extends State<ReportUserDialog> {
   final TextEditingController _descriptionController = TextEditingController();
   String? _errorText;
-
+  bool _isSubmitting = false;
   final List<String> reasons = [
-    "Giả mạo",
-    "Spam, quảng cáo, lừa đảo",
-    "Hành vi tiêu cực",
-    "Vi phạm pháp luật, chính sách PolyGo",
-    "Lý do khác",
+    "report_fake",
+    "report_spam",
+    "report_negative",
+    "report_illegal",
+    "report_other",
   ];
 
   late Map<String, bool> selected;
@@ -63,28 +59,35 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
   void _handleSubmit() async {
     final loc = AppLocalizations.of(context);
 
-    final selectedReasons =
-    selected.entries.where((e) => e.value).map((e) => e.key).toList();
+    final selectedReasons = selected.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
 
     if (selectedReasons.isEmpty) {
       setState(() => _errorText = loc.translate("select_reason_first"));
       return;
     }
 
-    if (selected["Lý do khác"] == true &&
+    if (selected["report_other"] == true &&
         _descriptionController.text.trim().isEmpty) {
       setState(() => _errorText = loc.translate("enter_other_reason"));
       return;
     }
 
-    final reason = selectedReasons.map((r) {
-      if (r == "Lý do khác") return _descriptionController.text.trim();
-      return r;
-    }).join(", ");
+    final reason = selectedReasons
+        .map((r) {
+      if (r == "report_other") return _descriptionController.text.trim();
+      return loc.translate(r);
+    })
+        .join(", ");
 
     final description = _descriptionController.text.trim();
 
-    setState(() => _errorText = null);
+    setState(() {
+      _errorText = null;
+      _isSubmitting = true;
+    });
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -122,15 +125,22 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
       } else {
         setState(() {
           _errorText =
-          "Bạn đã báo cáo người dùng này rồi, chúng tôi đang xử lí, vui lòng chờ";
+              loc.translate("already_report_user");
         });
       }
     } catch (e) {
       setState(() {
         _errorText = loc.translate("report_failed");
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,10 +149,10 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
     final textColor = isDark ? Colors.white : Colors.black;
     final Gradient bg = isDark
         ? const LinearGradient(
-      colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    )
+            colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
         : const LinearGradient(colors: [Colors.white, Colors.white]);
 
     return Dialog(
@@ -159,21 +169,32 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  loc.translate("report"),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: textColor, fontWeight: FontWeight.bold),
+                Center(
+                  child: Text(
+                    loc.translate("report"),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
+
+                const SizedBox(height: 10),
+
+                // ---- DIVIDER ----
+                Divider(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  thickness: 1,
+                ),
+
+                const SizedBox(height: 10),
 
                 ...reasons.map(
-                      (r) => CheckboxListTile(
+                  (r) => CheckboxListTile(
                     value: selected[r],
-                    onChanged: (v) =>
-                        setState(() => selected[r] = v ?? false),
-                    title: Text(r, style: TextStyle(color: textColor)),
+                    onChanged: (v) => setState(() => selected[r] = v ?? false),
+                    title: Text(loc.translate(r), style: TextStyle(color: textColor)),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                     dense: true,
@@ -183,8 +204,10 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
                 if (_errorText != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(_errorText!,
-                        style: const TextStyle(color: Colors.red, fontSize: 13)),
+                    child: Text(
+                      _errorText!,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
                   ),
 
                 const SizedBox(height: 12),
@@ -198,8 +221,10 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                 ),
 
@@ -227,12 +252,15 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
                             top: -8,
                             right: -8,
                             child: IconButton(
-                              icon: const Icon(Icons.cancel,
-                                  size: 18, color: Colors.red),
+                              icon: const Icon(
+                                Icons.cancel,
+                                size: 18,
+                                color: Colors.red,
+                              ),
                               onPressed: () =>
                                   setState(() => _imageUrls.remove(path)),
                             ),
-                          )
+                          ),
                         ],
                       );
                     }),
@@ -245,9 +273,12 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
                           color: isDark ? Colors.grey[800] : Colors.grey[200],
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.add_a_photo, color: Colors.grey),
+                        child: const Icon(
+                          Icons.add_a_photo,
+                          color: Colors.grey,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
 
@@ -262,18 +293,22 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _handleSubmit,
+                      onPressed: _isSubmitting ? null : _handleSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child: Text(loc.translate("submit"),
-                          style: const TextStyle(color: Colors.white)),
-                    )
+                      child: Text(
+                        loc.translate("submit"),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
               ],

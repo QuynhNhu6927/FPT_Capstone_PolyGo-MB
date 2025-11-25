@@ -1,24 +1,26 @@
 {
-  "error_no_connection": "Lost connection!",
-  "retry": "Try again",
 
-  "search_placeholder": "Search...",
-
-  "bottom_me": "Me",
-  "bottom_shop": "Shop",
-  "bottom_my_events": "My events",
-  "bottom_home": "Home",
-
-  "about_merit_title": "Merit Score",
-  "merit_range_high": "•70 - 100: You are an active and trustworthy member",
-  "merit_range_mid": "•51 - 69: You have multiple warnings, please be careful",
-  "merit_range_low": "•0 - 50: You are untrustworthy and will be temporarily banned",
-
+  "very_trusted": "High trusted",
+  "merit_range_high": "You are active and high trusted, please keep up!",
+  "warned": "Warning",
+  "merit_range_mid": "You are reported many time! Please be careful!",
+  "not_trusted": "Trusted low",
+  "merit_range_low": "You are banned from using our features for 7 days!",
+  "TRUST_SCORE": "TRUST SCORE",
   "about_plus_title": "Plus member",
-  "about_plus_description": "Tag for Plus member only!",
+  "about_plus_description": "Tag for plus member only!",
   "register_now": "Register for Plus",
-
-  "about_streak_title": "Login streak in PolyGo!",
-  "about_streak_description": "Visit PolyGo every day to maintain your streak and earn your own title!"
+  "good_streak": "Good streak",
+  "keep_going": "Keep going!",
+  "normal_streak": "Normal streak",
+  "you_can_reach": "You can reach higher! Please keep up!",
+  "try_active": "Try active more for the streak",
+  "-DAY STREAK": "-DAY STREAK",
+  "longest_streak": "Longest streak: ",
+  "error_no_connection": "System error or lost connection!",
+  "retry": "Try again",
+  "light_mode": "Light mode",
+  "dark_mode": "Dark mode",
+  "share_caption": ""
 
 }

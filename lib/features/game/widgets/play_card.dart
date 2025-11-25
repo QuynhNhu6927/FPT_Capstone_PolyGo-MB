@@ -140,7 +140,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
                       const Icon(Icons.timer, size: 20, color: Colors.blue),
                       const SizedBox(width: 8),
                       Text(
-                          "${loc.translate("completion_time")}: $completionTime ${loc.translate("seconds")}",
+                          "${loc.translate("completion_time")}: $completionTime ${loc.translate("seconds_short")}",
                           style: const TextStyle(fontSize: 16)),
                     ],
                   ),
@@ -338,7 +338,7 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
               controller: _answerController,
               textAlign: TextAlign.center,
               decoration: InputDecoration(
-                hintText: loc.translate("type_the_word_here..."),
+                hintText: loc.translate("type_the_word_here"),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(sw(context, 8))),
               ),
             ),

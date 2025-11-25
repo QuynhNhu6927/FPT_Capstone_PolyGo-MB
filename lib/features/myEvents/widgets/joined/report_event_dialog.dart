@@ -29,14 +29,7 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
 
   String? _errorText;
 
-  final List<String> reasons = [
-    "Nội dung tiêu cực",
-    "Spam, quảng cáo, lừa đảo",
-    "Giá cả không hợp lí",
-    "Vi phạm pháp luật, chính sách PolyGo",
-    "Lý do khác",
-  ];
-
+  late List<String> reasons;
   late Map<String, bool> selected;
 
   final List<String> _imageUrls = [];
@@ -45,7 +38,6 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
   @override
   void initState() {
     super.initState();
-    selected = {for (var r in reasons) r: false};
   }
 
   @override
@@ -53,6 +45,21 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
     _otherController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final loc = AppLocalizations.of(context);
+
+    reasons = [
+      loc.translate("reason_negative_content"),
+      loc.translate("reason_spam_or_ads"),
+      loc.translate("reason_unfair_price"),
+      loc.translate("reason_illegal_or_policy_violation"),
+      loc.translate("reason_other"),
+    ];
+    selected = {for (var r in reasons) r: false};
   }
 
   Future<void> _pickImages() async {
@@ -72,27 +79,23 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
         .map((e) => e.key)
         .toList();
 
-    // ❗ Không chọn lý do nào
     if (selectedReasons.isEmpty) {
       setState(() => _errorText = loc.translate("select_reason_first"));
       return;
     }
 
-    // ❗ Nếu chọn "Lý do khác" → bắt buộc nhập mô tả
-    if (selected["Lý do khác"] == true &&
+    if (selected[loc.translate("reason_other")] == true &&
         _descriptionController.text.trim().isEmpty) {
       setState(() => _errorText = loc.translate("enter_other_reason"));
       return;
     }
 
-    // ❗ Ghép lý do
     final reason = selectedReasons.map((r) {
-      if (r == "Lý do khác") return _descriptionController.text.trim();
+      if (r == loc.translate("reason_other")) return _descriptionController.text.trim();
       return r;
     }).join(", ");
 
     final description = _descriptionController.text.trim();
-
     setState(() => _errorText = null);
 
     try {
@@ -100,7 +103,6 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
       final token = prefs.getString("token");
       if (token == null) throw Exception("Token missing");
 
-      // upload ảnh
       List<String> uploadedUrls = [];
       if (_imageUrls.isNotEmpty) {
         final mediaRepo = MediaRepository(MediaService(ApiClient()));
@@ -112,7 +114,6 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
       }
 
       final repo = ReportRepository(ReportService(ApiClient()));
-
       final res = await repo.postReport(
         token: token,
         reportType: "Event",
@@ -129,13 +130,11 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
           SnackBar(content: Text(loc.translate("report_submitted"))),
         );
       } else {
-        // report đã tồn tại
         setState(() {
-          _errorText = "Bạn đã báo cáo sự kiện này rồi, chúng tôi đang xử lí, vui lòng chờ";
+          _errorText = loc.translate("report_already_exists");
         });
       }
     } catch (e) {
-      // các lỗi khác
       setState(() {
         _errorText = loc.translate("report_failed");
       });
@@ -169,30 +168,40 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  loc.translate("report"),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: textColor, fontWeight: FontWeight.bold),
+                Center(
+                  child: Text(
+                    loc.translate("report"),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+                Divider(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  thickness: 1,
+                ),
+                const SizedBox(height: 10),
 
-                /// Checkbox items
+                // Checkbox items
                 ...reasons.map(
                       (r) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CheckboxListTile(
                         value: selected[r],
-                        onChanged: (v) =>
-                            setState(() => selected[r] = v ?? false),
+                        onChanged: (v) => setState(() => selected[r] = v ?? false),
                         title: Text(r, style: TextStyle(color: textColor)),
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                       ),
-
                     ],
                   ),
                 ),
@@ -201,13 +210,12 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(_errorText!,
-                        style:
-                        const TextStyle(color: Colors.red, fontSize: 13)),
+                        style: const TextStyle(color: Colors.red, fontSize: 13)),
                   ),
 
                 const SizedBox(height: 12),
 
-                /// Description (optional)
+                // Description
                 TextField(
                   controller: _descriptionController,
                   maxLines: 2,
@@ -217,13 +225,13 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                /// Image picker
+                // Image picker
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -272,7 +280,7 @@ class _ReportEventDialogState extends State<ReportEventDialog> {
 
                 const SizedBox(height: 16),
 
-                /// Buttons
+                // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

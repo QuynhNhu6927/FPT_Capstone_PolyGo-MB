@@ -15,6 +15,7 @@
   "my_wallet": "Ví của tôi",
   "add_balance": "Thêm số dư",
   "withdraw": "Rút tiền",
+  "earn": "Kiếm được",
   "transaction_history": "Lich sử giao dịch",
 
   "current_subscription": "Gói hiện tại",
@@ -101,5 +102,19 @@
   "your_support_request": "Cho chúng tôi biết yêu cầu của bạn",
   "your_problem": "Yêu cầu",
   "support_request_success": "Yêu cầu hỗ trợ thành công",
-  "support_request_failed": "Yêu cầu hỗ trợ thất bại"
+  "support_request_failed": "Yêu cầu hỗ trợ thất bại",
+
+  "reason_too_expensive": "Giá quá cao",
+  "reason_not_using_enough": "Không đủ dùng",
+  "reason_found_alternative": "Muốn đổi gói khác",
+  "reason_technical_issues": "Lỗi ký thuật",
+  "reason_lack_feature": "Thiếu tính năg",
+  "reason_other": "Lý do khác",
+  "show_statistics": "Xem thống kê",
+  "hide_statistics": "Ẩn thống kê",
+
+  "total_deposited": "Tổng nạp",
+  "total_spent": "Tổng chi",
+  "total_earned": "Tổng kiếm",
+  "total_withdrawn": "Tổng rút"
 }

@@ -4,6 +4,7 @@ import '../../../../../data/models/post/share_request_model.dart';
 import '../../../../../data/repositories/post_repository.dart';
 import '../../../../../data/services/apis/post_service.dart';
 import '../../../../../core/api/api_client.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/utils/audioplayers.dart';
 import '../../core/widgets/app_button.dart';
 
@@ -78,6 +79,7 @@ class _ShareEventDialogState extends State<ShareEventDialog> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final Color secondaryText = isDark ? Colors.white54 : Colors.grey[700]!;
+    final loc = AppLocalizations.of(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -110,7 +112,7 @@ class _ShareEventDialogState extends State<ShareEventDialog> {
               controller: _contentController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: "Thêm nội dung (tùy chọn)...",
+                hintText: loc.translate('share_caption'),
                 hintStyle: TextStyle(color: secondaryText),
                 filled: true,
                 fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
@@ -125,7 +127,7 @@ class _ShareEventDialogState extends State<ShareEventDialog> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton(
-                text: "Chia sẻ",
+                text: loc.translate('share'),
                 onPressed: _loading ? null : _shareEvent,
                 size: ButtonSize.sm,
                 variant: ButtonVariant.primary,

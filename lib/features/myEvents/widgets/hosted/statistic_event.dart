@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/events/event_details_model.dart';
@@ -58,6 +59,7 @@ class _StatisticEventState extends State<StatisticEvent> {
 
   Future<void> _claimPayout() async {
     if (_event == null) return;
+    final loc = AppLocalizations.of(context);
 
     setState(() => _payoutLoading = true);
 
@@ -87,7 +89,7 @@ class _StatisticEventState extends State<StatisticEvent> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Nhận tiền thành công: ${claimedAmount.toStringAsFixed(0)} VND"),
+          content: Text("${loc.translate('payout_success')} ${claimedAmount.toStringAsFixed(0)} đ"),
         ),
       );
 
@@ -98,7 +100,7 @@ class _StatisticEventState extends State<StatisticEvent> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Nhận tiền thất bại"),
+          content: Text(loc.translate('payout_failed')),
         ),
       );
     }
@@ -109,18 +111,19 @@ class _StatisticEventState extends State<StatisticEvent> {
     final t = Theme.of(context).textTheme;
     final theme = Theme.of(context);
     final colorPrimary = theme.colorScheme.primary;
+    final loc = AppLocalizations.of(context);
 
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: Text("Thống kê sự kiện")),
+        appBar: AppBar(title: Text(loc.translate('statistic_event'))),
         body: Center(child: CircularProgressIndicator(color: colorPrimary)),
       );
     }
 
     if (_event == null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Thống kê sự kiện")),
-        body: Center(child: Text("Không có dữ liệu sự kiện")),
+        appBar: AppBar(title: Text(loc.translate('statistic_event'))),
+        body: Center(child: Text(loc.translate('no_data_statistic_event'))),
       );
     }
 
@@ -131,7 +134,7 @@ class _StatisticEventState extends State<StatisticEvent> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         elevation: 1,
-        title: Text("Thống kê sự kiện"),
+        title: Text(loc.translate('statistic_event')),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -171,7 +174,7 @@ class _StatisticEventState extends State<StatisticEvent> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Doanh thu sự kiện",
+                          loc.translate('event_amount'),
                           style: t.titleMedium?.copyWith(
                             color: Colors.green.shade700,
                             fontWeight: FontWeight.w700,
@@ -180,7 +183,7 @@ class _StatisticEventState extends State<StatisticEvent> {
                         ),
                         SizedBox(height: sh(context, 4)),
                         Text(
-                          "${e.revenue.toStringAsFixed(0)} VND",
+                          "${e.revenue.toStringAsFixed(0)} đ",
                           style: t.headlineMedium?.copyWith(
                             color: Colors.green.shade800,
                             fontWeight: FontWeight.bold,
@@ -193,7 +196,7 @@ class _StatisticEventState extends State<StatisticEvent> {
                       ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: sw(context, 200)),
                         child: AppButton(
-                          text: "Nhận tiền về ví",
+                          text: loc.translate('payout'),
                           onPressed: _payoutLoading ? null : _claimPayout,
                           variant: ButtonVariant.primary,
                           size: ButtonSize.lg,
@@ -208,7 +211,7 @@ class _StatisticEventState extends State<StatisticEvent> {
                           borderRadius: BorderRadius.circular(sw(context, 12)),
                         ),
                         child: Text(
-                          "Đã nhận ${e.hostPayoutAmount.toStringAsFixed(0)} VND",
+                          "${loc.translate('payouted')} ${e.hostPayoutAmount.toStringAsFixed(0)} đ",
                           style: TextStyle(
                             color: Colors.green.shade800,
                             fontWeight: FontWeight.bold,
@@ -221,24 +224,24 @@ class _StatisticEventState extends State<StatisticEvent> {
               ),
               SizedBox(height: sh(context, 22)),
               Text(
-                "Thông tin chi tiết",
+                loc.translate('payout_detail'),
                 style: t.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: st(context, 18),
                 ),
               ),
               SizedBox(height: sh(context, 12)),
-              _buildInfoRow(Icons.people, "Số người tham gia", "${e.numberOfParticipants}"),
-              _buildInfoRow(Icons.attach_money, "Phí đăng ký", "${e.fee} đ"),
-              _buildInfoRow(Icons.category, "Loại gói", e.planType),
+              _buildInfoRow(Icons.people, loc.translate('number_of_participants'), "${e.numberOfParticipants}"),
+              _buildInfoRow(Icons.attach_money, loc.translate('fee'), "${e.fee} đ"),
+              _buildInfoRow(Icons.category, loc.translate('planType'), e.planType),
               _buildInfoRow(
                 Icons.schedule,
-                "Bắt đầu",
+                loc.translate('start'),
                 DateFormat('dd MMM yyyy, HH:mm').format(e.startAt.toLocal()),
               ),
               _buildInfoRow(
                 Icons.schedule,
-                "Kết thúc",
+                loc.translate('end'),
                 DateFormat('dd MMM yyyy, HH:mm').format(e.endAt!.toLocal()),
               ),
             ],

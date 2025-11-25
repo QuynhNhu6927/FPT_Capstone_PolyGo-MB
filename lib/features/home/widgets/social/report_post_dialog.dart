@@ -27,13 +27,13 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
   final TextEditingController _descriptionController = TextEditingController();
   String? _errorText;
 
-  final List<String> reasons = [
-    "Nội dung tiêu cực",
-    "Spam, quảng cáo, lừa đảo",
-    "Thông tin sai sự thật",
-    "Vi phạm bản quyền",
-    "Vi phạm pháp luật, chính sách PolyGo",
-    "Lý do khác",
+  final List<String> reasonKeys = [
+    "reason_negative",
+    "reason_spam",
+    "reason_fake_info",
+    "reason_copyright",
+    "reason_illegal",
+    "reason_other",
   ];
 
   late Map<String, bool> selected;
@@ -43,7 +43,7 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
   @override
   void initState() {
     super.initState();
-    selected = {for (var r in reasons) r: false};
+    selected = {for (var r in reasonKeys) r: false};
   }
 
   @override
@@ -74,16 +74,18 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
     }
 
     // Nếu chọn "Lý do khác" → bắt buộc nhập mô tả
-    if (selected["Lý do khác"] == true &&
+    if (selected["reason_other"] == true &&
         _descriptionController.text.trim().isEmpty) {
       setState(() => _errorText = loc.translate("enter_other_reason"));
       return;
     }
 
     // Ghép lý do, nếu "Lý do khác" thì dùng text mô tả
-    final reason = selectedReasons.map((r) {
-      if (r == "Lý do khác") return _descriptionController.text.trim();
-      return r;
+    final reason = selectedReasons.map((key) {
+      if (key == "reason_other") {
+        return _descriptionController.text.trim();
+      }
+      return loc.translate(key);
     }).join(", ");
 
     final description = _descriptionController.text.trim();
@@ -126,7 +128,7 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
       } else {
         setState(() {
           _errorText =
-          "Bạn đã báo cáo bài viết này rồi, chúng tôi đang xử lí, vui lòng chờ";
+              loc.translate("already_report_post");
         });
       }
     } catch (e) {
@@ -173,17 +175,17 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
                 const SizedBox(height: 12),
 
                 /// Checkbox items
-                ...reasons.map(
-                      (r) => CheckboxListTile(
-                    value: selected[r],
-                    onChanged: (v) =>
-                        setState(() => selected[r] = v ?? false),
-                    title: Text(r, style: TextStyle(color: textColor)),
+                ...reasonKeys.map((key) {
+                  final label = loc.translate(key);
+                  return CheckboxListTile(
+                    value: selected[key],
+                    onChanged: (v) => setState(() => selected[key] = v ?? false),
+                    title: Text(label, style: TextStyle(color: textColor)),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                  ),
-                ),
+                  );
+                }),
 
                 if (_errorText != null)
                   Padding(

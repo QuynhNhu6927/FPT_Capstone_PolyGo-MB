@@ -1,0 +1,24 @@
+{
+
+  "call_ended": "Call has ended",
+  "calling": "Calling...",
+  "video_call": "Video call",
+  "conversation_list": "Conversation list",
+  "video_from": "Video call from",
+  "voice_from": "Voice call from",
+  "type_mess": "Typing...",
+  "loading...": "Loading...",
+  "permission_denied": "Permission denied! Please try again!",
+  "user_offline": "User offline! Please try again later!",
+  "cannot_check_status": "System error! Please try again later!",
+  "online": "Online",
+  "last_seen": "Last seen",
+  "search_conversation_placeholder": "Searching...",
+  "load_more": "Load more",
+  "you_sent": "You",
+  "sent_one_image": "sent one image",
+  "sent_multiple_images": "sent multiple images",
+  "sent_audio": "sent audio",
+  "erase_mess": "Erase message"
+
+}

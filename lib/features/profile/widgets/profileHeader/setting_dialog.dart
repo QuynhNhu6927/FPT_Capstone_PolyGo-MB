@@ -34,7 +34,7 @@ class SettingsFullScreenDialog extends StatelessWidget {
           scrolledUnderElevation: 0,
           surfaceTintColor: Colors.transparent,
           title: Text(
-            loc.translate("Persona"),
+            loc.translate("persona"),
             style: TextStyle(color: textColor),
           ),
           iconTheme: IconThemeData(color: textColor),

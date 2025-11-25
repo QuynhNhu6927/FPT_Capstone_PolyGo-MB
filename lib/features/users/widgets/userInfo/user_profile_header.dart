@@ -38,6 +38,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
   // ------------------- Friend handlers giữ nguyên -------------------
 
   Future<void> _handleSendFriendRequest() async {
+    final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -48,7 +49,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       setState(() => _friendStatus = "Sent");
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Friend request sent!')));
+      ).showSnackBar(SnackBar(content: Text(loc.translate('Friend request sent!'))));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -59,6 +60,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
   }
 
   Future<void> _handleCancelFriendRequest() async {
+    final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -68,7 +70,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       await repo.cancelFriendRequest(token, widget.user.id);
       setState(() => _friendStatus = "None");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Friend request cancelled!')),
+        SnackBar(content: Text(loc.translate('Friend request cancelled!'))),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -80,6 +82,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
   }
 
   Future<void> _handleAcceptFriendRequest() async {
+    final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -90,7 +93,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       if (success) {
         setState(() => _friendStatus = "Friends");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Friend request accepted!')),
+          SnackBar(content: Text(loc.translate('Friend request accepted!'))),
         );
       }
     } catch (e) {
@@ -103,6 +106,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
   }
 
   Future<void> _handleRejectFriendRequest() async {
+    final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -113,7 +117,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       if (success) {
         setState(() => _friendStatus = "None");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Friend request rejected!')),
+          SnackBar(content: Text(loc.translate('Friend request rejected!'))),
         );
       }
     } catch (e) {
@@ -126,6 +130,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
   }
 
   Future<void> _handleUnfriend() async {
+    final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -136,7 +141,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       if (success) {
         setState(() => _friendStatus = "None");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unfriended successfully!')),
+         SnackBar(content: Text(loc.translate('Unfriended successfully!'))),
         );
       }
     } catch (e) {
@@ -321,7 +326,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "Introduction: ",
+                    text: loc.translate("introduction: "),
                     style: t.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: st(context, 14),

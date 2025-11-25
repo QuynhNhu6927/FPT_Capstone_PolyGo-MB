@@ -216,7 +216,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                             children: [
                               const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 20),
                               const SizedBox(width: 8),
-                              Text('Cancel', style: const TextStyle(color: Colors.redAccent)),
+                              Text(loc.translate('cancel_event'), style: const TextStyle(color: Colors.redAccent)),
                             ],
                           ),
                         ),
@@ -311,6 +311,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                         hostId: widget.event.host.id,
                         token: widget.token,
                         eventId: widget.event.id,
+                        eventStatus: widget.event.status,
                         eventRepository: widget.eventRepository,
                         onKick: (kickedUserId) {
                           setState(() {
@@ -365,6 +366,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     // Share button
+                    if (widget.event.isPublic)
                     AppButton(
                       variant: ButtonVariant.outline,
                       size: ButtonSize.md,

@@ -15,6 +15,7 @@
   "my_wallet": "My wallet",
   "add_balance": "Add balance",
   "withdraw": "Withdraw",
+  "earn": "Earn",
   "transaction_history": "Transaction history",
 
   "current_subscription": "Current subscription",
@@ -101,6 +102,20 @@
   "your_support_request": "Tell us about your problem",
   "your_problem": "Your problem",
   "support_request_success": "Request sent success",
-  "support_request_failed": "Request sent failed"
+  "support_request_failed": "Request sent failed",
+
+  "reason_too_expensive": "Too expensive",
+  "reason_not_using_enough": "Not using enough",
+  "reason_found_alternative": "Found alternative",
+  "reason_technical_issues": "Technical issues",
+  "reason_lack_feature": "Lack of features",
+  "reason_other": "Other",
+  "show_statistics": "Show statistics",
+  "hide_statistics": "Hide statistics",
+
+  "total_deposited": "Total deposited",
+  "total_spent": "Total spent",
+  "total_earned": "Total earned",
+  "total_withdrawn": "Total withdrawn"
 
 }

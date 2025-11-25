@@ -166,6 +166,7 @@ class _LimitedMarkdownState extends State<LimitedMarkdown> {
 
     final endIndex = tp.getPositionForOffset(Offset(tp.width, tp.height)).offset;
     final visibleText = decoded.substring(0, endIndex).trim();
+    final loc = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,8 +178,8 @@ class _LimitedMarkdownState extends State<LimitedMarkdown> {
         ),
         GestureDetector(
           onTap: () => setState(() => _expanded = true),
-          child: const Text(
-            "xem thêm",
+          child: Text(
+            loc.translate('read_more'),
             style: TextStyle(
               color: Color(0xFF2563EB),
               fontWeight: FontWeight.bold,

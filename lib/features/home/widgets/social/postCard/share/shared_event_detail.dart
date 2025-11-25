@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../../core/api/api_client.dart';
@@ -14,6 +13,7 @@ import '../../../../../../data/services/apis/auth_service.dart';
 import '../../../../../../data/services/apis/event_service.dart';
 import '../../../../../../routes/app_routes.dart';
 import '../../../../../myEvents/widgets/joined/report_event_dialog.dart';
+import '../../../events/event_details.dart';
 
 class SharedEventDetail extends StatefulWidget {
   final String sharedEventId;
@@ -56,9 +56,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
         _userPlanType = user.planType;
         _userId = user.id;
       });
-    } catch (e) {
-      //
-    }
+    } catch (_) {}
   }
 
   Future<void> _fetchEvent() async {
@@ -74,14 +72,205 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
         event = res;
         _loading = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _loading = false;
+      setState(() => _loading = false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final loc = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate("share_post_not_found"))),
+        );
       });
+    }
+  }
+
+  Future<bool?> _showPaidEventWarning() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final loc = AppLocalizations.of(context);
+
+        return StatefulBuilder(
+          builder: (context, setState) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: isDark
+                    ? const LinearGradient(
+                  colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+                    : const LinearGradient(
+                  colors: [Colors.white, Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ---- TITLE ----
+                  Center(
+                    child: Text(
+                      loc.translate("paid_event_warning"),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // ---- DIVIDER ----
+                  Divider(
+                    color: isDark ? Colors.grey[700] : Colors.grey[300],
+                    thickness: 1,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ---- DESCRIPTION ----
+                  Text(
+                    loc.translate("paid_event_confirmation"),
+                    style: TextStyle(
+                      color: isDark ? Colors.grey[300] : Colors.grey[800],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // ---- AVAILABLE BALANCE ----
+                  Text(
+                    loc.translate("available_balance"),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // ---- SỐ DƯ ----
+                  Text(
+                    formatCurrency(_balance),
+                    style: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ---- ACTION BUTTONS ----
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text(loc.translate("cancel")),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: Text(loc.translate("confirm")),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _registerEvent(String password, {bool closeTwoDialogs = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final loc = AppLocalizations.of(context);
+
+    if (token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching event details")),
+        SnackBar(content: Text(loc.translate("missing_token"))),
       );
+      return;
+    }
+
+    final repository = EventRepository(EventService(ApiClient()));
+
+    try {
+      await repository.registerEvent(
+        token: token,
+        eventId: event!.id,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      // update state
+      widget.onEventUpdated?.call(event!.copyWith(isParticipant: true));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate("event_register_success"))),
+      );
+
+      if (closeTwoDialogs) Navigator.of(context, rootNavigator: true).pop(); // password dialog
+      Navigator.pop(context); // main dialog
+    } on InvalidEventPasswordException {
+      throw "wrong_password";
+    } on KickedFromEventException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate("event_register_kicked"))),
+      );
+      if (closeTwoDialogs) Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
+    } on EventsOverlappingException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate("event_overlapping"))),
+      );
+      if (closeTwoDialogs) Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
+    } on InsufficientBalanceException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate("insufficient_balance"))),
+      );
+      if (closeTwoDialogs) Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate("event_join_system_error"))),
+      );
+      if (closeTwoDialogs) Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
     }
   }
 
@@ -100,13 +289,18 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
 
-    final isPastEvent = event!.startAt.isBefore(DateTime.now());
+    final now = DateTime.now();
+    final isPastRegisterDeadline = event?.registerDeadline.isBefore(now);
+
+    final shouldHideJoinButton =
+        isPastRegisterDeadline! && (event?.allowLateRegister == false);
+
     bool isDisabled = false;
     String buttonText = loc.translate('join');
 
     if (_userPlanType == "Free" && event!.planType == "Plus") {
       isDisabled = true;
-      buttonText = "Plus Only";
+      buttonText = loc.translate("for_plus_only");
     } else if (event!.isParticipant) {
       isDisabled = true;
       buttonText = loc.translate('joined');
@@ -116,44 +310,12 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
     final durationFormatted =
         "${event!.expectedDurationInMinutes ~/ 60}h ${event!.expectedDurationInMinutes % 60}m";
 
-    Future<bool?> _showPaidEventWarning() {
-      return showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(loc.translate("paid_event_warning")),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(loc.translate("paid_event_confirmation")),
-              const SizedBox(height: 12),
-              Text(
-                "${loc.translate("available_balance")}: $_balanceđ",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(loc.translate("cancel")),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(loc.translate("confirm")),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Dialog(
       elevation: 12,
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(sw(context, 16)),
       ),
-      shadowColor: Colors.black.withOpacity(0.3),
       child: Container(
         padding: EdgeInsets.all(sw(context, 20)),
         width: sw(context, 500),
@@ -162,15 +324,16 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Title + Close ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Row(
                       children: [
-                        if (event?.planType == "Plus") ...[
+                        if (event!.planType == "Plus") ...[
                           const SizedBox(width: 6),
-                          Icon(Icons.star, size: 20, color: Colors.amber),
+                          const Icon(Icons.star, size: 20, color: Colors.amber),
                         ],
                         Flexible(
                           child: Text(
@@ -186,19 +349,17 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                       ],
                     ),
                   ),
-
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Icon(Icons.close,
-                        size: 24, color: secondaryText ?? Colors.grey),
+                    child: Icon(Icons.close, size: 24, color: secondaryText),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               Divider(color: dividerColor, thickness: 1),
-
               const SizedBox(height: 16),
 
+              // --- Banner ---
               AspectRatio(
                 aspectRatio: 16 / 9,
                 child: event!.bannerUrl.isNotEmpty
@@ -224,27 +385,27 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
               ),
               const SizedBox(height: 16),
 
+              // --- Host Info ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: _userId != event?.host.id ? () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.userProfile,
-                        arguments: {'id': event?.host.id},
-                      );
-                    } : null,
+                    onTap: _userId != event!.host.id
+                        ? () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.userProfile,
+                      arguments: {'id': event!.host.id},
+                    )
+                        : null,
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: sw(context, 28),
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: (event?.host.avatarUrl ?? '').isNotEmpty
+                          backgroundImage: (event!.host.avatarUrl ?? '').isNotEmpty
                               ? NetworkImage(event!.host.avatarUrl!)
                               : null,
-                          child: (event?.host.avatarUrl ?? '').isEmpty
+                          child: (event!.host.avatarUrl ?? '').isEmpty
                               ? const Icon(Icons.person, size: 36, color: Colors.white70)
                               : null,
                         ),
@@ -252,180 +413,90 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              event!.host.name,
-                              style: t.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: st(context, 15),
-                                color: textColor,
-                              ),
-                            ),
-                            Text(
-                              loc.translate('host'),
-                              style: t.bodySmall?.copyWith(
-                                color: secondaryText,
-                                fontSize: st(context, 13),
-                              ),
-                            ),
+                            Text(event!.host.name,
+                                style: t.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: st(context, 15),
+                                    color: textColor)),
+                            Text(loc.translate('host'),
+                                style: t.bodySmall?.copyWith(
+                                    fontSize: st(context, 13), color: secondaryText)),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  if (_userId.isNotEmpty && _userId != event?.host.id)
+                  if (_userId.isNotEmpty && _userId != event!.host.id)
                     GestureDetector(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => ReportEventDialog(
-                            eventId: event!.id,
-                            onSubmit: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        Icons.flag_outlined,
-                        size: 20,
-                        color: Colors.grey,
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (_) => ReportEventDialog(
+                          eventId: event!.id,
+                          onSubmit: () => Navigator.pop(context),
+                        ),
                       ),
+                      child: Icon(Icons.flag_outlined, size: 20, color: Colors.grey),
                     ),
                 ],
               ),
+
               const SizedBox(height: 20),
 
+              // --- Description ---
               RenderUtils.selectableMarkdownText(
                 context,
                 event!.description.isNotEmpty
-                    ? event?.description
+                    ? event!.description
                     : loc.translate('no_description'),
-                style: TextStyle(
-                  fontSize: st(context, 14),
-                  height: 1.4,
-                  color: textColor,
-                ),
+                style: TextStyle(fontSize: st(context, 14), height: 1.4, color: textColor),
               ),
 
               const SizedBox(height: 16),
 
-              _buildInfoRow(
-                context,
-                Icons.language,
-                loc.translate('language'),
-                event!.language.name,
-                textColor,
-                secondaryText,
-              ),
-              _buildInfoRow(
-                context,
-                Icons.category_outlined,
-                loc.translate('categories'),
-                event!.categories.isNotEmpty
-                    ? event!.categories.map((e) => e.name).join(', ')
-                    : loc.translate('none'),
-                textColor,
-                secondaryText,
-              ),
-              _buildInfoRow(
-                context,
-                Icons.people_alt_outlined,
-                loc.translate('participants'),
-                "${event?.numberOfParticipants}/${event?.capacity}",
-                textColor,
-                secondaryText,
-              ),
-              _buildInfoRow(
-                context,
-                Icons.access_time,
-                loc.translate('time'),
-                dateFormatted,
-                textColor,
-                secondaryText,
-              ),
-              _buildInfoRow(
-                context,
-                Icons.timer_outlined,
-                loc.translate('duration'),
-                durationFormatted,
-                textColor,
-                secondaryText,
-              ),
-              _buildInfoRow(
-                context,
-                Icons.monetization_on_outlined,
-                loc.translate('fee'),
-                event!.fee > 0 ? "${event?.fee}đ" : loc.translate('free'),
-                textColor,
-                secondaryText,
-              ),
+              // --- Info Rows ---
+              _buildInfoRow(context, Icons.language, loc.translate('language'),
+                  event!.language.name, textColor, secondaryText),
+              _buildInfoRow(context, Icons.category_outlined, loc.translate('categories'),
+                  event!.categories.isNotEmpty
+                      ? event!.categories.map((e) => e.name).join(', ')
+                      : loc.translate('none'),
+                  textColor, secondaryText),
+              _buildInfoRow(context, Icons.people_alt_outlined, loc.translate('participants'),
+                  "${event!.numberOfParticipants}/${event!.capacity}", textColor, secondaryText),
+              _buildInfoRow(context, Icons.access_time, loc.translate('time'), dateFormatted,
+                  textColor, secondaryText),
+              _buildInfoRow(context, Icons.timer_outlined, loc.translate('duration'),
+                  durationFormatted, textColor, secondaryText),
+              _buildInfoRow(context, Icons.monetization_on_outlined, loc.translate('fee'),
+                  event!.fee > 0 ? "${event!.fee}đ" : loc.translate('free'), textColor, secondaryText),
 
               const SizedBox(height: 16),
               Divider(color: dividerColor, thickness: 1),
-
               const SizedBox(height: 16),
 
+              // --- Action Buttons ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  AppButton(
-                    variant: ButtonVariant.outline,
-                    size: ButtonSize.md,
-                    icon: const Icon(Icons.share_outlined, size: 18),
-                    onPressed: () {},
-                  ),
-                  if (!isPastEvent) ...[
+                  if (!shouldHideJoinButton) ...[
                     SizedBox(width: sw(context, 12)),
                     AppButton(
                       text: buttonText,
-                      variant: ButtonVariant.primary,
+                      variant: event!.isParticipant
+                          ? ButtonVariant.outline
+                          : ButtonVariant.primary,
                       size: ButtonSize.md,
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      onPressed: isDisabled ? null : () async {
-
-                        final prefs = await SharedPreferences.getInstance();
-                        final token = prefs.getString('token') ?? '';
-                        if (token.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(loc.translate("missing_token"))),
-                          );
-                          return;
-                        }
-
-                        Future<void> registerEvent(String password) async {
-                          final repository = EventRepository(EventService(ApiClient()));
-                          try {
-                            await repository.registerEvent(
-                              token: token,
-                              eventId: event!.id,
-                              password: password,
-                            );
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(loc.translate("event_register_success"))),
-                            );
-                            widget.onEventUpdated?.call(event!.copyWith(isParticipant: true));
-                            Navigator.pop(context);
-                          } catch (e) {
-                            final errorString = e.toString();
-                            if (errorString.contains("Error.InvalidEventPassword")) {
-                              throw "wrong_password";
-                            } else {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(errorString)),
-                              );
-                            }
-                          }
-                        }
-
+                      onPressed: isDisabled
+                          ? null
+                          : () async {
                         if (event!.fee > 0) {
                           final confirmPaid = await _showPaidEventWarning();
                           if (confirmPaid != true) return;
                         }
 
                         if (event!.isPublic) {
-                          await registerEvent('');
+                          await _registerEvent('');
                           return;
                         }
 
@@ -435,99 +506,158 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                           barrierDismissible: false,
                           builder: (context) {
                             String? errorText;
+                            final isDark = Theme.of(context).brightness == Brightness.dark;
+                            final loc = AppLocalizations.of(context);
+
                             return StatefulBuilder(builder: (context, setState) {
-                              return AlertDialog(
-                                title: Text(loc.translate("enter_event_password")),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
-                                      controller: controller,
-                                      obscureText: true,
-                                      decoration: InputDecoration(
-                                        hintText: loc.translate("password"),
-                                        border: const OutlineInputBorder(),
-                                        errorText: errorText,
-                                      ),
+                              return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    gradient: isDark
+                                        ? const LinearGradient(
+                                      colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    )
+                                        : const LinearGradient(
+                                      colors: [Colors.white, Colors.white],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                  ],
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.08),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // ---- TITLE ----
+                                      Center(
+                                        child: Text(
+                                          loc.translate("enter_event_password"),
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            color: isDark ? Colors.white : Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 10),
+
+                                      Divider(
+                                        color: isDark ? Colors.grey[700] : Colors.grey[300],
+                                        thickness: 1,
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // ---- DESCRIPTION ----
+                                      Text(
+                                        loc.translate("private_event_description"),
+                                        style: TextStyle(
+                                          color: isDark ? Colors.grey[300] : Colors.grey[800],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // ---- PASSWORD FIELD ----
+                                      TextField(
+                                        controller: controller,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                          hintText: loc.translate("password"),
+                                          hintStyle: TextStyle(
+                                            color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          errorText: errorText,
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 16),
+
+                                      // ---- BUTTONS ----
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: Text(loc.translate("cancel")),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF2563EB),
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            onPressed: () async {
+                                              if (controller.text.isEmpty) {
+                                                setState(() {
+                                                  errorText = loc.translate("password_required");
+                                                });
+                                                return;
+                                              }
+
+                                              try {
+                                                await _registerEvent(
+                                                  controller.text,
+                                                  closeTwoDialogs: true,
+                                                );
+                                              } catch (e) {
+                                                if (e == "wrong_password") {
+                                                  setState(() {
+                                                    errorText = loc.translate("wrong_password");
+                                                  });
+                                                }
+                                              }
+                                            },
+                                            child: Text(loc.translate("confirm")),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(loc.translate("cancel")),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      if (controller.text.isEmpty) {
-                                        setState(() {
-                                          errorText = loc.translate("password_required");
-                                        });
-                                        return;
-                                      }
-
-                                      try {
-                                        await EventRepository(EventService(ApiClient()))
-                                            .registerEvent(
-                                          token: token,
-                                          eventId: event!.id,
-                                          password: controller.text,
-                                        );
-
-                                        if (!mounted) return;
-                                        widget.onEventUpdated?.call(event!.copyWith(isParticipant: true));
-                                        Navigator.of(context, rootNavigator: true).pop();
-                                        Navigator.pop(context);
-
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(loc.translate("event_register_success"))),
-                                        );
-
-                                      } catch (e) {
-                                        final err = e.toString();
-                                        if (err.contains("Error.InvalidEventPassword")) {
-                                          setState(() {
-                                            errorText = loc.translate("wrong_password");
-                                          });
-                                        } else {
-                                          if (!mounted) return;
-                                          setState(() {
-                                            errorText = loc.translate("wrong_password");
-                                          });
-                                        }
-                                      }
-                                    },
-                                    child: Text(loc.translate("confirm")),
-                                  ),
-                                ],
                               );
                             });
                           },
                         );
+
                       },
                     ),
                   ],
                 ],
-              )
-
+              ),
             ],
           ),
         ),
       ),
-    )
-        .animate()
-        .fadeIn(duration: 250.ms)
-        .slide(begin: const Offset(0, 0.08), duration: 300.ms, curve: Curves.easeOutCubic);
+    );
   }
 
-  Widget _buildInfoRow(
-      BuildContext context,
-      IconData icon,
-      String label,
-      String value,
-      Color textColor,
-      Color? secondaryText,
-      ) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value,
+      Color textColor, Color? secondaryText) {
     final t = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -559,31 +689,6 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
           ),
         ],
       ),
-    );
-  }
-}
-
-extension EventModelCopy on EventModel {
-  EventModel copyWith({bool? isParticipant}) {
-    return EventModel(
-      id: id,
-      title: title,
-      description: description,
-      status: status,
-      startAt: startAt,
-      expectedDurationInMinutes: expectedDurationInMinutes,
-      registerDeadline: registerDeadline,
-      allowLateRegister: allowLateRegister,
-      capacity: capacity,
-      fee: fee,
-      bannerUrl: bannerUrl,
-      isPublic: isPublic,
-      numberOfParticipants: numberOfParticipants,
-      planType: planType,
-      isParticipant: isParticipant ?? this.isParticipant,
-      host: host,
-      language: language,
-      categories: categories,
     );
   }
 }

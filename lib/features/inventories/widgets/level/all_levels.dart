@@ -239,7 +239,7 @@ class _AllLevelsState extends State<AllLevels> {
                                                   borderRadius: BorderRadius.circular(8),
                                                 ),
                                                 child: Text(
-                                                  "Claim",
+                                                  loc.translate("claimed"),
                                                   style: t.bodySmall?.copyWith(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.bold,

@@ -264,7 +264,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                                                             borderRadius: BorderRadius.circular(sw(context, 4)),
                                                           ),
                                                           child: Text(
-                                                            loc.translate("you"),
+                                                            loc.translate("you_leaderboard"),
                                                             style: t.bodySmall?.copyWith(
                                                               color: Colors.white,
                                                               fontWeight: FontWeight.bold,
@@ -452,7 +452,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                                                         borderRadius: BorderRadius.circular(sw(context, 4)),
                                                       ),
                                                       child: Text(
-                                                        'YOU',
+                                                        loc.translate("you_leaderboard"),
                                                         style: t.bodySmall?.copyWith(
                                                           color: Colors.white,
                                                           fontWeight: FontWeight.bold,

@@ -77,7 +77,7 @@ class _EventDetailState extends State<EventDetail> {
 
     if (_userPlanType == "Free" && event.planType == "Plus") {
       isDisabled = true;
-      buttonText = "Plus Only";
+      buttonText = loc.translate("for_plus_only");
     } else if (event.isParticipant) {
       isDisabled = true;
       buttonText = loc.translate('joined');
@@ -94,14 +94,6 @@ class _EventDetailState extends State<EventDetail> {
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           final loc = AppLocalizations.of(context);
-
-          // Format số tiền kiểu Việt Nam
-          String formatVND(double amount) {
-            final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 2);
-            String formatted = formatter.format(amount);
-            if (formatted.endsWith(',00')) formatted = formatted.replaceAll(',00', '');
-            return '$formatted đ';
-          }
 
           return StatefulBuilder(
             builder: (context, setState) => Dialog(
@@ -133,18 +125,29 @@ class _EventDetailState extends State<EventDetail> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tiêu đề
-                    Text(
-                      loc.translate("paid_event_warning"),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: isDark ? Colors.white : Colors.black87,
+                    // ---- TITLE ----
+                    Center(
+                      child: Text(
+                        loc.translate("paid_event_warning"),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 10),
+
+                    // ---- DIVIDER ----
+                    Divider(
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
+                      thickness: 1,
+                    ),
+
                     const SizedBox(height: 12),
 
-                    // Nội dung
+                    // ---- DESCRIPTION ----
                     Text(
                       loc.translate("paid_event_confirmation"),
                       style: TextStyle(
@@ -154,18 +157,30 @@ class _EventDetailState extends State<EventDetail> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Số dư khả dụng
+                    // ---- AVAILABLE BALANCE ----
                     Text(
-                      "${loc.translate("available_balance")}: ${formatVND(_balance)}",
+                      loc.translate("available_balance"),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.grey[200] : Colors.grey[900],
+                        color: Colors.green,
                         fontSize: 14,
                       ),
                     ),
+
+                    const SizedBox(height: 4),
+
+                    // ---- SỐ DƯ (màu xám) ----
+                    Text(
+                      formatCurrency(_balance),
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+
                     const SizedBox(height: 16),
 
-                    // Nút hủy / xác nhận
+                    // ---- BUTTONS ----
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -178,7 +193,8 @@ class _EventDetailState extends State<EventDetail> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2563EB),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -452,6 +468,7 @@ class _EventDetailState extends State<EventDetail> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (event.isPublic)
                   AppButton(
                     variant: ButtonVariant.outline,
                     size: ButtonSize.md,
@@ -469,12 +486,12 @@ class _EventDetailState extends State<EventDetail> {
                     SizedBox(width: sw(context, 12)),
                     AppButton(
                       text: buttonText,
-                      variant: ButtonVariant.primary,
+                      variant: event.isParticipant
+                          ? ButtonVariant.outline
+                          : ButtonVariant.primary,
                       size: ButtonSize.md,
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      onPressed: isDisabled
-                          ? null
-                          : () async {
+                      onPressed: isDisabled ? null : () async {
                         final prefs = await SharedPreferences.getInstance();
                         final token = prefs.getString('token') ?? '';
                         if (token.isEmpty) {
@@ -512,7 +529,7 @@ class _EventDetailState extends State<EventDetail> {
                                   Text(loc.translate("event_register_success"))),
                             );
                           } on InvalidEventPasswordException {
-                            throw "wrong_password";
+                            throw loc.translate("wrong_password");
                           } on KickedFromEventException {
                             if (!mounted) return;
                             if (closeTwoDialogs) {
@@ -523,6 +540,17 @@ class _EventDetailState extends State<EventDetail> {
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(loc.translate("event_register_kicked"))),
+                            );
+                          } on EventsOverlappingException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.translate("event_overlapping"))),
                             );
                           } on InsufficientBalanceException {
                             if (!mounted) return;
@@ -544,7 +572,7 @@ class _EventDetailState extends State<EventDetail> {
                               Navigator.pop(context);
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(loc.translate("system_error"))),
+                              SnackBar(content: Text(loc.translate("event_join_system_error"))),
                             );
                           }
                         }
@@ -599,34 +627,61 @@ class _EventDetailState extends State<EventDetail> {
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        loc.translate("enter_event_password"),
-                                        style:
-                                        Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black87,
+                                      // ---- TITLE ----
+                                      Center(
+                                        child: Text(
+                                          loc.translate("enter_event_password"),
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            color: isDark ? Colors.white : Colors.black87,
+                                          ),
                                         ),
                                       ),
+
+                                      const SizedBox(height: 10),
+
+                                      // ---- DIVIDER ----
+                                      Divider(
+                                        color: isDark ? Colors.grey[700] : Colors.grey[300],
+                                        thickness: 1,
+                                      ),
+
                                       const SizedBox(height: 12),
+
+                                      // ---- DESCRIPTION ----
+                                      Text(
+                                        loc.translate("private_event_description"), // hãy đặt key này trong localization
+                                        style: TextStyle(
+                                          color: isDark ? Colors.grey[300] : Colors.grey[800],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // ---- PASSWORD FIELD ----
                                       TextField(
                                         controller: controller,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           hintText: loc.translate("password"),
                                           hintStyle: TextStyle(
-                                              color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                                            color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                          ),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           errorText: errorText,
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 10),
+                                          contentPadding:
+                                          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
+
+                                      const SizedBox(height: 16),
+
+                                      // ---- BUTTONS ----
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
@@ -654,8 +709,10 @@ class _EventDetailState extends State<EventDetail> {
                                               }
 
                                               try {
-                                                await registerEvent(controller.text,
-                                                    closeTwoDialogs: true);
+                                                await registerEvent(
+                                                  controller.text,
+                                                  closeTwoDialogs: true,
+                                                );
                                               } catch (e) {
                                                 if (e == "wrong_password") {
                                                   setState(() {
@@ -673,6 +730,7 @@ class _EventDetailState extends State<EventDetail> {
                                 ),
                               );
                             });
+
                           },
                         );
                       },

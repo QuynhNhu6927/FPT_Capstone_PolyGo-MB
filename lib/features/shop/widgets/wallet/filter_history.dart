@@ -42,6 +42,8 @@ class TransactionFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
+    String translateKey(String value) => loc.translate(value.toLowerCase());
+
     return Column(
       children: [
         Row(
@@ -49,9 +51,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: "Type",
+                label: translateKey("type"),
                 value: selectedType,
-                items: _transactionTypes,
+                items: _transactionTypes.map(translateKey).toList(),
                 onChanged: (val) => onFilterChanged(
                   type: val,
                   method: selectedMethod,
@@ -65,9 +67,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: "Method",
+                label: translateKey("method"),
                 value: selectedMethod,
-                items: _transactionMethods,
+                items: _transactionMethods.map(translateKey).toList(),
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: val,
@@ -85,9 +87,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: "Status",
+                label: translateKey("status"),
                 value: selectedStatus,
-                items: _transactionStatuses,
+                items: _transactionStatuses.map(translateKey).toList(),
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: selectedMethod,
@@ -101,9 +103,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: "Inquiry",
+                label: translateKey("inquiry"),
                 value: selectedInquiry,
-                items: _inquiryOptions,
+                items: _inquiryOptions.map(translateKey).toList(),
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: selectedMethod,
@@ -131,7 +133,6 @@ class TransactionFilter extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Nền menu dropdown
     final dropdownBackground = isDark ? Colors.grey[800] : Colors.grey[300];
 
     return Column(
@@ -171,8 +172,8 @@ class TransactionFilter extends StatelessWidget {
             maxHeight: 250,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: dropdownBackground, // đổi màu menu
-              border: Border.all(color: Colors.white), // nếu muốn viền trắng
+              color: dropdownBackground,
+              border: Border.all(color: Colors.white),
             ),
             elevation: 0,
             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -181,5 +182,4 @@ class TransactionFilter extends StatelessWidget {
       ],
     );
   }
-
 }

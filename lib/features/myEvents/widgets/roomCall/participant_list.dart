@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/services/signalr/webrtc_controller.dart';
 
 class ParticipantList extends StatefulWidget {
@@ -46,6 +47,7 @@ class _ParticipantListState extends State<ParticipantList> {
         widget.controller?.participants.values.toList() ?? widget.participants;
     final height = MediaQuery.of(context).size.height * 0.45;
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
@@ -81,7 +83,7 @@ class _ParticipantListState extends State<ParticipantList> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Participants",
+                    loc.translate('participants'),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -108,7 +110,7 @@ class _ParticipantListState extends State<ParticipantList> {
                       onPressed: () async {
                         if (widget.onMuteAll != null) await widget.onMuteAll!();
                       },
-                      child: const Text("Mute All"),
+                      child: Text(loc.translate('mute_all_mic'),),
                     ),
                     ElevatedButton(
                       onPressed: () async {
@@ -116,7 +118,7 @@ class _ParticipantListState extends State<ParticipantList> {
                           await widget.onTurnOffAllCams!();
                         }
                       },
-                      child: const Text("Turn Off All Cameras"),
+                      child: Text(loc.translate('mute_all_cam')),
                     ),
                   ],
                 ),
@@ -129,7 +131,7 @@ class _ParticipantListState extends State<ParticipantList> {
               child: participants.isEmpty
                   ? Center(
                       child: Text(
-                        "No participants yet",
+                        loc.translate('no_parti_yet'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.grey,
                         ),
@@ -210,15 +212,15 @@ class _ParticipantListState extends State<ParticipantList> {
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(
-                                          title: const Text("Kick participant"),
+                                          title: Text(loc.translate('confirm_kick')),
                                           content: Text(
-                                            "Are you sure you want to kick ${p.name}?",
+                                            "${loc.translate('confirm_kick_username')} ${p.name}?",
                                           ),
                                           actions: [
                                             TextButton(
                                               onPressed: () =>
                                                   Navigator.pop(context, false),
-                                              child: const Text("Cancel"),
+                                              child: Text(loc.translate('cancel')),
                                             ),
                                             ElevatedButton(
                                               onPressed: () =>
@@ -226,7 +228,7 @@ class _ParticipantListState extends State<ParticipantList> {
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.red,
                                               ),
-                                              child: const Text("Kick"),
+                                              child: Text(loc.translate('kick')),
                                             ),
                                           ],
                                         );

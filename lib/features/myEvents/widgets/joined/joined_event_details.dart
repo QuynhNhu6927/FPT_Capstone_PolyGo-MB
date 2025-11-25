@@ -202,7 +202,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                                         Text(
                                           AppLocalizations.of(
                                             context,
-                                          ).translate('cancel'),
+                                          ).translate('unregister_cancel'),
                                           style: const TextStyle(
                                             color: Colors.redAccent,
                                             fontWeight: FontWeight.w500,
@@ -256,6 +256,7 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
                           builder: (_) => HostedUserList(
                             participants: eventDetails!.participants,
                             hostId: widget.event.host.id,
+                            eventStatus: widget.event.status,
                             token: widget.token,
                             eventId: widget.event.id,
                             eventRepository: widget.eventRepository,

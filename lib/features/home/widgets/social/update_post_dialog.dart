@@ -225,7 +225,7 @@ class _UpdatePostDialogState extends State<UpdatePostDialog> {
                           color: Colors.white,
                         ),
                       )
-                          : const Text("Lưu", style: TextStyle(fontSize: 15)),
+                          : Text(loc.translate('save'), style: TextStyle(fontSize: 15)),
                     ),
                 ],
               ),
@@ -247,7 +247,7 @@ class _UpdatePostDialogState extends State<UpdatePostDialog> {
                       maxLines: null,
                       autofocus: false,
                       decoration: InputDecoration(
-                        hintText: "Chia sẻ cảm nghĩ của bạn...",
+                        hintText: loc.translate('share_your_though'),
                         hintStyle: TextStyle(
                           color: isDark ? Colors.white54 : Colors.grey[700],
                         ),

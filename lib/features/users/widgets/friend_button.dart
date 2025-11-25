@@ -80,25 +80,27 @@ class FriendButton extends StatelessWidget {
   }
 
   void _showFriendRequestDialog(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Friend Request"),
-        content: const Text("Do you want to accept this friend request?"),
+        title: Text(loc.translate("Friend Request")),
+        content: Text(loc.translate("Do you want to accept this friend request?")),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               onRejectRequest();
             },
-            child: const Text("Reject"),
+            child: Text(loc.translate("Reject")),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               onAcceptRequest();
             },
-            child: const Text("Accept"),
+            child: Text(loc.translate("Accept")),
           ),
         ],
       ),
@@ -109,19 +111,19 @@ class FriendButton extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Unfriend"),
-        content: const Text("Do you want to remove this friend?"),
+        title: Text(loc.translate("Unfriend")),
+        content: Text(loc.translate("Do you want to remove this friend?")),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(loc.translate("cancel")),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               onUnfriend();
             },
-            child: const Text("Confirm"),
+            child: Text(loc.translate("confirm")),
           ),
         ],
       ),

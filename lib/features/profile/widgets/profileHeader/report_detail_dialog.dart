@@ -1,6 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/render_utils.dart';
 import '../../../../data/models/report/view_report_details.dart';
 
@@ -37,6 +37,7 @@ class ReportDetailDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
     final target = report.targetInfo;
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
@@ -44,7 +45,12 @@ class ReportDetailDialog extends StatelessWidget {
     List<Widget> buildContent() {
       List<Widget> children = [];
 
-      Widget buildItem({required IconData icon, required String title, String? value, Color? valueColor}) {
+      Widget buildItem({
+        required IconData icon,
+        required String title,
+        String? value,
+        Color? valueColor,
+      }) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
@@ -57,7 +63,10 @@ class ReportDetailDialog extends StatelessWidget {
                   text: TextSpan(
                     style: TextStyle(color: textColor, fontSize: 14, height: 1.4),
                     children: [
-                      TextSpan(text: "$title: ", style: const TextStyle(fontWeight: FontWeight.w600)),
+                      TextSpan(
+                        text: "${loc.translate(title.toLowerCase())}: ",
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       if (value != null)
                         TextSpan(
                           text: value,
@@ -75,7 +84,11 @@ class ReportDetailDialog extends StatelessWidget {
         );
       }
 
-      Widget buildMarkdownItem({required IconData icon, required String title, required String content}) {
+      Widget buildMarkdownItem({
+        required IconData icon,
+        required String title,
+        required String content,
+      }) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
@@ -91,7 +104,7 @@ class ReportDetailDialog extends StatelessWidget {
                   child: SingleChildScrollView(
                     child: RenderUtils.selectableMarkdownText(
                       context,
-                      content.isNotEmpty ? content : "No description",
+                      content.isNotEmpty ? content : loc.translate('no_description'),
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.4,
@@ -106,55 +119,55 @@ class ReportDetailDialog extends StatelessWidget {
         );
       }
 
-      switch (report.reportType?.toLowerCase()) {
+      final type = report.reportType?.toLowerCase();
+
+      switch (type) {
         case 'system':
-          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "Reason", value: report.reason));
+          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "reason", value: report.reason));
           if (report.description != null && report.description!.isNotEmpty) {
-            children.add(buildMarkdownItem(icon: Icons.description, title: "Description", content: report.description!));
+            children.add(buildMarkdownItem(icon: Icons.description, title: "description", content: report.description!));
           }
-          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
+          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "status", value: report.status, valueColor: statusColor(report.status)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "created_at", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'event':
-          if (target?.title != null) children.add(buildItem(icon: Icons.event, title: "Title", value: target!.title!));
+          if (target?.title != null) children.add(buildItem(icon: Icons.event, title: "title", value: target!.title!));
           if (target?.description != null && target!.description!.isNotEmpty) {
-            children.add(buildMarkdownItem(icon: Icons.description, title: "Event Description", content: target.description!));
+            children.add(buildMarkdownItem(icon: Icons.description, title: "event_description", content: target.description!));
           }
-          if (target?.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Event Status", value: target?.status!, valueColor: statusColor(target?.status)));
-          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "Reason", value: report.reason));
+          if (target?.status != null) children.add(buildItem(icon: Icons.info_outline, title: "event_status", value: target?.status!, valueColor: statusColor(target?.status)));
+          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "reason", value: report.reason));
           if (report.description != null && report.description!.isNotEmpty) {
-            children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
+            children.add(buildMarkdownItem(icon: Icons.description, title: "report_description", content: report.description!));
           }
-          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
+          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "report_status", value: report.status, valueColor: statusColor(report.status)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "created_at", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'post':
-          if (target?.content != null) {
-            children.add(buildMarkdownItem(icon: Icons.article, title: "Content", content: target!.content!));
-          }
-          if (target?.creator != null) children.add(buildItem(icon: Icons.person, title: "Creator", value: target?.creator!.name!));
-          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "Reason", value: report.reason));
+          if (target?.content != null) children.add(buildMarkdownItem(icon: Icons.article, title: "content", content: target!.content!));
+          if (target?.creator != null) children.add(buildItem(icon: Icons.person, title: "creator", value: target?.creator!.name!));
+          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "reason", value: report.reason));
           if (report.description != null && report.description!.isNotEmpty) {
-            children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
+            children.add(buildMarkdownItem(icon: Icons.description, title: "report_description", content: report.description!));
           }
-          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
+          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "report_status", value: report.status, valueColor: statusColor(report.status)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "created_at", value: formatDateTime(context, report.createdAt!)));
           break;
 
         case 'user':
-          if (target?.name != null) children.add(buildItem(icon: Icons.person, title: "User", value: target!.name!));
-          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "Reason", value: report.reason));
+          if (target?.name != null) children.add(buildItem(icon: Icons.person, title: "user", value: target!.name!));
+          if (report.reason != null) children.add(buildItem(icon: Icons.report, title: "reason", value: report.reason));
           if (report.description != null && report.description!.isNotEmpty) {
-            children.add(buildMarkdownItem(icon: Icons.description, title: "Report Description", content: report.description!));
+            children.add(buildMarkdownItem(icon: Icons.description, title: "report_description", content: report.description!));
           }
-          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "Report Status", value: report.status, valueColor: statusColor(report.status)));
-          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "Created At", value: formatDateTime(context, report.createdAt!)));
+          if (report.status != null) children.add(buildItem(icon: Icons.info_outline, title: "report_status", value: report.status, valueColor: statusColor(report.status)));
+          if (report.createdAt != null) children.add(buildItem(icon: Icons.access_time, title: "created_at", value: formatDateTime(context, report.createdAt!)));
           break;
 
         default:
-          children.add(const Text("No details available"));
+          children.add(Text(loc.translate("no_details_available")));
       }
 
       // Images
@@ -182,7 +195,7 @@ class ReportDetailDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    report.reportType ?? "Report Detail",
+                    loc.translate(report.reportType?.toLowerCase() ?? "report_detail"),
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : Colors.black87,

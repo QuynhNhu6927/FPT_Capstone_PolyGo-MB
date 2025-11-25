@@ -183,7 +183,7 @@ class _FriendsState extends State<Friends> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "XP: ${friend.experiencePoints}",
+                        "EXP: ${friend.experiencePoints}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

@@ -199,7 +199,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                                   : Colors.black87,
                             ),
                             decoration: InputDecoration(
-                              hintText:  loc.translate("search_placeholder"),
+                              hintText:  loc.translate("search_game_placeholder"),
                               hintStyle: TextStyle(
                                 color: Theme.of(context).brightness == Brightness.dark
                                     ? Colors.grey
@@ -366,7 +366,7 @@ class _JoinedGamesState extends State<JoinedGames> {
           // --- GRID VIEW ---
           Expanded(
             child: _filteredWordSets.isEmpty
-                ? const Center(child: Text("No games found"))
+                ? Center(child: Text(loc.translate("no_game_found")))
                 : MasonryGridView.count(
                     controller: _scrollController,
                     crossAxisCount: crossAxisCount,

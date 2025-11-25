@@ -238,14 +238,14 @@ class _AllBadgesState extends State<AllBadges> {
                                         widget.onBadgeClaimed!(_badges[index]);
                                       }
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(res?.message ?? "Claimed!")),
+                                        SnackBar(content: Text(res?.message ?? loc.translate('claimed'))),
                                       );
                                     } catch (e) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text("Claim failed: $e"),
+                                          content: Text(loc.translate('claimed_error')),
                                         ),
                                       );
                                     }
@@ -260,7 +260,7 @@ class _AllBadgesState extends State<AllBadges> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      loc.translate("claim"),
+                                      loc.translate("claimed"),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

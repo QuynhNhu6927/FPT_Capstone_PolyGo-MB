@@ -29,18 +29,14 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
   String? _errorText;
   String? _generalError;
 
-  final List<String> reasons = [
-    "Có việc bận",
-    "Không đủ điều kiện nữa",
-    "Thiếu thông tin",
-    "Lý do khác",
-  ];
+  late List<String> reasons;
   late Map<String, bool> selected;
 
   @override
   void initState() {
     super.initState();
-    selected = {for (var r in reasons) r: false};
+    // reasons sẽ được build trong build() vì cần loc
+    selected = {};
   }
 
   @override
@@ -51,9 +47,14 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
 
   Future<void> _handleCancel() async {
     final loc = AppLocalizations.of(context);
+
     final selectedReasons = selected.entries
         .where((e) => e.value)
-        .map((e) => e.key == "Lý do khác" ? _otherController.text.trim() : e.key)
+        .map(
+          (e) => e.key == loc.translate("reason_other")
+          ? _otherController.text.trim()
+          : e.key,
+    )
         .where((r) => r.isNotEmpty)
         .toList();
 
@@ -67,6 +68,7 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
 
     try {
       final reason = selectedReasons.join(', ');
+
       final res = widget.isHost
           ? await widget.eventRepository.cancelEvent(
         token: widget.token,
@@ -87,10 +89,12 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
 
       ScaffoldMessenger.of(widget.parentContext).showSnackBar(
         SnackBar(
-          content: Text(res?.message ??
-              (widget.isHost
-                  ? loc.translate('cancel_success')
-                  : loc.translate('unregister_success'))),
+          content: Text(
+            res?.message ??
+                (widget.isHost
+                    ? loc.translate('cancel_success')
+                    : loc.translate('unregister_success')),
+          ),
         ),
       );
     } catch (_) {
@@ -103,8 +107,23 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+
+    // Build reasons từ localization
+    reasons = [
+      loc.translate("reason_busy"),
+      loc.translate("reason_not_eligible"),
+      loc.translate("reason_missing_info"),
+      loc.translate("reason_other"),
+    ];
+
+    // Init selected nếu chưa có
+    if (selected.isEmpty) {
+      selected = {for (var r in reasons) r: false};
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black;
+
     final Gradient cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -128,14 +147,26 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  loc.translate('confirm_cancel'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                Center(
+                  child: Text(
+                    loc.translate('confirm_cancel'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+
+                Divider(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  thickness: 1,
+                ),
+
+                const SizedBox(height: 10),
+
+                /// Lý do
                 ...reasons.map(
                       (reason) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,12 +175,18 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
                         value: selected[reason],
                         onChanged: (v) =>
                             setState(() => selected[reason] = v ?? false),
-                        title: Text(reason, style: TextStyle(color: textColor)),
+                        title: Text(
+                          reason,
+                          style: TextStyle(color: textColor),
+                        ),
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                       ),
-                      if (reason == "Lý do khác" && selected["Lý do khác"] == true)
+
+                      /// Input "Lý do khác"
+                      if (reason == loc.translate("reason_other") &&
+                          selected[reason] == true)
                         SizedBox(
                           height: 80,
                           child: TextField(
@@ -159,7 +196,9 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
                             decoration: InputDecoration(
                               hintText: loc.translate('enter_other_reason'),
                               hintStyle: TextStyle(
-                                color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                color: isDark
+                                    ? Colors.grey[500]
+                                    : Colors.grey[400],
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(6),
@@ -176,19 +215,27 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
                     ],
                   ),
                 ),
+
                 if (_errorText != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(_errorText!,
-                        style: const TextStyle(color: Colors.red)),
+                    child: Text(
+                      _errorText!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ),
+
                 if (_generalError != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(_generalError!,
-                        style: const TextStyle(color: Colors.redAccent)),
+                    child: Text(
+                      _generalError!,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
                   ),
+
                 const SizedBox(height: 16),
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: Row(
@@ -207,7 +254,9 @@ class _CancelEventDialogState extends State<CancelEventDialog> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                         ),
                         child: Text(
                           loc.translate('yes'),

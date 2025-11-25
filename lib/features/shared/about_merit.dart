@@ -32,7 +32,7 @@ class AboutMeritDialog extends StatelessWidget {
         end: Alignment.bottomRight,
       );
       iconColor = Colors.green.shade700;
-      trustLabel = loc.translate("Very trusted");
+      trustLabel = loc.translate("very_trusted");
       noteLabel = loc.translate("merit_range_high");
     } else if (merit >= 51) {
       bgGradient = const LinearGradient(
@@ -41,7 +41,7 @@ class AboutMeritDialog extends StatelessWidget {
         end: Alignment.bottomRight,
       );
       iconColor = Colors.orange.shade700;
-      trustLabel = loc.translate("Warned");
+      trustLabel = loc.translate("warned");
       noteLabel = loc.translate("merit_range_mid");
     } else {
       bgGradient = const LinearGradient(
@@ -50,7 +50,7 @@ class AboutMeritDialog extends StatelessWidget {
         end: Alignment.bottomRight,
       );
       iconColor = Colors.red.shade700;
-      trustLabel = loc.translate("Not trusted");
+      trustLabel = loc.translate("not_trusted");
       noteLabel = loc.translate("merit_range_low");
     }
 
@@ -74,7 +74,7 @@ class AboutMeritDialog extends StatelessWidget {
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start, // căn trái
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Row Icon + TRUST SCORE
                 Row(
@@ -101,7 +101,7 @@ class AboutMeritDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "TRUST SCORE",
+                          loc.translate("TRUST_SCORE"),
                           style: t.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: st(context, 20),

@@ -105,13 +105,14 @@ class EventService {
       return EventRegisterResponse.fromJson(json);
 
     } on DioError catch (e) {
-      // Nếu server trả về response với body
       if (e.response?.data != null && e.response!.data is Map<String, dynamic>) {
         final data = e.response!.data as Map<String, dynamic>;
         final message = data['message'] ?? '';
 
         if (message == 'Error.InvalidEventPassword') {
           throw InvalidEventPasswordException();
+        }else if (message == 'Error.EventsOverlapping') {
+          throw EventsOverlappingException();
         } else if (message == 'Error.KickedFromEvent') {
           throw KickedFromEventException();
         } else if (message == 'Error.InsufficientBalance') {
@@ -454,3 +455,4 @@ class EventService {
 class InvalidEventPasswordException implements Exception {}
 class KickedFromEventException implements Exception {}
 class InsufficientBalanceException implements Exception {}
+class EventsOverlappingException implements Exception {}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:polygo_mobile/features/home/widgets/social/postCard/share/share_dialog.dart';
+import '../../../../../../core/localization/app_localizations.dart';
 import '../../comment_popup.dart';
 import '../../react_popup.dart';
 import '../../../../../../data/models/post/post_model.dart';
@@ -20,6 +21,7 @@ class PostFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
@@ -74,7 +76,7 @@ class PostFooter extends StatelessWidget {
 
             if (result != null && result is PostModel) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Đã chia sẻ thành công")),
+                SnackBar(content: Text(loc.translate('post_share_success'))),
               );
             }
           },

@@ -263,7 +263,7 @@ class _RatesState extends State<Rates> {
                             ...[
                             SizedBox(height: sh(context, 4)),
                             Text(
-                              'Lúc: ${DateFormat('dd/MM/yyyy, HH:mm').format(_myRating!.createdAt.toLocal())}',
+                              '${loc.translate('at')} ${DateFormat('dd/MM/yyyy, HH:mm').format(_myRating!.createdAt.toLocal())}',
                               style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
                             ),
                           ],
@@ -397,7 +397,7 @@ class _RatesState extends State<Rates> {
 
                   // --- Other ratings ---
                   Text(
-                    loc.translate("Others rating"),
+                    loc.translate("others_rating"),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: textColor,

@@ -18,16 +18,18 @@ class AppLocalizations {
 
     final files = [
       'auth.json',
+      'home_event.json',
+      'home_user.json',
+      'home_social.json',
+      'chat.json',
+      'game.json',
+      'inventories.json',
+      'my_event.json',
       'profile.json',
+      'rating.json',
       'shared.json',
-      'badges.json',
       'shop.json',
-      'home_users.json',
-      'gifts.json',
-      'events.json',
-      'games.json',
-      'call.json',
-      'post.json'
+      'user.json'
     ];
 
     _localizedStrings = {};

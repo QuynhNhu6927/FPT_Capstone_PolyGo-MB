@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/events/event_details_model.dart';
 import '../../../../data/repositories/event_repository.dart';
@@ -11,6 +13,7 @@ class HostedUserList extends StatefulWidget {
   final String hostId;
   final String token;
   final String eventId;
+  final String eventStatus;
   final EventRepository eventRepository;
   final VoidCallback? onClose;
   final void Function(String kickedUserId)? onKick;
@@ -21,6 +24,7 @@ class HostedUserList extends StatefulWidget {
     required this.hostId,
     required this.token,
     required this.eventId,
+    required this.eventStatus,
     required this.eventRepository,
     this.onClose,
     this.onKick,
@@ -51,6 +55,7 @@ class _HostedUserListState extends State<HostedUserList> {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 2 : width < 1000 ? 3 : 4;
+    final loc = AppLocalizations.of(context);
 
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
@@ -64,11 +69,12 @@ class _HostedUserListState extends State<HostedUserList> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            /// Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Danh sách người tham dự",
+                  loc.translate('participants_list'),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.primary,
@@ -83,7 +89,10 @@ class _HostedUserListState extends State<HostedUserList> {
                 ),
               ],
             ),
+
             const SizedBox(height: 12),
+
+            /// List
             Expanded(
               child: MasonryGridView.count(
                 crossAxisCount: crossAxisCount,
@@ -107,6 +116,7 @@ class _HostedUserListState extends State<HostedUserList> {
     final isDark = theme.brightness == Brightness.dark;
     final hasAvatar = (user.avatarUrl ?? '').isNotEmpty;
     final isLocked = user.status == 3;
+    final loc = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: isLocked
@@ -126,7 +136,8 @@ class _HostedUserListState extends State<HostedUserList> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
+                  color:
+                  isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -137,6 +148,7 @@ class _HostedUserListState extends State<HostedUserList> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /// Avatar
                   Stack(
                     children: [
                       AspectRatio(
@@ -170,12 +182,13 @@ class _HostedUserListState extends State<HostedUserList> {
                           ),
                         ),
                       ),
-
-
                     ],
                   ),
+
+                  /// Name + Kick
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -192,7 +205,10 @@ class _HostedUserListState extends State<HostedUserList> {
                           ),
                         ),
 
-                        if (widget.hostId != user.id && !isLocked)
+                        /// Kick button
+                        if (widget.hostId != user.id &&
+                            !isLocked &&
+                            widget.eventStatus == "Approved")
                           GestureDetector(
                             onTap: () async {
                               final reasonController = TextEditingController();
@@ -202,12 +218,17 @@ class _HostedUserListState extends State<HostedUserList> {
                                 context: context,
                                 builder: (context) {
                                   final theme = Theme.of(context);
-                                  final isDark = theme.brightness == Brightness.dark;
-                                  final textColor = isDark ? Colors.white : Colors.black;
+                                  final isDark =
+                                      theme.brightness == Brightness.dark;
+                                  final textColor =
+                                  isDark ? Colors.white : Colors.black;
 
                                   final Gradient cardBackground = isDark
                                       ? const LinearGradient(
-                                    colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                                    colors: [
+                                      Color(0xFF1E1E1E),
+                                      Color(0xFF2C2C2C)
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   )
@@ -222,40 +243,51 @@ class _HostedUserListState extends State<HostedUserList> {
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
                                           gradient: cardBackground,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                          BorderRadius.circular(12),
                                         ),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              "Kick người dùng",
-                                              style: theme.textTheme.titleMedium?.copyWith(
+                                              loc.translate('kick_user'),
+                                              style: theme
+                                                  .textTheme.titleMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: textColor,
                                               ),
                                             ),
                                             const SizedBox(height: 16),
 
+                                            /// Reason
                                             TextField(
                                               controller: reasonController,
-                                              decoration: const InputDecoration(
-                                                labelText: 'Lý do',
-                                                border: OutlineInputBorder(),
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                loc.translate('reason'),
+                                                border:
+                                                const OutlineInputBorder(),
                                               ),
                                             ),
+
                                             const SizedBox(height: 16),
 
+                                            /// Allow Rejoin Switch
                                             Row(
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    "Cho phép quay lại (Allow Rejoin)",
-                                                    style: TextStyle(color: textColor),
+                                                    loc.translate(
+                                                        'allow_rejoin'),
+                                                    style: TextStyle(
+                                                        color: textColor),
                                                   ),
                                                 ),
                                                 Switch(
                                                   value: allowRejoin,
-                                                  onChanged: (v) => setState(() => allowRejoin = v),
+                                                  onChanged: (v) => setState(
+                                                          () => allowRejoin = v),
                                                 ),
                                               ],
                                             ),
@@ -263,18 +295,25 @@ class _HostedUserListState extends State<HostedUserList> {
                                             const SizedBox(height: 16),
 
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.end,
                                               children: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(false),
-                                                  child: const Text("Hủy"),
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(false),
+                                                  child: Text(
+                                                      loc.translate('cancel')),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 AppButton(
-                                                  text: "Kick",
-                                                  onPressed: () => Navigator.of(context).pop(true),
+                                                  text: loc.translate('kick'),
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(true),
                                                   size: ButtonSize.sm,
-                                                  variant: ButtonVariant.primary,
+                                                  variant:
+                                                  ButtonVariant.primary,
                                                 ),
                                               ],
                                             ),
@@ -295,12 +334,19 @@ class _HostedUserListState extends State<HostedUserList> {
                                     allowRejoin: allowRejoin,
                                     reason: reasonController.text.isNotEmpty
                                         ? reasonController.text
-                                        : 'Vi phạm quy định',
+                                        : loc.translate('against_rule'),
                                   );
+
+                                  if (!mounted) return;
                                   _handleKick(user.id);
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Kick thất bại: $e')),
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.maybeOf(context)
+                                      ?.showSnackBar(
+                                    SnackBar(
+                                      content:
+                                      Text(loc.translate('kick_failed')),
+                                    ),
                                   );
                                 }
                               }
@@ -314,7 +360,6 @@ class _HostedUserListState extends State<HostedUserList> {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),

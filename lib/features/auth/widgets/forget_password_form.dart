@@ -141,7 +141,7 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
 
   String? _passwordValidator(String? v) {
     final loc = AppLocalizations.of(context);
-    if (v == null || v.isEmpty) return AppLocalizations.of(context).translate("null");
+    if (v == null || v.isEmpty) return AppLocalizations.of(context).translate("null_warning");
     if (v.length < 6) return AppLocalizations.of(context).translate("min_6_char");
     final upperCase = RegExp(r'[A-Z]');
     final number = RegExp(r'\d');
@@ -232,7 +232,7 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return loc.translate("null");
+                        if (v == null || v.isEmpty) return loc.translate("null_warning");
                         if (!v.contains('@')) return loc.translate("invalid_email");
                         return null;
                       },
@@ -258,7 +258,7 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                           : Text(
-                        _otpCountdown > 0 ? "Resend in $_otpCountdown s" : loc.translate("send_otp"),
+                        _otpCountdown > 0 ? "$_otpCountdown s" : loc.translate("send_otp"),
                         style: TextStyle(fontSize: st(context, 14), fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -294,7 +294,7 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
                     ),
                   ),
                   validator: (v) =>
-                  (v == null || v.isEmpty) ? loc.translate("null") : null,
+                  (v == null || v.isEmpty) ? loc.translate("null_warning") : null,
                 ),
                 SizedBox(height: sh(context, 16)),
               ],
@@ -344,7 +344,7 @@ class _ForgetPasswordFormState extends State<ForgetPasswordForm> {
                   ),
                 ),
                 validator: (v) =>
-                (v != _passwordController.text) ? loc.translate("not_match") : null,
+                (v != _passwordController.text) ? loc.translate("not_match_password") : null,
               ),
 
               SizedBox(height: sh(context, 24)),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/user/update_profile_request.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../data/services/apis/user_service.dart';
@@ -57,6 +58,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   Future<void> _onFinishInterests(List<String> selected) async {
     _selectedInterests = selected;
+    final loc = AppLocalizations.of(context);
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -85,7 +87,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          SnackBar(content: Text(loc.translate('profile_updated_successfully'))),
         );
 
         Navigator.of(context).pop(true);
@@ -94,7 +96,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       // show error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Update profile failed: $e')),
+          SnackBar(content: Text(loc.translate('update_profile_failed'))),
         );
       }
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/apis/auth_service.dart';
 import 'event_room_screen.dart';
@@ -77,6 +78,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   }
 
   Future<void> _initStream() async {
+    final loc = AppLocalizations.of(context);
     try {
       await _localRenderer.initialize();
       final stream = await navigator.mediaDevices.getUserMedia({
@@ -88,7 +90,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
     } catch (_) {
       setState(() {
         permissionError =
-        "Permission denied. Please allow access to microphone and camera.";
+            loc.translate('permission_denied');
       });
     }
   }
@@ -304,6 +306,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   }
 
   Widget _buildJoinButton(bool isDark) {
+    final loc = AppLocalizations.of(context);
     final canJoin = permissionError == null && (_isHost || _eventStarted);
     return ElevatedButton(
       onPressed: canJoin ? _handleJoin : null,
@@ -317,7 +320,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text(
-        _isHost ? (_eventStarted ? "Bắt đầu" : "Chờ bắt đầu") : "Tham gia",
+        _isHost ? (_eventStarted ? loc.translate("start") : loc.translate("wait_host_start")) : loc.translate("join"),
         style: TextStyle(
           fontSize: 16,
           color: canJoin ? Colors.white : (isDark ? Colors.white54 : Colors.black45),

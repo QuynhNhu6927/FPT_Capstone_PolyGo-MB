@@ -24,13 +24,14 @@ class SubscriptionActions {
 
     final loc = AppLocalizations.of(context);
     final reasons = [
-      "Too expensive",
-      "Not using enough",
-      "Found an alternative",
-      "Technical issues",
-      "Lack of feature",
-      "Other",
+      "reason_too_expensive",
+      "reason_not_using_enough",
+      "reason_found_alternative",
+      "reason_technical_issues",
+      "reason_lack_feature",
+      "reason_other",
     ];
+
 
     // Track selected reasons
     final Map<String, bool> selected = {for (var r in reasons) r: false};
@@ -92,11 +93,11 @@ class SubscriptionActions {
                             CheckboxListTile(
                               value: selected[reason],
                               onChanged: (v) => setState(() => selected[reason] = v ?? false),
-                              title: Text(reason, style: TextStyle(color: textColor)),
+                              title: Text(loc.translate(reason), style: TextStyle(color: textColor)),
                               controlAffinity: ListTileControlAffinity.leading,
                               contentPadding: EdgeInsets.zero,
                             ),
-                            if (reason == "Other" && selected["Other"] == true)
+                            if (reason == "reason_other" && selected[reason] == true)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
                                 child: SizedBox(
@@ -146,7 +147,9 @@ class SubscriptionActions {
                               onPressed: () async {
                                 final selectedReasons = selected.entries
                                     .where((e) => e.value)
-                                    .map((e) => e.key == "Other" ? otherController.text.trim() : e.key)
+                                    .map((e) => e.key == "reason_other"
+                                    ? otherController.text.trim()
+                                    : loc.translate(e.key))
                                     .where((r) => r.isNotEmpty)
                                     .toList();
 

@@ -3,6 +3,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/apis/auth_service.dart';
@@ -95,16 +96,18 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     _controller.onParticipantMuted = (participantId) {
       final p = _controller.participants[participantId];
       if (p != null && mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${p.name} has been muted")),
+          SnackBar(content: Text("${p.name} ${loc.translate('mic_has_been_muted')}")),
         );
       }
     };
 
     _controller.onAllMuted = () {
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("All participants have been muted")),
+          SnackBar(content: Text(loc.translate("all_mic_muted"))),
         );
       }
     };
@@ -112,16 +115,18 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     _controller.onParticipantCameraOff = (participantId) {
       final p = _controller.participants[participantId];
       if (p != null && mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${p.name}'s camera has been turned off")),
+          SnackBar(content: Text("${p.name}'s ${loc.translate('camera_has_been_muted')}")),
         );
       }
     };
 
     _controller.onAllCamsOff = () {
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("All participant cameras have been turned off")),
+          SnackBar(content: Text(loc.translate("all_cam_muted"))),
         );
       }
     };
@@ -250,13 +255,14 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
 
   void _handleStartEvent() async {
     if (!widget.isHost) return;
+    final loc = AppLocalizations.of(context);
     setState(() => hasStartedEvent = true);
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
-        _showSnack("Bạn chưa đăng nhập");
+        _showSnack(loc.translate("missing_token"));
         setState(() => hasStartedEvent = false);
         return;
       }
@@ -269,26 +275,27 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       );
 
       if (updatedEvent != null) {
-        _showSnack("Event status updated to Live!");
+        _showSnack(loc.translate('event_status_update_live'));
         await _controller.startCall();
       } else {
-        _showSnack("Failed to update event status.");
+        _showSnack(loc.translate('event_status_update_failed'));
         setState(() => hasStartedEvent = false);
       }
     } catch (e) {
-      _showSnack("Error updating event status: $e");
+      _showSnack(loc.translate('event_status_update_failed'));
       setState(() => hasStartedEvent = false);
     }
   }
 
   void _handleEndEvent() async {
     if (!widget.isHost) return;
+    final loc = AppLocalizations.of(context);
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
-        _showSnack("Bạn chưa đăng nhập");
+        _showSnack(loc.translate("missing_token"));
         return;
       }
 
@@ -300,9 +307,9 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       );
 
       if (updatedEvent != null) {
-        _showSnack("Event ended and status updated to Completed!");
+        _showSnack(loc.translate('event_status_update_completed'));
       } else {
-        _showSnack("Failed to update event status.");
+        _showSnack(loc.translate('event_status_update_failed'));
       }
 
       await _controller.endEvent();
@@ -311,7 +318,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
       }
     } catch (e) {
-      _showSnack("Error ending event: $e");
+      _showSnack(loc.translate('event_status_update_failed'));
     }
   }
 
@@ -320,6 +327,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -354,13 +362,13 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                     onMuteAll: () async {
                       await _controller.muteAllParticipants();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Muted all participants")),
+                        SnackBar(content: Text(loc.translate("all_mic_muted"))),
                       );
                     },
                     onTurnOffAllCams: () async {
                       await _controller.turnOffAllParticipantCameras();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Turned off all cameras")),
+                        SnackBar(content: Text(loc.translate("all_cam_muted"))),
                       );
                     },
                     controller: _controller,
@@ -393,19 +401,21 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
             //  Leave / End dialogs
             if (showLeaveDialog)
               _buildConfirmDialog(
-                title: "Leave Meeting?",
-                message: "Are you sure you want to leave this meeting?",
-                confirmText: "Leave",
+                title: loc.translate('confirm_leaving_call_title'),
+                message: loc.translate('confirm_leaving_call'),
+                confirmText: loc.translate('leave'),
                 onConfirm: _handleLeave,
                 onCancel: () => setState(() => showLeaveDialog = false),
+                loc: loc,
               ),
             if (showEndDialog)
               _buildConfirmDialog(
-                title: "End Event?",
-                message: "This will end the meeting for all participants.",
-                confirmText: "End Event",
+                title: loc.translate('confirm_end_call_title'),
+                message: loc.translate('confirm_end_call'),
+                confirmText: loc.translate('end'),
                 onConfirm: _handleEndEvent,
                 onCancel: () => setState(() => showEndDialog = false),
+                loc: loc,
               ),
 
             // Meeting controls
@@ -448,13 +458,14 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     required String confirmText,
     required VoidCallback onConfirm,
     required VoidCallback onCancel,
+    required AppLocalizations loc,
   }) {
     return Center(
       child: AlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: onCancel, child: const Text("Cancel")),
+          TextButton(onPressed: onCancel, child: Text(loc.translate('cancel'))),
           ElevatedButton(onPressed: onConfirm, child: Text(confirmText)),
         ],
       ),

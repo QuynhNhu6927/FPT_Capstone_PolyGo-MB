@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/responsive.dart';
 import '../widgets/play_info.dart';
 import '../widgets/play_card.dart';
@@ -37,19 +38,20 @@ class _PlayScreenState extends State<PlayScreen> {
   }
 
   Future<bool> _onWillPop() async {
+    final loc = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Chưa hoàn thành"),
-        content: const Text("Bạn chưa chơi xong. Bạn có muốn thoát không?"),
+        title: Text(loc.translate("game_not_done_title")),
+        content: Text(loc.translate("confirm_out_game")),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("Hủy"),
+            child: Text(loc.translate("cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("Thoát"),
+            child: Text(loc.translate("exit")),
           ),
         ],
       ),
@@ -60,11 +62,12 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Play Game"),
+          title: Text(loc.translate("play_game")),
           centerTitle: true,
         ),
         body: ListView(

@@ -48,21 +48,18 @@ class MeetingControls extends StatelessWidget {
               icon: isMicOn ? Icons.mic : Icons.mic_off,
               color: isMicOn ? Colors.white : Colors.redAccent,
               onPressed: onToggleMic,
-              tooltip: isMicOn ? "Tắt mic" : "Bật mic",
             ),
             const SizedBox(width: 14),
             _buildButton(
               icon: isCameraOn ? Icons.videocam : Icons.videocam_off,
               color: isCameraOn ? Colors.white : Colors.redAccent,
               onPressed: onToggleCamera,
-              tooltip: isCameraOn ? "Tắt camera" : "Bật camera",
             ),
             const SizedBox(width: 14),
             _buildButton(
               icon: Icons.chat,
               color: Colors.white,
               onPressed: onChatToggle,
-              tooltip: "Chat",
             ),
             const SizedBox(width: 14),
             if (!isHost) ...[
@@ -70,7 +67,6 @@ class MeetingControls extends StatelessWidget {
                 icon: isHandRaised ? Icons.back_hand : Icons.pan_tool_alt_outlined,
                 color: isHandRaised ? Colors.amber : Colors.white,
                 onPressed: onToggleHand,
-                tooltip: isHandRaised ? "Hạ tay" : "Giơ tay",
               ),
 
             ],
@@ -80,7 +76,6 @@ class MeetingControls extends StatelessWidget {
               icon: Icons.people,
               color: Colors.white,
               onPressed: onParticipants,
-              tooltip: "Người tham gia",
             ),
             const SizedBox(width: 14),
 
@@ -90,13 +85,11 @@ class MeetingControls extends StatelessWidget {
                 icon: Icons.stop_circle,
                 color: Colors.redAccent,
                 onPressed: onEndEvent ?? () {},
-                tooltip: "Kết thúc sự kiện",
               )
                   : _buildButton(
                 icon: Icons.play_circle_fill,
                 color: Colors.greenAccent,
                 onPressed: onStartEvent ?? () {},
-                tooltip: "Bắt đầu sự kiện",
               ),
               const SizedBox(width: 14),
             ],
@@ -105,7 +98,6 @@ class MeetingControls extends StatelessWidget {
               icon: Icons.call_end,
               color: Colors.redAccent,
               onPressed: onLeave,
-              tooltip: "Rời phòng",
             ),
           ],
         ),

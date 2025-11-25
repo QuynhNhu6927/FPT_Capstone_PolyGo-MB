@@ -194,6 +194,7 @@ class _PostContentState extends State<PostContent> {
     return _posts.where((e) => e.content.fuzzyContains(query)).toList();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -210,6 +211,17 @@ class _PostContentState extends State<PostContent> {
       );
     }
 
+    final loc = AppLocalizations.of(context);
+    String _timeAgo(DateTime dateTime) {
+      final diff = DateTime.now().difference(dateTime);
+      if (diff.inSeconds < 60) return loc.translate("just_now");
+      if (diff.inMinutes < 60) return '${diff.inMinutes} ${loc.translate("minutes_ago")}';
+      if (diff.inHours < 24) return '${diff.inHours} ${loc.translate("hours_ago")}';
+      if (diff.inDays < 7) return '${diff.inDays} ${loc.translate("days_ago")}';
+      if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} ${loc.translate("weeks_ago")}';
+      if (diff.inDays < 365) return '${(diff.inDays / 30).floor()} ${loc.translate("months_ago")}';
+      return '${(diff.inDays / 365).floor()} ${loc.translate("year_ago")}';
+    }
 
     return Scaffold(
       body: RefreshIndicator(
@@ -229,7 +241,7 @@ class _PostContentState extends State<PostContent> {
               post: post,
               avatarUrl: post.creator.avatarUrl,
               userName: post.creator.name,
-              timeAgo: "${DateTime.now().difference(post.createdAt).inHours} giờ trước",
+              timeAgo: _timeAgo(post.createdAt),
               contentText: post.content,
               contentImage: post.imageUrls.isNotEmpty ? post.imageUrls.first : null,
               reactCount: post.reactionsCount,

@@ -77,6 +77,13 @@ class _UsersState extends State<Users> {
       }
 
       _lastOffset = offset;
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (_isShowingMatching && !_hasActiveFilter) {
+          _loadMoreMatchingUsers();
+        }
+      }
     });
   }
 
@@ -111,11 +118,26 @@ class _UsersState extends State<Users> {
     }
   }
 
+  int _currentPage = 1;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+
+  int _getPageSize(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 900) return 40;
+    if (width >= 600) return 20;
+    return 10;
+  }
+
   Future<void> _loadMatchingUsers({String? lang}) async {
+    final pageSize = _getPageSize(context);
+
     setState(() {
       _loading = true;
       _hasError = false;
       _isShowingMatching = true;
+      _currentPage = 1;
+      _hasMore = true;
     });
 
     try {
@@ -130,15 +152,21 @@ class _UsersState extends State<Users> {
         return;
       }
 
-      final response = await _repository.getMatchingUsers(token, lang: lang ?? "vi");
+      final response = await _repository.getMatchingUsers(
+        token,
+        lang: lang ?? "vi",
+        pageNumber: 1,
+        pageSize: pageSize,
+      );
 
       if (!mounted) return;
 
       setState(() {
-        _matchingUsers = response;
+        _matchingUsers = response.items;
+        _hasMore = response.hasNextPage;
         _loading = false;
-        _hasError = false;
       });
+
       widget.onLoaded?.call();
     } catch (e) {
       if (!mounted) return;
@@ -147,6 +175,40 @@ class _UsersState extends State<Users> {
         _loading = false;
       });
       widget.onError?.call();
+    }
+  }
+
+  Future<void> _loadMoreMatchingUsers() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() => _isLoadingMore = true);
+    final pageSize = _getPageSize(context);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null || token.isEmpty) return;
+
+      final nextPage = _currentPage + 1;
+
+      final response = await _repository.getMatchingUsers(
+        token,
+        lang: _currentLocale?.languageCode ?? "vi",
+        pageNumber: nextPage,
+        pageSize: pageSize,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _currentPage = nextPage;
+        _matchingUsers.addAll(response.items);
+        _hasMore = response.hasNextPage;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
     }
   }
 
@@ -395,10 +457,23 @@ class _UsersState extends State<Users> {
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               padding: const EdgeInsets.only(bottom: 16),
-              itemCount: usersToShow.length,
+              itemCount: usersToShow.length + (_isLoadingMore ? 1 : 0), // thêm 1 item nếu đang load
               itemBuilder: (context, index) {
-                final user = usersToShow[index];
-                return _buildUserCard(context, user);
+                if (index < usersToShow.length) {
+                  final user = usersToShow[index];
+                  return _buildUserCard(context, user);
+                } else {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           ),
@@ -410,7 +485,7 @@ class _UsersState extends State<Users> {
   Widget _buildUserCard(BuildContext context, dynamic user) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final loc = AppLocalizations.of(context);
     final cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -482,7 +557,7 @@ class _UsersState extends State<Users> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        user.name ?? 'Unknown',
+                        user.name ?? loc.translate('Unknown'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -494,7 +569,7 @@ class _UsersState extends State<Users> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "XP: ${user.experiencePoints}",
+                        "EXP: ${user.experiencePoints}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 12, height: 1, color: Colors.grey[500]),
