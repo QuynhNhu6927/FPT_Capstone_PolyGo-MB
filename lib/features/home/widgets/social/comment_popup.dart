@@ -577,18 +577,7 @@ class _CommentPopupState extends State<CommentPopup> {
                                               ),
                                             ],
                                           )
-                                        : IconButton(
-                                            onPressed: () {
-                                              print('Report comment');
-                                            },
-                                            icon: Icon(
-                                              Icons.flag_outlined,
-                                              color: isDark
-                                                  ? Colors.white54
-                                                  : Colors.grey,
-                                              size: 20,
-                                            ),
-                                          ),
+                                        : const SizedBox(),
                                   ),
                                 ],
                               ),

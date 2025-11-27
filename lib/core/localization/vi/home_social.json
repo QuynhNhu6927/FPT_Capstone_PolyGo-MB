@@ -20,7 +20,7 @@
   "edit": "Sửa",
   "share_post_failed": "Chia sẻ lỗi, vui lòng thử lại sau!",
   "share_error": "Chia sẻ lỗi, vui lòng thử lại sau!",
-  "share_caption": "Có gì thú vị về nội bạn muốn chia sẻ...",
+  "share_caption": "Có gì thú vị về nội dung này?",
   "share": "Chia sẻ",
   "share_post_not_found": "Bài đăng đã bị xóa!",
   "you_sure_delete_cmt": "Bạn có chắc muốn xóa bình luận?",
@@ -56,6 +56,8 @@
   "report_description_placeholder": "Mô tả",
   "submit": "Gửi",
   "edit_post": "Chỉnh sửa bài viết",
-  "save": "Lưu"
+  "save": "Lưu",
+  "post_details": "Chi tiết bài đăng",
+  "notification": "Thông báo"
 
 }

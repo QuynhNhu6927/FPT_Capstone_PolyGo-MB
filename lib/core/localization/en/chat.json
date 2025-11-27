@@ -12,13 +12,17 @@
   "user_offline": "User offline! Please try again later!",
   "cannot_check_status": "System error! Please try again later!",
   "online": "Online",
-  "last_seen": "Last seen",
+  "last_seen": "Last active",
   "search_conversation_placeholder": "Searching...",
   "load_more": "Load more",
   "you_sent": "You",
   "sent_one_image": "sent one image",
   "sent_multiple_images": "sent multiple images",
   "sent_audio": "sent audio",
-  "erase_mess": "Erase message"
+  "erase_mess": "Erase message",
+
+  "conversation_settings": "Conversation setting",
+  "choose_language_to_translate": "Choose a language to translate into",
+  "chat_images": "Chat images"
 
 }

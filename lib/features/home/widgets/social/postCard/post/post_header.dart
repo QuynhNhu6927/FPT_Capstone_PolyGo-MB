@@ -82,7 +82,7 @@ class PostHeader extends StatelessWidget {
       }
     }
 
-    String _timeAgo(DateTime dateTime) {
+    String timeAgo(DateTime dateTime) {
       final diff = DateTime.now().difference(dateTime);
       final loc = AppLocalizations.of(context);
       if (diff.inSeconds < 60) return loc.translate("just_now");
@@ -169,7 +169,7 @@ class PostHeader extends StatelessWidget {
 
               const SizedBox(height: 4),
               Text(
-                _timeAgo(post.createdAt),
+                timeAgo(post.createdAt),
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],

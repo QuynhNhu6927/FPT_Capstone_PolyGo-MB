@@ -159,6 +159,9 @@ class _LoginFormState extends State<LoginForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "user@example.com",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                  ),
                   errorText: _emailError,
                   prefixIcon: Icon(Icons.mail_outline, size: sw(context, 20)),
                   border: OutlineInputBorder(
@@ -182,6 +185,9 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: !_showPassword,
                 decoration: InputDecoration(
                   hintText: "••••••••",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                  ),
                   errorText: _passwordError,
                   prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                   suffixIcon: IconButton(

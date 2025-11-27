@@ -27,8 +27,7 @@ class SettingsFullScreenDialog extends StatelessWidget {
     final background = isDark ? Colors.black : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
 
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: background,
         appBar: AppBar(
           scrolledUnderElevation: 0,
@@ -39,7 +38,8 @@ class SettingsFullScreenDialog extends StatelessWidget {
           ),
           iconTheme: IconThemeData(color: textColor),
         ),
-        body: Padding(
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [

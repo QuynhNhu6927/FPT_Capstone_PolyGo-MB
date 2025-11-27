@@ -7,16 +7,23 @@ import '../widgets/gifts.dart';
 import '../widgets/wallet/wallet.dart';
 
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key});
+  final int initialTabIndex;
+  const ShopScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<ShopScreen> createState() => _ShopScreenState();
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  int _selectedTab = 0;
+  late int _selectedTab;
   bool _hasError = false;
   bool _isRetrying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTab = widget.initialTabIndex;
+  }
 
   void _onTabSelected(int index) {
     setState(() => _selectedTab = index);
@@ -36,17 +43,15 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget _buildTabContent() {
     switch (_selectedTab) {
       case 0:
-        return Subscriptions(isRetrying: _isRetrying, onError: () => setState(() => _hasError = true));
+        return Subscriptions(
+            isRetrying: _isRetrying,
+            onError: () => setState(() => _hasError = true));
       case 1:
-        return Gifts(
-            // isRetrying: _isRetrying,
-            // onError: () => setState(() => _hasError = true)
-        );
+        return Gifts();
       case 2:
         return Wallet(
             isRetrying: _isRetrying,
-            onError: () => setState(() => _hasError = true)
-        );
+            onError: () => setState(() => _hasError = true));
       default:
         return const SizedBox.shrink();
     }
@@ -67,9 +72,7 @@ class _ShopScreenState extends State<ShopScreen> {
               onItemSelected: _onTabSelected,
             ),
             Expanded(
-              child: _hasError
-                  ? AppErrorState(onRetry: _onRetry)
-                  : _buildTabContent(),
+              child: _hasError ? AppErrorState(onRetry: _onRetry) : _buildTabContent(),
             ),
           ],
         ),

@@ -42,8 +42,6 @@ class TransactionFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
-    String translateKey(String value) => loc.translate(value.toLowerCase());
-
     return Column(
       children: [
         Row(
@@ -51,9 +49,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: translateKey("type"),
+                label: loc.translate("type"),
                 value: selectedType,
-                items: _transactionTypes.map(translateKey).toList(),
+                items: _transactionTypes,
                 onChanged: (val) => onFilterChanged(
                   type: val,
                   method: selectedMethod,
@@ -67,9 +65,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: translateKey("method"),
+                label: loc.translate("method"),
                 value: selectedMethod,
-                items: _transactionMethods.map(translateKey).toList(),
+                items: _transactionMethods,
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: val,
@@ -87,9 +85,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: translateKey("status"),
+                label: loc.translate("status"),
                 value: selectedStatus,
-                items: _transactionStatuses.map(translateKey).toList(),
+                items: _transactionStatuses,
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: selectedMethod,
@@ -103,9 +101,9 @@ class TransactionFilter extends StatelessWidget {
             Expanded(
               child: _buildDropdown(
                 context: context,
-                label: translateKey("inquiry"),
+                label: loc.translate("inquiry"),
                 value: selectedInquiry,
-                items: _inquiryOptions.map(translateKey).toList(),
+                items: _inquiryOptions,
                 onChanged: (val) => onFilterChanged(
                   type: selectedType,
                   method: selectedMethod,
@@ -129,10 +127,11 @@ class TransactionFilter extends StatelessWidget {
     required Function(String?) onChanged,
     required String allLabel,
   }) {
+    final loc = AppLocalizations.of(context);
     final dropdownItems = [allLabel, ...items];
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
     final dropdownBackground = isDark ? Colors.grey[800] : Colors.grey[300];
 
     return Column(
@@ -153,7 +152,10 @@ class TransactionFilter extends StatelessWidget {
           items: dropdownItems
               .map((item) => DropdownMenuItem<String>(
             value: item,
-            child: Text(item, overflow: TextOverflow.ellipsis),
+            child: Text(
+              item == allLabel ? item : loc.translate(item.toLowerCase()),
+              overflow: TextOverflow.ellipsis,
+            ),
           ))
               .toList(),
           onChanged: (val) {

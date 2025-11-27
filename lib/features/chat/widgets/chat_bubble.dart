@@ -17,6 +17,7 @@ class ChatBubble extends StatefulWidget {
   final Color colorPrimary;
   final String? activeMessageId;
   final VoidCallback onTap;
+  final Future<void> Function()? onTranslate;
 
   const ChatBubble({
     super.key,
@@ -26,6 +27,7 @@ class ChatBubble extends StatefulWidget {
     required this.colorPrimary,
     this.activeMessageId,
     required this.onTap,
+    this.onTranslate,
   });
 
   @override
@@ -37,6 +39,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+
+  // 🔹 Translate UI states
+  bool _showTranslated = false;
 
   @override
   void initState() {
@@ -116,25 +121,48 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
             ),
           ),
-        GestureDetector(
-          onTap: widget.onTap,
-          child: _buildContent(context),
+        Column(
+          crossAxisAlignment:
+          widget.isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: widget.onTap,
+              child: _buildContent(context),
+            ),
+
+            // 🔹 Hiển thị phần dịch ở dưới
+            if (_showTranslated && widget.message.translatedContent != null)
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  widget.message.translatedContent!,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+
+          ],
         ),
       ],
     );
   }
-
   Widget _buildContent(BuildContext context) {
     // TEXT message
     if (widget.message.type == "Text") {
-      return Container(
+      final bubble = Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: widget.isMine
               ? widget.colorPrimary.withOpacity(0.85)
-              : (widget.isDark
-              ? const Color(0xFF2C2C2C)
-              : const Color(0xFFDFDFDF)),
+              : (widget.isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -147,76 +175,108 @@ class _ChatBubbleState extends State<ChatBubble> {
           ),
         ),
       );
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          bubble,
+
+          // 🔹 icon dịch ở bên phải bubble – chỉ hiện với tin nhắn đối phương
+          if (!widget.isMine)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GestureDetector(
+                onTap: () async {
+                  if (!_showTranslated) {
+                    // gọi API translate
+                    if (widget.onTranslate != null) {
+                      await widget.onTranslate!();
+                    }
+                  }
+                  setState(() => _showTranslated = !_showTranslated);
+                },
+                child: Icon(
+                  Icons.translate,
+                  size: 18,
+                  color: widget.isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ),
+
+        ],
+      );
     }
 
-    // AUDIO message
     if (widget.message.type == "Audio") {
       final url = widget.message.content;
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: widget.isMine
-              ? widget.colorPrimary.withOpacity(0.85)
-              : (widget.isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
-          borderRadius: BorderRadius.circular(12),
+      final screenWidth = MediaQuery.of(context).size.width;
+
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 120,
+          maxWidth: screenWidth * 3 / 5,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                color: widget.isMine ? Colors.white : Colors.black,
-              ),
-              onPressed: () async {
-                try {
-                  if (_isPlaying) {
-                    await _audioPlayer?.pause();
-                  } else {
-                    // Nếu audio đã kết thúc, play lại từ đầu
-                    if (_position >= _duration) {
-                      await _audioPlayer?.seek(Duration.zero);
-                      setState(() => _position = Duration.zero);
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.isMine
+                ? widget.colorPrimary.withOpacity(0.85)
+                : (widget.isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: widget.isMine ? Colors.white : Colors.black,
+                ),
+                onPressed: () async {
+                  try {
+                    if (_isPlaying) {
+                      await _audioPlayer?.pause();
+                    } else {
+                      if (_position >= _duration) {
+                        await _audioPlayer?.seek(Duration.zero);
+                        setState(() => _position = Duration.zero);
+                      }
+                      if (_duration == Duration.zero) {
+                        await _loadAudio(url);
+                      }
+                      await _audioPlayer?.play(UrlSource(url));
                     }
-
-                    // Nếu duration chưa load, load audio
-                    if (_duration == Duration.zero) {
-                      await _loadAudio(url);
-                    }
-
-                    // Dùng play() thay vì resume()
-                    await _audioPlayer?.play(UrlSource(url));
+                  } catch (e) {
+                    debugPrint("Audio play error: $e");
                   }
-                } catch (e) {
-                  debugPrint("Audio play error: $e");
-                }
-              },
-
-            ),
-            Expanded(
-              child: Slider(
-                activeColor: widget.isMine ? Colors.white : widget.colorPrimary,
-                inactiveColor: widget.isMine ? Colors.white70 : Colors.black26,
-                min: 0,
-                max: _duration.inMilliseconds.toDouble() > 0
-                    ? _duration.inMilliseconds.toDouble()
-                    : 1, // tránh chia cho 0
-                value: _position.inMilliseconds
-                    .toDouble()
-                    .clamp(0.0, _duration.inMilliseconds.toDouble()),
-                onChanged: (value) async {
-                  final pos = Duration(milliseconds: value.toInt());
-                  await _audioPlayer?.seek(pos);
-                  setState(() => _position = pos);
                 },
               ),
-            ),
-            Text(
-              _formatDuration(_duration - _position),
-              style: TextStyle(
-                  color: widget.isMine ? Colors.white : Colors.black, fontSize: 12),
-            ),
-          ],
+              Expanded(
+                child: Slider(
+                  activeColor: widget.isMine ? Colors.white : widget.colorPrimary,
+                  inactiveColor: widget.isMine ? Colors.white70 : Colors.black26,
+                  min: 0,
+                  max: _duration.inMilliseconds.toDouble() > 0
+                      ? _duration.inMilliseconds.toDouble()
+                      : 1,
+                  value: _position.inMilliseconds
+                      .toDouble()
+                      .clamp(0.0, _duration.inMilliseconds.toDouble()),
+                  onChanged: (value) async {
+                    final pos = Duration(milliseconds: value.toInt());
+                    await _audioPlayer?.seek(pos);
+                    setState(() => _position = pos);
+                  },
+                ),
+              ),
+              Text(
+                _formatDuration(_duration - _position),
+                style: TextStyle(
+                    color: widget.isMine ? Colors.white : Colors.black, fontSize: 12),
+              ),
+            ],
+          ),
         ),
       );
     }

@@ -242,6 +242,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   hintText: loc.translate("name_example"),
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                  ),
                   prefixIcon: Icon(Icons.person_outline, size: sw(context, 20)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(sw(context, 10)),
@@ -271,6 +274,9 @@ class _RegisterFormState extends State<RegisterForm> {
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             hintText: "user@example.com",
+                            hintStyle: TextStyle(
+                              color: Colors.grey[600],
+                            ),
                             prefixIcon: Icon(Icons.mail_outline, size: sw(context, 20)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(sw(context, 10)),
@@ -344,6 +350,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     hintText: "123456",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                     prefixIcon: Icon(Icons.numbers_outlined, size: sw(context, 20)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(sw(context, 10)),
@@ -362,6 +371,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 obscureText: !_showPassword,
                 decoration: InputDecoration(
                   hintText: "••••••••",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                  ),
                   prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                   suffixIcon: IconButton(
                     icon: Icon(_showPassword
@@ -390,6 +402,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 obscureText: !_showConfirmPassword,
                 decoration: InputDecoration(
                   hintText: "••••••••",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                  ),
                   prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                   suffixIcon: IconButton(
                     icon: Icon(_showConfirmPassword
@@ -452,7 +467,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
               SizedBox(height: sh(context, 24)),
               AppButton(
-                text: loc.translate("signup_google"),
+                text: loc.translate("login_google"),
                 icon: const Icon(Icons.g_mobiledata, size: 28),
                 variant: ButtonVariant.outline,
                 size: ButtonSize.lg,

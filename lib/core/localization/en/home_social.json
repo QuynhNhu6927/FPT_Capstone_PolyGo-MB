@@ -20,7 +20,7 @@
   "edit": "Edit",
   "share_post_failed": "Post shared failed! Please try again later!",
   "share_error": "Share failed! Please try again later!",
-  "share_caption": "Say something about this content... (optional)",
+  "share_caption": "What is interesting about this content?",
   "share": "Share",
   "share_post_not_found": "This post was deleted",
   "you_sure_delete_cmt": "You want to delete this comment?",
@@ -56,6 +56,8 @@
   "report_description_placeholder": "Description",
   "submit": "Submit",
   "edit_post": "Edit post",
-  "save": "Save"
+  "save": "Save",
+  "post_details": "Post details",
+  "notification": "Notifications"
 
 }

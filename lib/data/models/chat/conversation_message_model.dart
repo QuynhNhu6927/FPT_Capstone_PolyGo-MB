@@ -5,6 +5,14 @@ class ConversationMessage {
   Sender sender;
   String content;
   String sentAt;
+
+  // Fields for translation
+  String? translatedContent;
+  String? sourceLanguage;
+  String? targetLanguage;
+  bool isTranslated;
+
+  // Private image list
   final List<String> _images;
 
   ConversationMessage({
@@ -15,6 +23,10 @@ class ConversationMessage {
     required this.content,
     required this.sentAt,
     List<String> images = const [],
+    this.translatedContent,
+    this.sourceLanguage,
+    this.targetLanguage,
+    this.isTranslated = false,
   }) : _images = images;
 
   /// Trả về list URL nếu type là Image/Images
@@ -43,6 +55,10 @@ class ConversationMessage {
       sender: Sender.fromJson(json['sender'] ?? {}),
       content: json['content'] ?? '',
       sentAt: json['sentAt'] ?? '',
+      translatedContent: json['translatedContent'],
+      sourceLanguage: json['sourceLanguage'],
+      targetLanguage: json['targetLanguage'],
+      isTranslated: json['isTranslated'] ?? false,
     );
   }
 
@@ -54,6 +70,10 @@ class ConversationMessage {
       'sender': sender.toJson(),
       'content': content,
       'sentAt': sentAt,
+      'translatedContent': translatedContent,
+      'sourceLanguage': sourceLanguage,
+      'targetLanguage': targetLanguage,
+      'isTranslated': isTranslated,
     };
   }
 }
@@ -63,7 +83,6 @@ class Sender {
   String name;
   String? avatarUrl;
 
-  // ✅ Thêm các biến còn thiếu từ swagger:
   bool? isOnline;
   String? lastActiveAt;
 

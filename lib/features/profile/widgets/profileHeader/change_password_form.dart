@@ -27,6 +27,8 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   bool _showConfirmPassword = false;
   bool _isLoading = false;
 
+  String? _serverError;
+
   late final AuthRepository _authRepository;
   final apiClient = ApiClient();
 
@@ -61,7 +63,10 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _serverError = null;
+    });
     try {
       final req = ChangePasswordRequest(
         currentPassword: _currentPasswordController.text.trim(),
@@ -83,13 +88,13 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
       );
       Navigator.pop(context);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).translate("change_password_failed")),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      setState(() {
+        if (e.toString().contains("InvalidMailOrPassword")) {
+          _serverError = AppLocalizations.of(context).translate("incorrect_current_pass");
+        } else {
+          _serverError = AppLocalizations.of(context).translate("incorrect_current_pass");
+        }
+      });
     } finally {
       setState(() => _isLoading = false);
     }
@@ -174,6 +179,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                   obscureText: !_showCurrentPassword,
                   decoration: InputDecoration(
                     hintText: "••••••••",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                     prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                     suffixIcon: IconButton(
                       icon: Icon(_showCurrentPassword
@@ -183,10 +191,20 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                     ),
                     border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(sw(context, 10))),
+                    errorMaxLines: 3,
                   ),
                   validator: (v) => (v == null || v.isEmpty) ? loc.translate("null") : null,
                 ),
-                SizedBox(height: sh(context, 16)),
+                  if (_serverError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 12),
+                      child: Text(
+                        _serverError!,
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+
+                  SizedBox(height: sh(context, 16)),
 
                 Text(loc.translate("new_password"), style: t.labelLarge),
                 SizedBox(height: sh(context, 8)),
@@ -195,6 +213,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                   obscureText: !_showNewPassword,
                   decoration: InputDecoration(
                     hintText: "••••••••",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                     prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                     suffixIcon: IconButton(
                       icon: Icon(_showNewPassword
@@ -204,6 +225,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                     ),
                     border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(sw(context, 10))),
+                    errorMaxLines: 3,
                   ),
                   validator: _passwordValidator,
                 ),
@@ -216,6 +238,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                   obscureText: !_showConfirmPassword,
                   decoration: InputDecoration(
                     hintText: "••••••••",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                     prefixIcon: Icon(Icons.lock_outline, size: sw(context, 20)),
                     suffixIcon: IconButton(
                       icon: Icon(_showConfirmPassword

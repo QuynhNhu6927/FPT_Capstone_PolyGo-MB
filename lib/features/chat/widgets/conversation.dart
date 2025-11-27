@@ -267,11 +267,14 @@ class _ConversationState extends State<Conversation> {
     final sentAtStr = data['sentAt'] ?? DateTime.now().toIso8601String();
     final sentAt = DateTime.tryParse(sentAtStr)?.toLocal() ?? DateTime.now();
 
+    final serverMessageId = data['id'];
+    if (serverMessageId == null) return;
+
     setState(() {
       _messages.insert(
         0,
         ConversationMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: serverMessageId,
           conversationId: widget.conversationId,
           type: messageType,
           sender: existingSender,
@@ -329,6 +332,33 @@ class _ConversationState extends State<Conversation> {
     );
   }
 
+  Future<void> _translateMessage(ConversationMessage message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+    final repo = ConversationRepository(ConversationService(ApiClient()));
+    try {
+      final translated = await repo.translateMessage(
+        token: token,
+        messageId: message.id,
+      );
+
+      if (translated != null) {
+        setState(() {
+          final index = _messages.indexWhere((m) => m.id == message.id);
+          if (index != -1) {
+            _messages[index].translatedContent = translated.translatedContent;
+            _messages[index].sourceLanguage = translated.sourceLanguage;
+            _messages[index].targetLanguage = translated.targetLanguage;
+            _messages[index].isTranslated = translated.isAutoTranslated;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Translate error: $e');
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -348,6 +378,7 @@ class _ConversationState extends State<Conversation> {
 
     return Scaffold(
       appBar: ConversationAppBar(
+        conversationId: widget.conversationId,
         receiverId: widget.receiverId,
         userName: widget.userName,
         avatarHeader: widget.avatarHeader,
@@ -410,6 +441,7 @@ class _ConversationState extends State<Conversation> {
                             _messages.removeWhere((m) => m.id == messageId);
                           });
                         },
+                        onTranslate: () => _translateMessage(msg),
                       );
 
                     },

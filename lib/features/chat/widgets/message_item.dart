@@ -18,6 +18,7 @@ class MessageItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool showDateSeparator;
   final Function(String messageId)? onDelete;
+  final Future<void> Function()? onTranslate;
 
   const MessageItem({
     super.key,
@@ -29,6 +30,7 @@ class MessageItem extends StatelessWidget {
     required this.onTap,
     required this.showDateSeparator,
     this.onDelete,
+    this.onTranslate,
   });
 
   @override
@@ -118,6 +120,7 @@ class MessageItem extends StatelessWidget {
                     colorPrimary: colorPrimary,
                     activeMessageId: activeMessageId,
                     onTap: onTap,
+                    onTranslate: onTranslate,
                   ),
                 ),
               ),

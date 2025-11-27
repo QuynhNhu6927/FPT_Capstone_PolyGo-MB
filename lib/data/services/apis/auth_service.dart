@@ -108,7 +108,13 @@ class AuthService {
             (_) => null,
       );
     } on DioError catch (e) {
-      rethrow;
+      if (e.response != null && e.response?.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        final msg = data['message'] ?? e.message;
+        throw Exception(msg);
+      } else {
+        throw Exception(e.message);
+      }
     }
   }
 }

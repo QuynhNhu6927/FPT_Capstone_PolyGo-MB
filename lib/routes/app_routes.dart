@@ -7,7 +7,6 @@ import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/forget_password_screen.dart';
 import '../features/chat/screens/conversation_screen.dart';
 import '../features/game/screens/overview_screen.dart';
-import '../features/home/screens/notification_screen.dart';
 import '../features/inventories/screens/all_gifts_screen.dart';
 import '../features/inventories/screens/friends_screen.dart';
 import '../features/myEvents/screens/my_events_screen.dart';
@@ -86,8 +85,8 @@ class AppRoutes {
       case allGifts:
         return MaterialPageRoute(builder: (_) => const AllGiftsScreen());
 
-      case notifications:
-        return MaterialPageRoute(builder: (_) => const NotificationScreen());
+      // case notifications:
+      //   return MaterialPageRoute(builder: (_) => const NotificationScreen());
       case play:
         final args = settings.arguments as Map<String, dynamic>?;
         final startData = args?['startData'] as WordSetData?;

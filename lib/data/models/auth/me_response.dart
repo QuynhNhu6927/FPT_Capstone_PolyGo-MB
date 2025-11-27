@@ -8,6 +8,8 @@ class MeResponse {
   final String gender;
   final int experiencePoints;
   final String role;
+  final int numberOfUnreadMessages;
+  final int numberOfUnreadNotifications;
   final bool autoRenewSubscription;
   final int streakDays;
   final int longestStreakDays;
@@ -29,6 +31,8 @@ class MeResponse {
     required this.merit,
     required this.introduction,
     required this.gender,
+    required this.numberOfUnreadNotifications,
+    required this.numberOfUnreadMessages,
     required this.experiencePoints,
     required this.role,
     required this.autoRenewSubscription,
@@ -66,6 +70,12 @@ class MeResponse {
           : int.tryParse(json['streakDays']?.toString() ?? '0') ?? 0,
       longestStreakDays: (json['longestStreakDays'] is int)
           ? json['longestStreakDays'] as int
+          : int.tryParse(json['longestStreakDays']?.toString() ?? '0') ?? 0,
+      numberOfUnreadMessages: (json['numberOfUnreadMessages'] is int)
+          ? json['numberOfUnreadMessages'] as int
+          : int.tryParse(json['numberOfUnreadMessages']?.toString() ?? '0') ?? 0,
+      numberOfUnreadNotifications: (json['numberOfUnreadNotifications'] is int)
+          ? json['numberOfUnreadNotifications'] as int
           : int.tryParse(json['longestStreakDays']?.toString() ?? '0') ?? 0,
       withdrawTimes: (json['withdrawTimes'] is int)
           ? json['withdrawTimes'] as int

@@ -116,6 +116,10 @@
   "total_deposited": "Total deposited",
   "total_spent": "Total spent",
   "total_earned": "Total earned",
-  "total_withdrawn": "Total withdrawn"
-
+  "total_withdrawn": "Total withdrawn",
+  "all": "All",
+  "transaction_details": "Transaction details",
+  "type": "Type",
+  "method": "Method",
+  "inquiry": "Inquiry"
 }

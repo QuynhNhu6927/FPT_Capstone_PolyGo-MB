@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../data/repositories/auth_repository.dart';
+import '../../../data/services/apis/auth_service.dart';
 import '../../../routes/app_routes.dart';
+import 'notification.dart';
 
 class HomeHeader extends StatefulWidget {
   final int currentIndex;
@@ -25,6 +30,9 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
   bool _isSearching = false;
   late int _selectedIndex;
 
+  int numberOfUnreadNotifications = 0;
+  int numberOfUnreadMessages = 0;
+
   final _items = const [
     {'icon': Icons.event_rounded},
     {'icon': Icons.people_alt_rounded},
@@ -39,6 +47,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
     _focusNode.addListener(() {
       setState(() => _isSearching = _focusNode.hasFocus);
     });
+    _loadUnreadCounts();
   }
 
   @override
@@ -51,6 +60,26 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
     widget.onItemSelected(index);
+  }
+
+  Future<void> _loadUnreadCounts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null) return;
+
+      final repo = AuthRepository(AuthService(ApiClient()));
+      final user = await repo.me(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        numberOfUnreadNotifications = user.numberOfUnreadNotifications ?? 0;
+        numberOfUnreadMessages = user.numberOfUnreadMessages ?? 0;
+      });
+    } catch (e) {
+      // có thể log lỗi hoặc ignore
+    }
   }
 
   @override
@@ -177,59 +206,106 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                 const SizedBox(width: 12),
 
                 // Chat icon
-                AnimatedOpacity(
+                AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
-                  opacity: _isSearching ? 0.0 : 1.0,
-                  child: AnimatedContainer(
+                  width: _isSearching ? 0 : 42, 
+                  child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 250),
-                    width: _isSearching ? 0 : 42,
-                    child: IconButton(
-                      icon: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(Icons.chat_bubble_outline_rounded,
+                    opacity: _isSearching ? 0.0 : 1.0,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.chat_bubble_outline_rounded,
                               size: 26, color: searchTextColor),
-                        ],
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.conversations);
-                      },
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                // Notification icon
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 250),
-                  opacity: _isSearching ? 0.0 : 1.0,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: _isSearching ? 0 : 42,
-                    child: IconButton(
-                      icon: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(Icons.notifications_none_rounded,
-                              size: 26, color: searchTextColor),
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRoutes.conversations);
+                          },
+                        ),
+                        if (numberOfUnreadMessages > 0)
                           Positioned(
-                            right: -1,
-                            top: -1,
+                            right: 4,
+                            top: 4,
                             child: Container(
-                              width: 9,
-                              height: 9,
-                              decoration: const BoxDecoration(
+                              padding: const EdgeInsets.all(2),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              decoration: BoxDecoration(
                                 color: Colors.red,
-                                shape: BoxShape.circle,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  numberOfUnreadMessages > 99
+                                      ? '99+'
+                                      : numberOfUnreadMessages.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.notifications);
-                      },
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Notification icon
+                // Notification icon
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: _isSearching ? 0 : 42, // width mặc định IconButton
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: _isSearching ? 0.0 : 1.0,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.notifications_none_rounded,
+                              size: 26, color: searchTextColor),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        if (numberOfUnreadNotifications > 0)
+                          Positioned(
+                            right: 4,
+                            top: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  numberOfUnreadNotifications > 99
+                                      ? '99+'
+                                      : numberOfUnreadNotifications.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

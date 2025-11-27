@@ -409,24 +409,27 @@ class _SubscriptionsState extends State<Subscriptions> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
+                Wrap(
+                  alignment: WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: sw(context, 8),
                   children: [
-                    Expanded(
-                      child: Text(
-                        _currentSubscription!.planName,
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                    Text(
+                      _currentSubscription!.planName,
+                      style: t.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "${_currentSubscription!.daysRemaining} ${loc.translate(
-                          "days_remaining")}",
+                      "${_currentSubscription!.daysRemaining} ${loc.translate("days_remaining")}",
                       style: t.bodyMedium?.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
+
                 SizedBox(height: sh(context, 8)),
                 Text(
                   "${loc.translate("start_at")}: ${_currentSubscription!.startAt
@@ -442,6 +445,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                 Row(
                   children: [
                     Expanded(
+                      flex: 2,
                       child: ElevatedButton(
                         onPressed: () {
                           _actions.showCancelDialog(
@@ -455,6 +459,10 @@ class _SubscriptionsState extends State<Subscriptions> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: sh(context, 8),
+                            horizontal: sw(context, 12),
+                          ),
                           backgroundColor: Colors.white,
                           foregroundColor: colorPrimary,
                           shape: RoundedRectangleBorder(
@@ -466,6 +474,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                     SizedBox(width: sw(context, 12)),
                     Expanded(
+                      flex: 3,
                       child: ElevatedButton(
                         onPressed: () {
                           _actions.showAutoRenewDialog(
@@ -477,6 +486,10 @@ class _SubscriptionsState extends State<Subscriptions> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: sh(context, 8),
+                            horizontal: sw(context, 12),
+                          ),
                           backgroundColor: Colors.white,
                           foregroundColor: colorPrimary,
                           shape: RoundedRectangleBorder(

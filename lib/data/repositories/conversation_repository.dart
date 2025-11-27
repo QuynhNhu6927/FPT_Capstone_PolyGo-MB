@@ -1,5 +1,8 @@
 import '../models/chat/conversation_message_model.dart';
 import '../models/chat/conversation_model.dart';
+import '../models/chat/get_images_model.dart';
+import '../models/chat/get_translate_language.dart';
+import '../models/chat/translate_message.dart';
 import '../services/apis/conversation_service.dart';
 
 class ConversationRepository {
@@ -104,5 +107,57 @@ class ConversationRepository {
     return res.data;
   }
 
+  Future<TranslatedMessage?> translateMessage({
+    required String token,
+    required String messageId,
+  }) async {
+    final res = await _service.translateMessage(
+      token: token,
+      messageId: messageId,
+    );
 
+    return res.data;
+  }
+
+  Future<ConversationTranslationLanguage?> getTranslationLanguage({
+    required String token,
+    required String conversationId,
+  }) async {
+    final res = await _service.getTranslationLanguage(
+      token: token,
+      conversationId: conversationId,
+    );
+
+    return res.data;
+  }
+
+  Future<bool> updateTranslationLanguage({
+    required String token,
+    required String conversationId,
+    required String languageCode,
+  }) async {
+    final res = await _service.updateTranslationLanguage(
+      token: token,
+      conversationId: conversationId,
+      languageCode: languageCode,
+    );
+
+    return res.message != null && res.message!.contains("Success");
+  }
+
+  Future<ConversationImagesResponse?> getConversationImages({
+    required String token,
+    required String conversationId,
+    int pageNumber = 1,
+    int pageSize = 50,
+  }) async {
+    final res = await _service.getConversationImages(
+      token: token,
+      conversationId: conversationId,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+
+    return res.data;
+  }
 }

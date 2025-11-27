@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/localization/app_localizations.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../widgets/gifts/accepted_gifts.dart';
 import '../widgets/gifts/gifts_header_menu.dart';
@@ -7,14 +6,21 @@ import '../widgets/gifts/my_gifts.dart';
 import '../widgets/gifts/sent_gifts.dart';
 
 class AllGiftsScreen extends StatefulWidget {
-  const AllGiftsScreen({super.key});
+  final int initialTabIndex;
+  const AllGiftsScreen({super.key, this.initialTabIndex = 2});
 
   @override
   State<AllGiftsScreen> createState() => _AllGiftsScreenState();
 }
 
 class _AllGiftsScreenState extends State<AllGiftsScreen> {
-  int _selectedTab = 2;
+  late int _selectedTab;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTab = widget.initialTabIndex;
+  }
 
   void _onTabSelected(int index) {
     setState(() => _selectedTab = index);

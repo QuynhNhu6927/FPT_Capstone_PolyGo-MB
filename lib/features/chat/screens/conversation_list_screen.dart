@@ -18,8 +18,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final loc = AppLocalizations.of(context);
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
         appBar: AppBar(
           scrolledUnderElevation: 0,
@@ -27,7 +26,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           title: Text(loc.translate("conversation_list")),
           centerTitle: true,
         ),
-        body: ConversationList(),
+      body: SafeArea(
+        child: ConversationList(),
       ),
     );
 

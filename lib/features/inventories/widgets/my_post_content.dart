@@ -11,7 +11,6 @@ import '../../../../data/services/apis/post_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../home/widgets/social/create_post_dialog.dart';
 import '../../home/widgets/social/postCard/post/post_card.dart';
-import '../../home/widgets/social/post_card_old.dart';
 import '../../shared/app_error_state.dart';
 
 class MyPostContent extends StatefulWidget {
@@ -127,7 +126,7 @@ class _MyPostContentState extends State<MyPostContent> {
     final isDark = theme.brightness == Brightness.dark;
     final loc = AppLocalizations.of(context);
 
-    String _timeAgo(DateTime dateTime) {
+    String timeAgo(DateTime dateTime) {
       final diff = DateTime.now().difference(dateTime);
       if (diff.inSeconds < 60) return loc.translate("just_now");
       if (diff.inMinutes < 60) return '${diff.inMinutes} ${loc.translate("minutes_ago")}';
@@ -173,7 +172,7 @@ class _MyPostContentState extends State<MyPostContent> {
                 post: post,
                 avatarUrl: post.creator.avatarUrl,
                 userName: post.creator.name,
-                timeAgo: _timeAgo(post.createdAt),
+                timeAgo: timeAgo(post.createdAt),
                 contentText: post.content,
                 contentImage: post.imageUrls.isNotEmpty
                     ? post.imageUrls.first

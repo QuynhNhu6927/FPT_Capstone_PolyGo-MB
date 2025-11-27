@@ -79,7 +79,7 @@ class AuthRepository {
     try {
       await _service.changePassword(req, token);
     } catch (e) {
-      // throw Exception('Change password failed: $e');
+      throw Exception('Change password failed: ${e.toString()}');
     }
   }
 }

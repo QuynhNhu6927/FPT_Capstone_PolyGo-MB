@@ -171,6 +171,9 @@ class _UpdateUserInfoFormState extends State<UpdateUserInfoForm> {
                     decoration: InputDecoration(
                       labelText: loc.translate("name"),
                       hintText: loc.translate("enter_name"),
+                      hintStyle: TextStyle(
+                        color: Colors.grey[600],
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -187,6 +190,9 @@ class _UpdateUserInfoFormState extends State<UpdateUserInfoForm> {
                       decoration: InputDecoration(
                         labelText: loc.translate("introduction"),
                         hintText: loc.translate("enter_introduction"),
+                        hintStyle: TextStyle(
+                          color: Colors.grey[600],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

@@ -116,5 +116,10 @@
   "total_deposited": "Tổng nạp",
   "total_spent": "Tổng chi",
   "total_earned": "Tổng kiếm",
-  "total_withdrawn": "Tổng rút"
+  "total_withdrawn": "Tổng rút",
+  "all": "Tất cả",
+  "transaction_details": "Chi tiết giao dịch",
+  "type": "Phân loại",
+  "method": "Phương thức",
+  "inquiry": "Hỗ trợ"
 }

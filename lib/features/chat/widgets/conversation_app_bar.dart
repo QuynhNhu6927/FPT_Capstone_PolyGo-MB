@@ -7,8 +7,10 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/audioplayers.dart';
 import '../../../data/services/signalr/user_presence.dart';
 import '../screens/calling_screen.dart';
+import 'conversation_setting.dart';
 
 class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final String conversationId;
   final String userName;
   final String avatarHeader;
   final bool isOnline;
@@ -17,6 +19,7 @@ class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   const ConversationAppBar({
     super.key,
+    required this.conversationId,
     required this.receiverId,
     required this.userName,
     required this.avatarHeader,
@@ -36,10 +39,23 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
     if (date == null || date.isEmpty) return '';
     try {
       final dt = DateTime.parse(date).toLocal();
-      return DateFormat('dd MMM yyyy, HH:mm').format(dt);
+      return _timeAgo(dt);
     } catch (_) {
       return '';
     }
+  }
+
+  String _timeAgo(DateTime dateTime) {
+    final loc = AppLocalizations.of(context);
+    final diff = DateTime.now().difference(dateTime);
+
+    if (diff.inSeconds < 60) return loc.translate("just_now");
+    if (diff.inMinutes < 60) return '${diff.inMinutes} ${loc.translate("minutes_ago")}';
+    if (diff.inHours < 24) return '${diff.inHours} ${loc.translate("hours_ago")}';
+    if (diff.inDays < 7) return '${diff.inDays} ${loc.translate("days_ago")}';
+    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} ${loc.translate("weeks_ago")}';
+    if (diff.inDays < 365) return '${(diff.inDays / 30).floor()} ${loc.translate("months_ago")}';
+    return '${(diff.inDays / 365).floor()} ${loc.translate("year_ago")}';
   }
 
   Future<bool> _requestCallPermissions(bool isVideoCall) async {
@@ -158,7 +174,7 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
     final formattedLastActive = widget.isOnline
         ? loc.translate('online')
         : (widget.lastActiveAt.isNotEmpty
-        ? '${loc.translate('last_seen')}: ${_formatLastActive(widget.lastActiveAt)}' // thay 'Lần cuối:'
+        ? '${loc.translate('last_seen')}: ${_formatLastActive(widget.lastActiveAt)}'
         : '');
 
     return Container(
@@ -248,7 +264,14 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
           ),
           IconButton(
             onPressed: () {
-              debugPrint('Settings pressed');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ConversationSetting(
+                    conversationId: widget.conversationId,
+                  ),
+                ),
+              );
             },
             icon: Icon(Icons.more_vert, color: isDark ? Colors.white : Colors.black),
           ),
