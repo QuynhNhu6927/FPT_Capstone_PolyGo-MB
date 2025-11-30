@@ -139,6 +139,10 @@
   "send_voice_audio": "Gửi tin nhắn thoại",
   "limited_free_feature": "Giới hạn tính năng miễn phí",
   "limited_free_des": "Bạn đã hết lượt sử dụng miễn phí tính năng này, hãy nâng cấp lên gói Plus để sử dụng không giới hạn nhiều tính năng của Polygo",
-  "limited_free_title": "Hết lượt sử dụng"
+  "limited_free_title": "Hết lượt sử dụng",
+
+  "confirm_subscription": "Xác nhận thanh toán",
+  "available_balance": "Số dư khả dụng",
+  "plan_price": "Giá gói"
 
 }

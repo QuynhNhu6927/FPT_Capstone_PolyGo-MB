@@ -57,7 +57,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
   bool showEndDialog = false;
   bool _chatListenerAdded = false;
   bool isHandRaised = false;
-
+  bool showControls = true;
   @override
   void initState() {
     super.initState();
@@ -131,6 +131,35 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       }
     };
     _initMeeting();
+  }
+
+  Future<void> _showSubtitleLanguageDialog() async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Chọn ngôn ngữ phụ đề"),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: subtitleLanguages.entries.map((entry) {
+              final isCurrent = _controller.targetLanguage == entry.key;
+              return ListTile(
+                title: Text(entry.value),
+                trailing: isCurrent ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () => Navigator.of(context).pop(entry.key),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    if (selected != null && selected != _controller.targetLanguage) {
+      setState(() {
+        _controller.setTargetLanguage(selected);
+      });
+    }
   }
 
   @override
@@ -334,21 +363,99 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Video & grid
-            Positioned.fill(
-              child: VideoGrid(
-                eventTitle: widget.eventTitle,
-                localRenderer: _localRenderer,
-                participants: _controller.participants.values
-                    .where((p) => p.id != _controller.myConnectionId)
-                    .toList(),
-                controller: _controller,
-                widgetIsHost: widget.isHost,
-              )
-              ,
+            // Main layout: VideoGrid + Subtitle + Controls
+            Column(
+              children: [
+                // VideoGrid chiếm tất cả không gian còn lại
+                Expanded(
+                  child: VideoGrid(
+                    eventTitle: widget.eventTitle,
+                    localRenderer: _localRenderer,
+                    participants: _controller.participants.values
+                        .where((p) => p.id != _controller.myConnectionId)
+                        .toList(),
+                    controller: _controller,
+                    widgetIsHost: widget.isHost,
+                  ),
+                ),
+
+                // Subtitle
+                Container(
+                  width: double.infinity,
+                  color: Colors.black.withOpacity(0.4),
+                  padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: IconButton(
+                      icon: Icon(
+                        showControls ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        setState(() => showControls = !showControls);
+                      },
+                    ),
+                  ),
+                ),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: showControls
+                      ? Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: IgnorePointer(
+                      ignoring: isChatOpen || isParticipantsOpen,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: (isChatOpen || isParticipantsOpen) ? 0 : 1,
+                        child: MeetingControls(
+                          isHandRaised: isHandRaised,
+                          onToggleHand: _toggleHand,
+                          isHost: widget.isHost,
+                          isCameraOn: _controller.isVideoEnabled,
+                          isMicOn: _controller.isAudioEnabled,
+                          hasStartedEvent: hasStartedEvent,
+                          onToggleCamera: _toggleVideo,
+                          onToggleMic: _toggleAudio,
+                          onChatToggle: () => setState(() => isChatOpen = !isChatOpen),
+                          onParticipants: () =>
+                              setState(() => isParticipantsOpen = !isParticipantsOpen),
+                          onSettings: () =>
+                              setState(() => isSettingsOpen = !isSettingsOpen),
+                          onLeave: () => setState(() => showLeaveDialog = true),
+                          onStartEvent: _handleStartEvent,
+                          onEndEvent: () => setState(() => showEndDialog = true),
+                          onTranscribeToggle: () {
+                            if (_controller.isTranscriptionEnabled) {
+                              _controller.stopTranscription();
+                            } else {
+                              _controller.startTranscription();
+                            }
+                            setState(() {}); // Cập nhật UI nút
+                          },
+                          onCaptionsToggle: () {
+                            if (_controller.isCaptionsEnabled) {
+                              _controller.disableCaptions();
+                            } else {
+                              _controller.enableCaptions();
+                            }
+                            setState(() {}); // cập nhật UI nút
+                          },
+                          onCaptionsLongPress: _showSubtitleLanguageDialog,
+
+                          isTranscriptionEnabled: _controller.isTranscriptionEnabled,
+                          isCaptionsEnabled: _controller.isCaptionsEnabled,
+                        )
+                      ),
+                    ),
+                  )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
 
-            // Participant list
+            // Overlays: participant list, chat, dialogs
             if (isParticipantsOpen)
               AnimatedBuilder(
                 animation: _controller,
@@ -376,7 +483,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 },
               ),
 
-            // Chat panel
             if (isChatOpen) ...[
               AbsorbPointer(
                 absorbing: true,
@@ -384,7 +490,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                   color: Colors.black.withOpacity(0.3),
                 ),
               ),
-              // Chat panel
               ChatPanel(
                 messages: _controller.chatMessages,
                 controller: _chatController,
@@ -395,10 +500,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 },
                 onClose: () => setState(() => isChatOpen = false),
               ),
-
             ],
 
-            //  Leave / End dialogs
             if (showLeaveDialog)
               _buildConfirmDialog(
                 title: loc.translate('confirm_leaving_call_title'),
@@ -408,6 +511,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 onCancel: () => setState(() => showLeaveDialog = false),
                 loc: loc,
               ),
+
             if (showEndDialog)
               _buildConfirmDialog(
                 title: loc.translate('confirm_end_call_title'),
@@ -417,38 +521,9 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 onCancel: () => setState(() => showEndDialog = false),
                 loc: loc,
               ),
-
-            // Meeting controls
-            IgnorePointer(
-              ignoring: isChatOpen || isParticipantsOpen,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: (isChatOpen || isParticipantsOpen) ? 0 : 1,
-                child: MeetingControls(
-                  isHandRaised: isHandRaised,
-                  onToggleHand: _toggleHand,
-                  isHost: widget.isHost,
-                  isCameraOn: _controller.isVideoEnabled,
-                  isMicOn: _controller.isAudioEnabled,
-                  hasStartedEvent: hasStartedEvent,
-                  onToggleCamera: _toggleVideo,
-                  onToggleMic: _toggleAudio,
-                  onChatToggle: () => setState(() => isChatOpen = !isChatOpen),
-                  onParticipants: () =>
-                      setState(() => isParticipantsOpen = !isParticipantsOpen),
-                  onSettings: () =>
-                      setState(() => isSettingsOpen = !isSettingsOpen),
-                  onLeave: () => setState(() => showLeaveDialog = true),
-                  onStartEvent: _handleStartEvent,
-                  onEndEvent: () => setState(() => showEndDialog = true),
-                ),
-              ),
-            ),
-
           ],
         ),
       ),
-
     );
   }
 
@@ -471,4 +546,20 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       ),
     );
   }
+
+  final Map<String, String> subtitleLanguages = {
+    'en': "English",
+    'vi': "Tiếng Việt",
+    'es': "Español",
+    'fr': "Français",
+    'de': "Deutsch",
+    'ja': "日本語",
+    'ko': "한국어",
+    'zh': "中文",
+    'ar': "العربية",
+    'ru': "Русский",
+    'pt': "Português",
+    'it': "Italiano",
+    'th': "ไทย",
+  };
 }

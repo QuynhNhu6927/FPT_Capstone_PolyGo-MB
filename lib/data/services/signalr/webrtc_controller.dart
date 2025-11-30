@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:signalr_core/signalr_core.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import 'dart:async';
 import '../../../core/config/api_constants.dart';
 
@@ -37,6 +38,54 @@ class ChatMessage {
   }) : timestamp = timestamp ?? DateTime.now();
 }
 
+class TranscriptionMessage {
+  final String id;
+  final String speakerId;
+  final String senderName;
+  final String originalText;
+  final String translatedText;
+  final String targetLanguage;
+  final DateTime timestamp;
+
+  TranscriptionMessage({
+    required this.id,
+    required this.speakerId,
+    required this.senderName,
+    required this.originalText,
+    required this.translatedText,
+    required this.targetLanguage,
+    required this.timestamp,
+  });
+}
+
+class VocabularyItem {
+  final String word;
+  final String meaning;
+  final String context;
+  final List<String> examples;
+
+  VocabularyItem({
+    required this.word,
+    required this.meaning,
+    required this.context,
+    required this.examples,
+  });
+}
+
+class MeetingSummary {
+  final String summary;
+  final List<String> keyPoints;
+  final List<VocabularyItem> vocabulary;
+  final List<String> actionItems;
+
+  MeetingSummary({
+    required this.summary,
+    required this.keyPoints,
+    required this.vocabulary,
+    required this.actionItems,
+  });
+}
+
 class WebRTCController extends ChangeNotifier {
   final List<ValueChanged<ChatMessage>> _chatListeners = [];
   final Map<String, RTCPeerConnection> _peerConnections = {};
@@ -61,6 +110,15 @@ class WebRTCController extends ChangeNotifier {
   ValueChanged<String>? onParticipantCameraOff;
   VoidCallback? onAllMuted;
   VoidCallback? onAllCamsOff;
+
+  List<TranscriptionMessage> transcriptions = [];
+  bool isTranscriptionEnabled = false;
+  bool isCaptionsEnabled = false;
+
+  String targetLanguage = "en";
+
+  MeetingSummary? meetingSummary;
+  bool isSummaryGenerating = false;
 
   WebRTCController({
     required this.eventId,
@@ -382,8 +440,175 @@ class WebRTCController extends ChangeNotifier {
       await leaveRoom();
     });
 
+    _hub!.on("ReceiveTranscription", (args) async {
+      print("🟢 Received transcription from hub: $args");
+
+      final transcriptionId = args?[0];
+      final speakerId = args?[1];
+      final speakerName = args?[2];
+      final originalText = args?[3];
+      final sourceLanguage = args?[4];
+      final timestamp = DateTime.parse(args?[5] ?? DateTime.now().toString());
+
+      String translatedText = originalText;
+
+      // Nếu targetLanguage khác sourceLanguage → yêu cầu server dịch
+      if (targetLanguage != sourceLanguage) {
+        try {
+          print("🌐 Requesting translation for $transcriptionId to $targetLanguage...");
+          translatedText = await _hub!.invoke(
+            "RequestTranslation",
+            args: [
+              transcriptionId,
+              targetLanguage,
+            ],
+          );
+          print("🌐 Translation received: $translatedText");
+        } catch (e) {
+          print("❌ Translation failed: $e");
+        }
+      }
+
+      transcriptions.add(
+        TranscriptionMessage(
+          id: transcriptionId,
+          speakerId: speakerId,
+          senderName: speakerName,
+          originalText: originalText,
+          translatedText: translatedText,
+          targetLanguage: targetLanguage,
+          timestamp: timestamp,
+        ),
+      );
+
+      notifyListeners();
+      print("🟢 Transcription list updated. Total items: ${transcriptions.length}");
+    });
+
+    _hub!.on("ReceiveMeetingSummary", (args) {
+      meetingSummary = MeetingSummary(
+        summary: args?[0]["summary"],
+        keyPoints: List<String>.from(args?[0]["keyPoints"]),
+        vocabulary: (args?[0]["vocabulary"] as List)
+            .map((v) => VocabularyItem(
+          word: v["word"],
+          meaning: v["meaning"],
+          context: v["context"],
+          examples: List<String>.from(v["examples"]),
+        ))
+            .toList(),
+        actionItems: List<String>.from(args?[0]["actionItems"]),
+      );
+
+      isSummaryGenerating = false;
+      notifyListeners();
+    });
+
+    _hub!.on("SummaryGenerating", (args) {
+      isSummaryGenerating = true;
+      notifyListeners();
+    });
+
     await _hub!.start();
     isConnected = true;
+  }
+
+  final SpeechToText _speech = SpeechToText();
+
+  Future<void> startTranscription() async {
+    print("🟢 Starting transcription...");
+    bool available = await _speech.initialize();
+    print("🟢 SpeechToText initialized: $available");
+
+    if (!available) {
+      print("❌ Microphone not available or permission denied");
+      return;
+    }
+
+    isTranscriptionEnabled = true;
+    notifyListeners();
+
+    _speech.listen(
+      localeId: "en_US",
+      onResult: (result) async {
+        print("🎤 Speech result received: ${result.recognizedWords} (final=${result.finalResult})");
+
+        if (result.finalResult) {
+          String transcript = result.recognizedWords;
+          print("🟢 Final transcript: $transcript");
+
+          if (_hub == null || !_hub!.state.toString().contains("Connected")) {
+            print("❌ Hub not connected, cannot broadcast transcription");
+            return;
+          }
+
+          try {
+            await _hub?.invoke(
+              "BroadcastTranscription",
+              args: [
+                eventId,
+                myConnectionId,
+                transcript,
+                "en",
+              ],
+            );
+            print("🟢 Broadcasted transcription to hub successfully");
+          } catch (e) {
+            print("❌ Failed to broadcast transcription: $e");
+          }
+        }
+      },
+      onSoundLevelChange: (level) {
+        print("🎚 Sound level: $level");
+      },
+      listenMode: ListenMode.dictation,
+      cancelOnError: true,
+    );
+
+    print("🟢 Listening started...");
+  }
+
+  void stopTranscription() {
+    print("🔴 Stopping transcription...");
+    _speech.stop();
+    isTranscriptionEnabled = false;
+    notifyListeners();
+    print("🔴 Transcription stopped");
+  }
+
+  void enableCaptions() {
+    print("🟢 Enabling captions...");
+    isCaptionsEnabled = true;
+    notifyListeners();
+  }
+
+  void disableCaptions() {
+    print("🔴 Disabling captions...");
+    isCaptionsEnabled = false;
+    notifyListeners();
+  }
+
+  void setTargetLanguage(String lang) {
+    targetLanguage = lang;
+    notifyListeners();
+  }
+
+  Future<void> requestMeetingSummary() async {
+    try {
+      await _hub!.invoke("RequestMeetingSummary", args: [eventId]);
+      isSummaryGenerating = true;
+      notifyListeners();
+    } catch (e) {
+      print("Failed request summary: $e");
+    }
+  }
+
+  Future<void> getMeetingSummary() async {
+    try {
+      await _hub!.invoke("GetMeetingSummary", args: [eventId]);
+    } catch (e) {
+      print("Failed get summary: $e");
+    }
   }
 
   Future<void> joinRoom({required bool isHost}) async {

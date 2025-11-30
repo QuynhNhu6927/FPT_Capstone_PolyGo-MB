@@ -139,6 +139,10 @@
   "send_voice_audio": "Send audio",
   "limited_free_title": "Usage limit reached",
   "limited_free_des": "You have reached limit of free uses for this feature, upgrade to the Plus plan for unlimited use of Polygo's features",
-  "limited_free_feature": "Free limited features"
+  "limited_free_feature": "Free limited features",
+
+  "confirm_subscription": "Confirm subscribe",
+  "available_balance": "Available balance",
+  "plan_price": "Plan price"
 
 }
