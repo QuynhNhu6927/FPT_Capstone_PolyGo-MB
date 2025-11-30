@@ -17,6 +17,7 @@ import '../../../data/services/apis/auth_service.dart';
 import '../../../data/services/signalr/chat_signalr_service.dart';
 import '../../../data/services/apis/conversation_service.dart';
 import '../../../data/services/apis/media_service.dart';
+import '../../shop/widgets/subscription/free_user_limit.dart';
 import 'chat_input.dart';
 import 'conversation_app_bar.dart';
 import 'message_item.dart';
@@ -155,6 +156,7 @@ class _ConversationState extends State<Conversation> {
   Future<void> _stopRecording({bool cancel = false}) async {
     if (_recorder == null || !_isRecording) return;
 
+    try {
     final path = await _recorder!.stopRecorder();
     setState(() {
       _isRecording = false;
@@ -165,7 +167,6 @@ class _ConversationState extends State<Conversation> {
       _audioFilePath = null;
       return;
     }
-
 
     // Upload và gửi audio
     final prefs = await SharedPreferences.getInstance();
@@ -185,8 +186,34 @@ class _ConversationState extends State<Conversation> {
 
     _audioFilePath = null;
     setState(() => _isRecordingDone = false);
-  }
+    } catch (e, st) {
+      debugPrint("Send audio error: $e\n$st");
 
+      if (!mounted) return;
+
+      final errorMessage = e.toString();
+      // Các lỗi free user sẽ hiển thị dialog
+      if (errorMessage.contains("Error.ChatLimitExceeded") ||
+          errorMessage.contains("Error.FreeUserCannotSendImage") ||
+          errorMessage.contains("Error.FreeUserCannotSendFile")) {
+        showDialog(
+          context: context,
+          builder: (_) => FreeUserLimitCard(),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi gửi audio: $errorMessage')),
+        );
+      }
+
+      // Reset trạng thái ghi âm
+      setState(() {
+        _isRecording = false;
+        _isRecordingDone = false;
+        _audioFilePath = null;
+      });
+    }
+  }
 
   Future<void> _loadMessages() async {
     if (_isLoading) return;
@@ -310,14 +337,36 @@ class _ConversationState extends State<Conversation> {
       }
 
       if (uploadedUrls.isNotEmpty) {
+        try {
         await _chatSignalrService.sendImageMessage(
           conversationId: widget.conversationId,
           senderId: _myUserId,
           imageUrls: uploadedUrls,
         );
+        } catch (e) {
+          debugPrint('Send image error: $e');
+
+          if (!mounted) return;
+          final errorMessage = e.toString();
+          if (errorMessage.contains("Error.ChatLimitExceeded") ||
+              errorMessage.contains("Error.FreeUserCannotSendImage") ||
+              errorMessage.contains("Error.FreeUserCannotSendFile")) {
+            showDialog(
+              context: context,
+              builder: (_) => FreeUserLimitCard(),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi gửi ảnh: $errorMessage')),
+            );
+          }
+        }
       }
-    } catch (e) {
-      debugPrint('Upload image error: $e');
+    } catch (e, st) {
+      debugPrint('Upload image error: $e\n$st');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi upload ảnh: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isUploadingImages = false);
     }
@@ -325,11 +374,34 @@ class _ConversationState extends State<Conversation> {
 
   Future<void> _handleSendText(String content) async {
     if (content.trim().isEmpty || _myUserId.isEmpty) return;
+    try {
     await _chatSignalrService.sendTextMessage(
       conversationId: widget.conversationId,
       senderId: _myUserId,
       content: content.trim(),
     );
+    } catch (e, st) {
+      debugPrint("Send text error: $e\n$st");
+
+      if (!mounted) return;
+
+      // Convert tất cả loại lỗi free user thành hiển thị dialog
+      final errorMessage = e.toString();
+      if (errorMessage.contains("Error.ChatLimitExceeded") ||
+          errorMessage.contains("Error.FreeUserCannotSendImage") ||
+          errorMessage.contains("Error.FreeUserCannotSendFile")) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            content: FreeUserLimitCard(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi gửi tin nhắn: $errorMessage')),
+        );
+      }
+    }
   }
 
   Future<void> _translateMessage(ConversationMessage message) async {

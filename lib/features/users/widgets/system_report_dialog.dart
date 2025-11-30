@@ -23,9 +23,9 @@ class _SystemReportDialogState extends State<SystemReportDialog> {
   String? _errorText;
 
   final List<String> reasons = [
-    "Kháng cáo",
-    "Lỗi hệ thống",
-    "Lý do khác",
+    "report_appeal",
+    "report_system",
+    "report_other",
   ];
 
   late Map<String, bool> selected;
@@ -65,15 +65,15 @@ class _SystemReportDialogState extends State<SystemReportDialog> {
       return;
     }
 
-    if (selected["Lý do khác"] == true &&
+    if (selected["report_other"] == true &&
         _descriptionController.text.trim().isEmpty) {
       setState(() => _errorText = loc.translate("enter_other_reason"));
       return;
     }
 
     final reason = selectedReasons.map((r) {
-      if (r == "Lý do khác") return _descriptionController.text.trim();
-      return r;
+      if (r == "report_other") return _descriptionController.text.trim();
+      return loc.translate(r);
     }).join(", ");
 
     final description = _descriptionController.text.trim();
@@ -97,11 +97,10 @@ class _SystemReportDialogState extends State<SystemReportDialog> {
 
       final repo = ReportRepository(ReportService(ApiClient()));
 
-      // Report type System, không cần check đã report
       await repo.postReport(
         token: token,
         reportType: "System",
-        targetId: "", // không dùng id
+        targetId: "",
         reason: reason,
         description: description,
         imageUrls: uploadedUrls,
@@ -146,21 +145,13 @@ class _SystemReportDialogState extends State<SystemReportDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  loc.translate("report"),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: textColor, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
 
                 /// Checkbox items
                 ...reasons.map(
                       (r) => CheckboxListTile(
                     value: selected[r],
                     onChanged: (v) => setState(() => selected[r] = v ?? false),
-                    title: Text(r, style: TextStyle(color: textColor)),
+                    title: Text(loc.translate(r), style: TextStyle(color: textColor)),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                     dense: true,

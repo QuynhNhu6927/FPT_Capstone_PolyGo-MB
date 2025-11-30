@@ -45,6 +45,19 @@
   "medium": "Trung bình",
   "hard": "Khó",
   "minutes": "p",
-  "seconds_short": "s"
+  "seconds_short": "s",
+  "wordsets_fit_you": "Thử thách bản thân với các câu đố từ vựng",
+
+  "how_to_play": "Hướng dẫn chơi",
+  "scoring": "Cách tính điểm",
+  "how_to_play_1": "• Chọn một bộ câu hỏi mà bạn hứng thú",
+  "how_to_play_2": "• Mỗi từ trong bộ câu hỏi sẽ bị xóa trộn ngẫu nhiên (apple : p/a/l/p/e)",
+  "how_to_play_3": "• Sắp xếp lại từ cho đúng để qua từ tiếp theo",
+  "how_to_play_4": "• Mỗi từ sẽ có 1 cơ hội dùng gợi ý (nếu có)",
+  "how_to_play_5": "• Hoàn thành tất cả từ trong bộ câu hỏi để kết thúc",
+  "scoring_1": "• Thứ hạng sẽ được dựa vào tổng điểm và thời gian hoàn thành",
+  "scoring_2": "• Mỗi bộ câu hỏi có bảng xếp hạng riêng",
+  "scoring_3": "• Bạn có thể chơi lại nhiều lần để cải thiện điểm số",
+  "scoring_4": "• Bạn sẽ được thêm điểm EXP sau mỗi lần chơi"
 
 }

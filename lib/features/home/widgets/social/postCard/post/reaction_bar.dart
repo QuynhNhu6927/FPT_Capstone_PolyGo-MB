@@ -22,28 +22,31 @@ class ReactionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (int i = 0; i < _reactions.length; i++)
-          GestureDetector(
-            onTap: () => onReactionTap(i),
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: selectedReaction == i
-                    ? _reactions[i]['color'].withOpacity(0.2)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Image.asset(
-                'assets/${_reactions[i]['asset']}',
-                width: 24,
-                height: 24,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (int i = 0; i < _reactions.length; i++)
+            GestureDetector(
+              onTap: () => onReactionTap(i),
+              child: Container(
+                margin: const EdgeInsets.only(right: 10),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: selectedReaction == i
+                      ? _reactions[i]['color'].withOpacity(0.2)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Image.asset(
+                  'assets/${_reactions[i]['asset']}',
+                  width: 24,
+                  height: 24,
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

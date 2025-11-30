@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../config/api_constants.dart';
+import '../utils/auth_util.dart';
 
 class ApiClient {
   final Dio dio;
@@ -27,7 +28,7 @@ class ApiClient {
         debugPrint('Response: ${response.data}');
         return handler.next(response);
       },
-      onError: (DioError e, handler) {
+      onError: (DioError e, handler) async {
         debugPrint('*** DioError ***');
         debugPrint('Message: ${e.message}');
         debugPrint('Type: ${e.type}');
@@ -36,6 +37,10 @@ class ApiClient {
           debugPrint('Data: ${e.response?.data}');
         } else {
           debugPrint('No response received (network issue?)');
+        }
+        if (e.response?.statusCode == 401) {
+          await forceLogout();
+          return;
         }
         return handler.next(e);
       },

@@ -45,5 +45,18 @@
   "medium": "Medium",
   "hard": "Hard",
   "minutes": "m",
-  "seconds_short": "s"
+  "seconds_short": "s",
+  "wordsets_fit_you": "Challenge yourself with vocabulary puzzles",
+
+  "how_to_play": "How to play?",
+  "scoring": "Scoring",
+  "how_to_play_1": "• Choose a question set by your favorite topic",
+  "how_to_play_2": "• Words will be scrambled randomly (apple : p/a/l/p/e)",
+  "how_to_play_3": "• Type the correct word to move to the next one",
+  "how_to_play_4": "• Each word you will have 1 chance to use hints if available",
+  "how_to_play_5": "• Complete all words in the set to finish",
+  "scoring_1": "• Ranking will be calculated based on total score and completion time.",
+  "scoring_2": "• Each set has its own leaderboard",
+  "scoring_3": "• You can replay to improve your time",
+  "scoring_4": "• You will earn XP when finishing a puzzle"
 }

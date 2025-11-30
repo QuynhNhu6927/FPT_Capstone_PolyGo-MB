@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:polygo_mobile/features/profile/widgets/profileHeader/report_list.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../auth/widgets/polygo_terms.dart';
 import '../../../users/widgets/system_report_dialog.dart';
 import 'change_password_form.dart';
 
@@ -107,6 +108,21 @@ class SettingsFullScreenDialog extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => MyReportsScreen(),
                         ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.privacy_tip, color: textColor),
+                    title: Text(
+                      loc.translate("terms_privacy"),
+                      style: TextStyle(color: textColor),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (_) => const PolyGoTerms(),
                       );
                     },
                   ),

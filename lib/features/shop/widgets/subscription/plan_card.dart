@@ -93,7 +93,7 @@ class SubscriptionPlanCard extends StatelessWidget {
           if (plan.features.isNotEmpty &&
               plan.features.any((f) => f.isEnabled)) ...[
             Text(
-              loc.translate("features"),
+              loc.translate("unlimited_features"),
               style: t.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: st(context, 16),
@@ -101,6 +101,7 @@ class SubscriptionPlanCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: sh(context, 8)),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: plan.features
@@ -117,12 +118,11 @@ class SubscriptionPlanCard extends StatelessWidget {
                         size: sw(context, 18),
                       ),
                       SizedBox(width: sw(context, 8)),
+
+                      // ➜ Chỉ giữ featureName + translate
                       Expanded(
                         child: Text(
-                          f.featureName +
-                              (f.limitValue > 0
-                                  ? " (${f.limitValue} ${f.limitType})"
-                                  : ""),
+                          loc.translate(f.featureName.toLowerCase()),
                           style: t.bodyMedium?.copyWith(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: st(context, 14),
@@ -132,11 +132,11 @@ class SubscriptionPlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              )
-                  .toList(),
+              ).toList(),
             ),
             SizedBox(height: sh(context, 20)),
           ],
+
           // Subscribe button
           SizedBox(
             width: double.infinity,

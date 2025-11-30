@@ -96,7 +96,10 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
     if (token == null || token.isEmpty) return;
 
     try {
-      final detail = await _repo.getReportDetail(token: token, reportId: reportId);
+      final detail = await _repo.getReportDetail(
+        token: token,
+        reportId: reportId,
+      );
 
       if (!mounted) return;
       showDialog(
@@ -120,86 +123,89 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final loc = AppLocalizations.of(context);
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(loc.translate("my_reports")),
-          centerTitle: true,
-          backgroundColor: isDark ? Colors.black : Colors.white,
-          foregroundColor: isDark ? Colors.white : Colors.black87,
-        ),
-        body: _loading
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(loc.translate("my_reports")),
+        centerTitle: true,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: SafeArea(
+        child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _reports.isEmpty
             ? Center(
-          child: Text(
-            loc.translate("no_reports"),
-            style: theme.textTheme.bodyMedium,
-          ),
-        )
+                child: Text(
+                  loc.translate("no_reports"),
+                  style: theme.textTheme.bodyMedium,
+                ),
+              )
             : ListView.builder(
-          padding: EdgeInsets.symmetric(
-            horizontal: sw(context, 16),
-            vertical: sh(context, 12),
-          ),
-          itemCount: _reports.length,
-          itemBuilder: (context, index) {
-            final report = _reports[index];
+                padding: EdgeInsets.symmetric(
+                  horizontal: sw(context, 16),
+                  vertical: sh(context, 12),
+                ),
+                itemCount: _reports.length,
+                itemBuilder: (context, index) {
+                  final report = _reports[index];
 
-            return GestureDetector(
-              onTap: () => _showReportDetailDialog(report.id!, isDark),
-              child: Container(
-                margin: EdgeInsets.only(bottom: sh(context, 10)),
-                padding: EdgeInsets.all(sw(context, 16)),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
-                        : [Colors.white, Colors.white],
-                  ),
-                  borderRadius: BorderRadius.circular(sw(context, 12)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${loc.translate("you_reported")} ${report.reportType} ${loc.translate("with_reason:")} ${report.reason}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: sh(context, 8)),
-                    if (report.createdAt != null)
-                      Text(
-                        '${loc.translate("at")} ${formatDateTime(report.createdAt!)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.white54 : Colors.black45,
+                  return GestureDetector(
+                    onTap: () => _showReportDetailDialog(report.id!, isDark),
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: sh(context, 10)),
+                      padding: EdgeInsets.all(sw(context, 16)),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: isDark
+                              ? [
+                                  const Color(0xFF1E1E1E),
+                                  const Color(0xFF2C2C2C),
+                                ]
+                              : [Colors.white, Colors.white],
                         ),
+                        borderRadius: BorderRadius.circular(sw(context, 12)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    SizedBox(height: sh(context, 12)),
-                    Text(
-                      '${loc.translate("status")}: ${report.status}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: statusColor(report.status, isDark),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${loc.translate("you_reported")} ${loc.translate(report.reportType!.toLowerCase())}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: sh(context, 8)),
+                          if (report.createdAt != null)
+                            Text(
+                              '${loc.translate("at")} ${formatDateTime(report.createdAt!)}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark ? Colors.white54 : Colors.black45,
+                              ),
+                            ),
+                          SizedBox(height: sh(context, 12)),
+                          Text(
+                            '${loc.translate("status")}: ${report.status}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: statusColor(report.status, isDark),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0),
-            );
-          },
-        ),
+                    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0),
+                  );
+                },
+              ),
       ),
     );
   }

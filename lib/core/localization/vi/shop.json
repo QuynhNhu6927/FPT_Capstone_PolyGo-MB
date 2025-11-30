@@ -121,5 +121,28 @@
   "transaction_details": "Chi tiết giao dịch",
   "type": "Phân loại",
   "method": "Phương thức",
-  "inquiry": "Hỗ trợ"
+  "inquiry": "Hỗ trợ",
+
+  "unlimited_features": "Tính năng không giới hạn",
+  "premiumbadges": "Huy hiệu Plus",
+  "eventcreation": "Tạo sự kiện",
+  "voicecall": "Gọi thoại",
+  "videocall": "Gọi video",
+  "eventparticipation": "Tham gia sự kiện",
+  "prioritysupport": "Ưu tiên hỗ trợ",
+  "translation": "Phiên dịch",
+  "advancedmatching": "",
+  "analytics": "",
+  "daily": "ngày",
+  "monthly": "tháng",
+  "send_image": "Gửi ảnh",
+  "send_voice_audio": "Gửi tin nhắn thoại",
+  "limited_free_feature": "Giới hạn tính năng miễn phí",
+  "limited_free_des": "Bạn đã hết lượt sử dụng miễn phí tính năng này, hãy nâng cấp lên gói Plus để sử dụng không giới hạn nhiều tính năng của Polygo",
+  "limited_free_title": "Hết lượt sử dụng",
+
+  "confirm_subscription": "Xác nhận thanh toán",
+  "available_balance": "Số dư khả dụng",
+  "plan_price": "Giá gói"
+
 }

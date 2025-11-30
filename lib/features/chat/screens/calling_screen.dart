@@ -112,8 +112,17 @@ class _CallingScreenState extends State<CallingScreen> {
 
     _peerConnection = await createPeerConnection({
       'iceServers': [
-        {'urls': 'stun:stun.l.google.com:19302'}
-      ]
+        {'urls': 'stun:stun.l.google.com:19302'},
+        {
+          'urls': [
+            'turn:160.25.81.144:3478',
+            'turn:160.25.81.144:3478?transport=tcp',
+            'turn:160.25.81.144:5349?transport=tcp',
+          ],
+          'username': 'polygo',
+          'credential': 'polygo2024',
+        },
+      ],
     });
 
     // Add tracks

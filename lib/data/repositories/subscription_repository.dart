@@ -6,6 +6,7 @@ import '../models/subscription/subscription_current_response.dart';
 import '../models/subscription/subscription_plan_list_response.dart';
 import '../models/subscription/subscription_request.dart';
 import '../models/subscription/subscription_response.dart';
+import '../models/subscription/usage_item.dart';
 import '../services/apis/subscription_service.dart';
 
 class SubscriptionRepository {
@@ -75,5 +76,19 @@ class SubscriptionRepository {
     }
   }
 
-
+  Future<ApiResponse<SubscriptionUsageResponse>> getUsage({
+    required String token,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      return await _service.getUsage(
+        token: token,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

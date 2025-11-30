@@ -29,10 +29,12 @@ class CallSoundManager {
   }
 
   Future<void> playEndCall() async {
+    await _player.setReleaseMode(ReleaseMode.release);
     await _player.play(AssetSource('end-call.mp3'), volume: 1.0);
   }
 
   Future<void> playReactPost() async {
+    await _player.setReleaseMode(ReleaseMode.release);
     await _player.play(AssetSource('pop.mp3'), volume: 1.0);
   }
 

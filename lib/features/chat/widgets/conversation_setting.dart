@@ -53,7 +53,7 @@ class _ConversationSettingState extends State<ConversationSetting> {
       final success = await repo.updateTranslationLanguage(
         token: token,
         conversationId: widget.conversationId,
-        languageCode: lang.id, // gửi id thay vì code
+        languageCode: lang.code,
       );
 
       if (!success) {
@@ -63,7 +63,7 @@ class _ConversationSettingState extends State<ConversationSetting> {
       } else {
         // update label mặc định
         setState(() {
-          _currentLanguageCode = lang.lang;
+          _currentLanguageCode = lang.code;
         });
       }
     } catch (e) {
@@ -218,17 +218,17 @@ class _ConversationSettingState extends State<ConversationSetting> {
                 hint: Row(
                   children: [
                     // Tìm language trong _languages theo effectiveLanguageCode
-                    if (_languages.any((e) => e.lang == _currentLanguageCode))
+                    if (_languages.any((e) => e.code == _currentLanguageCode))
                       Image.network(
-                        _languages.firstWhere((e) => e.lang == _currentLanguageCode).iconUrl,
+                        _languages.firstWhere((e) => e.code == _currentLanguageCode).iconUrl,
                         width: 24,
                         height: 24,
                       ),
-                    if (_languages.any((e) => e.lang == _currentLanguageCode))
+                    if (_languages.any((e) => e.code == _currentLanguageCode))
                       const SizedBox(width: 8),
                     Text(
-                      _languages.any((e) => e.lang == _currentLanguageCode)
-                          ? _languages.firstWhere((e) => e.lang == _currentLanguageCode).name
+                      _languages.any((e) => e.code == _currentLanguageCode)
+                          ? _languages.firstWhere((e) => e.code == _currentLanguageCode).name
                           : _currentLanguageCode ?? '',
                     ),
                   ],
@@ -287,8 +287,19 @@ class _ConversationSettingState extends State<ConversationSetting> {
               const SizedBox(height: 8),
 
               // Grid of chat images (scrollable)
+              // Grid of chat images (scrollable)
               Expanded(
-                child: GridView.builder(
+                child: _chatImages.isEmpty && !_isLoading
+                    ? Center(
+                  child: Text(
+                    loc.translate('no_images'), // bạn có thể thêm key 'no_images' trong localization
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                )
+                    : GridView.builder(
                   controller: _scrollController,
                   itemCount: _chatImages.length + (_isLoading ? 1 : 0),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -326,6 +337,7 @@ class _ConversationSettingState extends State<ConversationSetting> {
                   },
                 ),
               ),
+
             ],
           ),
         ),

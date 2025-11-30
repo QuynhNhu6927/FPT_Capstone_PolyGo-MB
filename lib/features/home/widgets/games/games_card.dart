@@ -54,86 +54,6 @@ class WordSetCard extends StatelessWidget {
                       DateFormat('dd MMM yyyy').format(wordSet.createdAt),
                       style: TextStyle(color: secondaryText, fontSize: 12),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.help_outline, color: Colors.grey),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            int pageIndex = 0; // 0 = how_to_play, 1 = scoring
-                            return StatefulBuilder(
-                              builder: (context, setState) {
-                                return AlertDialog(
-                                  titlePadding: const EdgeInsets.only(left: 12, right: 12, top: 8),
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // Nút quay lại (chỉ hiện ở trang 2)
-                                      if (pageIndex == 1)
-                                        IconButton(
-                                          icon: const Icon(Icons.arrow_back),
-                                          onPressed: () => setState(() => pageIndex = 0),
-                                        )
-                                      else
-                                        const SizedBox(width: 48),
-
-                                      // Tiêu đề
-                                      Text(
-                                        pageIndex == 0
-                                            ? loc.translate("how_to_play")
-                                            : loc.translate("scoring"),
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-
-                                      // Nút qua trang tiếp theo (chỉ hiện ở trang 1)
-                                      if (pageIndex == 0)
-                                        IconButton(
-                                          icon: const Icon(Icons.arrow_forward),
-                                          onPressed: () => setState(() => pageIndex = 1),
-                                        )
-                                      else
-                                        const SizedBox(width: 48),
-                                    ],
-                                  ),
-
-                                  content: SizedBox(
-                                    width: double.maxFinite,
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          if (pageIndex == 0) ...[
-                                            Text(loc.translate("how_to_play_1")),
-                                            Text(loc.translate("how_to_play_2")),
-                                            Text(loc.translate("how_to_play_3")),
-                                            Text(loc.translate("how_to_play_4")),
-                                            Text(loc.translate("how_to_play_5")),
-                                          ],
-                                          if (pageIndex == 1) ...[
-                                            Text(loc.translate("scoring_1")),
-                                            Text(loc.translate("scoring_2")),
-                                            Text(loc.translate("scoring_3")),
-                                            Text(loc.translate("scoring_4")),
-                                          ]
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(loc.translate("understand")),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    )
-
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -206,13 +126,13 @@ class WordSetCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '${loc.translate("est")}: ${wordSet.estimatedTimeInMinutes} ${loc.translate("minutes")}',
+                        '${loc.translate("est")}: ${wordSet.estimatedTimeInMinutes}${loc.translate("minutes")}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),
                     Expanded(
                       child: Text(
-                        '${loc.translate("avg")}: ${wordSet.averageTimeInSeconds.toStringAsFixed(2)}${loc.translate("seconds_short")}',
+                        '${loc.translate("avg")}: ${wordSet.averageTimeInSeconds.toStringAsFixed(0)}${loc.translate("seconds_short")}',
                         style: TextStyle(fontSize: 12, color: secondaryText),
                       ),
                     ),

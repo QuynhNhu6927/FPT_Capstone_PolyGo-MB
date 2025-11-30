@@ -80,6 +80,8 @@
   "plus_member": "Plus member",
   "days": "days",
   "incorrect_current_pass": "Incorrect current password",
-  "not_match": "Not match"
-
+  "not_match": "Not match",
+  "terms_privacy": "Terms of service and Privacy policy",
+  "report_appeal": "Appeal",
+  "report_system": "System error"
 }

@@ -41,6 +41,14 @@ class VideoGrid extends StatelessWidget {
           orElse: () => localParticipant,
         );
 
+        String hostSubtitle = '';
+        if (controller.isCaptionsEnabled && controller.transcriptions.isNotEmpty) {
+          final lastTwo = controller.transcriptions.length > 2
+              ? controller.transcriptions.sublist(controller.transcriptions.length - 2)
+              : controller.transcriptions;
+
+          hostSubtitle = lastTwo.map((t) => '${t.senderName}: ${t.translatedText}').join('\n');
+        }
         // Các participant còn lại
         final otherParticipants =
         allParticipants.where((p) => p.id != hostParticipant.id).toList();
@@ -86,7 +94,8 @@ class VideoGrid extends StatelessWidget {
                 child: ParticipantCard(
                   participant: hostParticipant,
                   isLarge: true,
-                  isHost: hostParticipant.id == controller.hostId,
+                  isHost: true,
+                  subtitle: hostSubtitle,
                   onSwitchCamera: hostParticipant.id == 'local' ? () => controller.switchCamera() : null,
                 ),
               ),
@@ -141,7 +150,6 @@ class VideoGrid extends StatelessWidget {
                 ),
               ),
 
-            const SizedBox(height: kToolbarHeight + 20),
           ],
         );
       },
@@ -155,12 +163,14 @@ class VideoGrid extends StatelessWidget {
     final bool isLarge;
     final bool isHost;
     final VoidCallback? onSwitchCamera;
+    final String? subtitle;
 
   const ParticipantCard({
     required this.participant,
     this.isLarge = false,
     this.isHost = false,
     this.onSwitchCamera,
+    this.subtitle,
   });
 
   @override
@@ -242,6 +252,30 @@ class _ParticipantCardState extends State<ParticipantCard> {
                     blurRadius: 4,
                   ),
                 ],
+              ),
+            ),
+
+          if (widget.isHost && widget.subtitle != null && widget.subtitle!.isNotEmpty)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 48,  // nằm phía trên Name + Icons
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  widget.subtitle!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
 

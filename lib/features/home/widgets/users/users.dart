@@ -330,7 +330,7 @@ class _UsersState extends State<Users> {
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) => SizeTransition(
               sizeFactor: animation,
-              axisAlignment: -1, // thu nhỏ từ trên xuống
+              axisAlignment: -1,
               child: FadeTransition(opacity: animation, child: child),
             ),
             child: _showFilterBar
@@ -437,7 +437,7 @@ class _UsersState extends State<Users> {
                   if (_isShowingMatching && !_hasActiveFilter) ...[
                     const SizedBox(height: 12),
                     Text(
-                      loc.translate("users_matching_you") ?? "Những sự kiện phù hợp với bạn",
+                      loc.translate("users_matching_you"),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.primary,

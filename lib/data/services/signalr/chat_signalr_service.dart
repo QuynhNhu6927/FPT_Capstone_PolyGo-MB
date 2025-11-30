@@ -76,6 +76,28 @@ class ChatSignalrService {
     });
   }
 
+  void _handleSignalRError(dynamic e) {
+    final message = e.toString();
+
+    if (message.contains("Error.ChatLimitExceeded")) {
+      debugPrint("[SignalR] Lỗi: vượt giới hạn chat free user");
+      throw Exception("Error.ChatLimitExceeded");
+    }
+
+    if (message.contains("Error.FreeUserCannotSendImage")) {
+      debugPrint("[SignalR] Lỗi: Free user không thể gửi hình");
+      throw Exception("Error.FreeUserCannotSendImage");
+    }
+
+    if (message.contains("Error.FreeUserCannotSendFile")) {
+      debugPrint("[SignalR] Lỗi: Free user không thể gửi file/audio");
+      throw Exception("Error.FreeUserCannotSendFile");
+    }
+
+    debugPrint("[SignalR] Lỗi khác: $e");
+    throw Exception("Error.FailedToSendMessage");
+  }
+
   Future<void> joinConversation(String conversationId) async {
     if (_hubConnection != null && _hubConnection!.state == HubConnectionState.connected) {
       try {
@@ -89,9 +111,20 @@ class ChatSignalrService {
     }
   }
 
-  Future<void> sendTextMessage({required String conversationId, required String senderId, required String content}) async {
+  Future<void> sendTextMessage({
+    required String conversationId,
+    required String senderId,
+    required String content
+  }) async {
     if (_hubConnection != null && _hubConnection!.state == HubConnectionState.connected) {
-      await _hubConnection!.invoke('SendTextMessage', args: [conversationId, senderId, content]);
+      try {
+        await _hubConnection!.invoke(
+            'SendTextMessage',
+            args: [conversationId, senderId, content]
+        );
+      } catch (e){
+        _handleSignalRError(e);
+      }
     }
   }
 
@@ -153,19 +186,12 @@ class ChatSignalrService {
     }
 
     try {
-      debugPrint('[SignalR] Gửi audio message:');
-      debugPrint('ConversationId: $conversationId');
-      debugPrint('SenderId: $senderId');
-      debugPrint('Audio URL: $audioUrl');
-
       await _hubConnection!.invoke(
         'SendAudioMessage',
         args: [conversationId, senderId, audioUrl],
       );
-
-      debugPrint('[SignalR] Gửi audio message thành công');
     } catch (e) {
-      debugPrint('[SignalR] Lỗi gửi audio message: $e');
+      _handleSignalRError(e);
     }
   }
 
@@ -200,13 +226,10 @@ class ChatSignalrService {
         ],
       );
 
-      debugPrint('[SignalR] Gửi image message thành công: ${imageUrls.length} ảnh');
-
     } catch (e) {
-      debugPrint('[SignalR] Lỗi gửi image message: $e');
+      _handleSignalRError(e);
     }
   }
-
 
   Future<void> stop() async {
     _reconnectTimer?.cancel();

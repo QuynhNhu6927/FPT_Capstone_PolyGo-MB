@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -161,6 +160,8 @@ class _WordSetContentState extends State<WordSetContent> {
     final loc = AppLocalizations.of(context);
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = width < 600 ? 1 : 2;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) return const Center(child: CircularProgressIndicator());
 
@@ -189,7 +190,7 @@ class _WordSetContentState extends State<WordSetContent> {
             child: _showFilterBar
                 ? Container(
               key: const ValueKey('filterBar'),
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 2),
               child: WordSetFilterBar(
                 selectedFilters: _selectedFilters,
                 onOpenFilter: () async {
@@ -221,6 +222,134 @@ class _WordSetContentState extends State<WordSetContent> {
             )
                 : const SizedBox.shrink(),
           ),
+
+          if (_showFilterBar && _selectedFilters.isEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    loc.translate("wordsets_fit_you"),
+                    softWrap: true,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+
+                IconButton(
+                  icon: Icon(Icons.help_outline,
+                      color: isDark ? Colors.white70 : Colors.grey[700]),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) {
+                        final PageController controller = PageController();
+                        int pageIndex = 0;
+
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            final bgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+                            final textColor = isDark ? Colors.white70 : Colors.black87;
+                            final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
+                            final theme = Theme.of(context);
+
+                            return Dialog(
+                              insetPadding: const EdgeInsets.all(16),
+                              backgroundColor: bgColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // TITLE CENTERED
+                                    Text(
+                                      pageIndex == 0
+                                          ? loc.translate("how_to_play")
+                                          : loc.translate("scoring"),
+                                      style: theme.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+
+                                    const SizedBox(height: 8),
+
+                                    // DIVIDER
+                                    Divider(color: secondaryText, thickness: 0.5),
+
+                                    const SizedBox(height: 12),
+
+                                    // CONTENT - PageView (Swipe to navigate)
+                                    SizedBox(
+                                      height: 220,
+                                      child: PageView(
+                                        controller: controller,
+                                        onPageChanged: (i) {
+                                          setState(() => pageIndex = i);
+                                        },
+                                        children: [
+                                          // PAGE 1
+                                          SingleChildScrollView(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                _helpText(loc.translate("how_to_play_1"), textColor),
+                                                _helpText(loc.translate("how_to_play_2"), textColor),
+                                                _helpText(loc.translate("how_to_play_3"), textColor),
+                                                _helpText(loc.translate("how_to_play_4"), textColor),
+                                                _helpText(loc.translate("how_to_play_5"), textColor),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // PAGE 2
+                                          SingleChildScrollView(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                _helpText(loc.translate("scoring_1"), textColor),
+                                                _helpText(loc.translate("scoring_2"), textColor),
+                                                _helpText(loc.translate("scoring_3"), textColor),
+                                                _helpText(loc.translate("scoring_4"), textColor),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    // PAGE INDICATOR (2 dots)
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        _dot(isActive: pageIndex == 0, color: secondaryText!),
+                                        const SizedBox(width: 8),
+                                        _dot(isActive: pageIndex == 1, color: secondaryText),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 1),
+          ],
 
           /// Main content grid
           Expanded(
@@ -265,4 +394,31 @@ class _WordSetContentState extends State<WordSetContent> {
       ),
     );
   }
+
+  Widget _helpText(String text, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _dot({required bool isActive, required Color color}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: isActive ? 10 : 8,
+      height: isActive ? 10 : 8,
+      decoration: BoxDecoration(
+        color: isActive ? color : color.withOpacity(0.4),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
 }

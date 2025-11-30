@@ -9,6 +9,7 @@ import '../../models/subscription/subscription_current_response.dart';
 import '../../models/subscription/subscription_plan_list_response.dart';
 import '../../models/subscription/subscription_request.dart';
 import '../../models/subscription/subscription_response.dart';
+import '../../models/subscription/usage_item.dart';
 
 class SubscriptionService {
   final ApiClient apiClient;
@@ -173,5 +174,40 @@ class SubscriptionService {
     }
   }
 
+  Future<ApiResponse<SubscriptionUsageResponse>> getUsage({
+    required String token,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      final query = {
+        'pageNumber': pageNumber.toString(),
+        'pageSize': pageSize.toString(),
+      };
+
+      final response = await apiClient.get(
+        ApiConstants.currentUsage,
+        queryParameters: query,
+        headers: {
+          ApiConstants.headerAuthorization: 'Bearer $token',
+        },
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => SubscriptionUsageResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        return ApiResponse<SubscriptionUsageResponse>(
+          data: null,
+          message: e.response?.data['message'] ?? e.message,
+          statusCode: e.response?.statusCode,
+        );
+      }
+      rethrow;
+    }
+  }
 
 }

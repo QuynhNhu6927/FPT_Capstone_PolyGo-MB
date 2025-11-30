@@ -9,7 +9,7 @@
   "TRUST_SCORE": "ĐIỂM TIN CẬY",
   "about_plus_title": "Thành viên Plus",
   "about_plus_description": "Nhãn dành riêng cho thành viên Plus của PolyGo",
-  "register_now": "Đăng ký Plus ngay",
+  "register_now": "Đăng ký Plus",
   "good_streak": "Chuỗi tốt",
   "keep_going": "Hãy tiếp tục cố gắng giữ chuỗi",
   "normal_streak": "Chuỗi bình thường",
@@ -21,6 +21,7 @@
   "retry": "Thử lại",
   "light_mode": "Sáng",
   "dark_mode": "Tối",
-  "search_placeholder": "Tìm kiếm..."
+  "search_placeholder": "Tìm kiếm...",
+  "about_plus": "Đăng ký ngay để nhận được nhiều quyền lợi không giới hạn"
 
 }

@@ -9,7 +9,7 @@
   "TRUST_SCORE": "TRUST SCORE",
   "about_plus_title": "Plus member",
   "about_plus_description": "Tag for plus member only!",
-  "register_now": "Register for Plus",
+  "register_now": "Register Plus",
   "good_streak": "Good streak",
   "keep_going": "Keep going!",
   "normal_streak": "Normal streak",
@@ -21,6 +21,7 @@
   "retry": "Try again",
   "light_mode": "Light mode",
   "dark_mode": "Dark mode",
-  "search_placeholder": "Searching..."
+  "search_placeholder": "Searching...",
+  "about_plus": "Register now to receive unlimited features"
 
 }

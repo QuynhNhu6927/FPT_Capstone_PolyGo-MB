@@ -105,7 +105,19 @@ class AboutPlusDialog extends StatelessWidget {
                   ],
                 ),
 
-                SizedBox(height: sh(context, 32)),
+                SizedBox(height: sh(context, 20)),
+
+                // ==== LONGEST STREAK TEXT ====
+                Text(
+                  loc.translate("about_plus"),
+                  style: t.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: st(context, 20),
+                    color: Colors.white,
+                  ),
+                ),
+
+                SizedBox(height: sh(context, 20)),
 
                 // BUTTON custom
                 Align(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:polygo_mobile/features/auth/widgets/polygo_terms.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/widgets/app_button.dart';
@@ -423,17 +424,33 @@ class _RegisterFormState extends State<RegisterForm> {
               SizedBox(height: sh(context, 12)),
 
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Checkbox(
-                    value: _agreeTerms,
-                    onChanged: (v) => setState(() => _agreeTerms = v!),
-                  ),
                   Expanded(
-                    child: Text(
-                      loc.translate("agree_terms"),
-                      style:
-                      t.bodyMedium?.copyWith(fontSize: st(context, 14)),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: _agreeTerms,
+                          onChanged: (v) => setState(() => _agreeTerms = v!),
+                        ),
+                        Expanded(
+                          child: Text(
+                            loc.translate("agree_terms"),
+                            style: t.bodyMedium?.copyWith(fontSize: st(context, 14)),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (_) => const PolyGoTerms(),
+                      );
+                    },
                   ),
                 ],
               ),

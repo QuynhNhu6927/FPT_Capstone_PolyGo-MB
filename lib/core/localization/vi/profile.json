@@ -80,6 +80,8 @@
   "plus_member": "Plus",
   "days": "ngày",
   "incorrect_current_pass": "Mật khẩu hiện tại không đúng",
-  "not_match": "Không khớp"
-
+  "not_match": "Không khớp",
+  "terms_privacy": "Điều khoản dịch vụ và chính sách bảo mật",
+  "report_appeal": "Kháng cáo",
+  "report_system": "Lỗi hệ thống"
 }
