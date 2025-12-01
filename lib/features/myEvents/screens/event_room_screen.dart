@@ -316,6 +316,41 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     }
   }
 
+  // void _handleEndEvent() async {
+  //   if (!widget.isHost) return;
+  //   final loc = AppLocalizations.of(context);
+  //
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final token = prefs.getString('token');
+  //     if (token == null || token.isEmpty) {
+  //       _showSnack(loc.translate("missing_token"));
+  //       return;
+  //     }
+  //
+  //     final eventRepository = EventRepository(EventService(ApiClient()));
+  //     final updatedEvent = await eventRepository.updateEventStatus(
+  //       token: token,
+  //       eventId: widget.eventId,
+  //       status: 'Completed',
+  //     );
+  //
+  //     if (updatedEvent != null) {
+  //       _showSnack(loc.translate('event_status_update_completed'));
+  //     } else {
+  //       _showSnack(loc.translate('event_status_update_failed'));
+  //     }
+  //
+  //     await _controller.endEvent();
+  //
+  //     if (mounted) {
+  //       Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
+  //     }
+  //   } catch (e) {
+  //     _showSnack(loc.translate('event_status_update_failed'));
+  //   }
+  // }
+
   void _handleEndEvent() async {
     if (!widget.isHost) return;
     final loc = AppLocalizations.of(context);
@@ -329,6 +364,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       }
 
       final eventRepository = EventRepository(EventService(ApiClient()));
+
+      // 1) Update event status
       final updatedEvent = await eventRepository.updateEventStatus(
         token: token,
         eventId: widget.eventId,
@@ -340,6 +377,17 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       } else {
         _showSnack(loc.translate('event_status_update_failed'));
       }
+
+      () async {
+        try {
+          await eventRepository.generateSummary(
+            token: token,
+            eventId: widget.eventId,
+          );
+        } catch (_) {
+
+        }
+      }();
 
       await _controller.endEvent();
 
@@ -428,25 +476,21 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                           onEndEvent: () => setState(() => showEndDialog = true),
                           onTranscribeToggle: () async {
                             if (_controller.isTranscriptionEnabled) {
-                              // Tắt transcription
-                              await _controller.disableMobileTranscription(); // tắt server STT
+                              await _controller.disableMobileTranscription();
                             } else {
-                              // Bật transcription
-                              await _controller.enableMobileTranscription(); // bật server STT
+                              await _controller.enableMobileTranscription();
                             }
-                            setState(() {}); // cập nhật UI nút
+                            setState(() {});
                           },
-
                           onCaptionsToggle: () {
                             if (_controller.isCaptionsEnabled) {
                               _controller.disableCaptions();
                             } else {
                               _controller.enableCaptions();
                             }
-                            setState(() {}); // cập nhật UI nút
+                            setState(() {});
                           },
                           onCaptionsLongPress: _showSubtitleLanguageDialog,
-
                           isTranscriptionEnabled: _controller.isTranscriptionEnabled,
                           isCaptionsEnabled: _controller.isCaptionsEnabled,
                         )

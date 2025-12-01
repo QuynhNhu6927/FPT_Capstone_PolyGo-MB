@@ -27,9 +27,10 @@
   "failed_to_load_gifts": "Không thể tải quà tặng! Vui lòng thử lại sau!",
   "owned": "Đã có",
   "no_sent_gifts": "Bạn chưa tặng quà cho ai",
-  "has_received_from": "đã nhận từ",
+  "has_received_from": "đã nhận",
   "levels": "Cấp độ",
   "no_levels_found": "Không thể tải! Vui lòng thử lại sau!",
-  "required_xp": "EXP yêu cầu"
+  "required_xp": "EXP yêu cầu",
+  "claim_now": "Nhận ngay"
 
 }

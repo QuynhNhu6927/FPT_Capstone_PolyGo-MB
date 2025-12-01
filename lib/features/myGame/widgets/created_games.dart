@@ -203,7 +203,7 @@ class _CreatedGamesState extends State<CreatedGames> {
                                   : Colors.black87,
                             ),
                             decoration: InputDecoration(
-                              hintText:  loc.translate("search_game_placeholder"),
+                              hintText:  loc.translate("search_my_game_placeholder"),
                               hintStyle: TextStyle(
                                 color: Theme.of(context).brightness == Brightness.dark
                                     ? Colors.grey

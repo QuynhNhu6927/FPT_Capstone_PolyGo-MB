@@ -289,7 +289,7 @@ class _JoinedEventsState extends State<JoinedEvents> {
               focusNode: _searchFocusNode,
               style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
-                hintText: loc.translate("search_event_placeholder"),
+                hintText: loc.translate("search_joined_placeholder"),
                 hintStyle: TextStyle(color: theme.brightness == Brightness.dark ? Colors.grey : Colors.grey[600]),
                 border: InputBorder.none,
                 isCollapsed: true,

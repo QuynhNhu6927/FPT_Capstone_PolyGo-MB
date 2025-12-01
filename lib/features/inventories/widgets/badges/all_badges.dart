@@ -11,6 +11,7 @@ import 'badge_detail.dart';
 
 class AllBadges extends StatefulWidget {
   final void Function(BadgeModel updatedBadge)? onBadgeClaimed;
+
   const AllBadges({super.key, this.onBadgeClaimed});
 
   @override
@@ -77,16 +78,16 @@ class _AllBadgesState extends State<AllBadges> {
       );
     }
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          elevation: 1,
-          title: Text(loc.translate("my_badges")),
-          centerTitle: true,
-        ),
-        body: LayoutBuilder(
+    return Scaffold(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        elevation: 1,
+        title: Text(loc.translate("my_badges")),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
 
@@ -121,6 +122,7 @@ class _AllBadgesState extends State<AllBadges> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
               child: GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 itemCount: _badges.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
@@ -229,23 +231,34 @@ class _AllBadgesState extends State<AllBadges> {
 
                                       if (!mounted) return;
                                       setState(() {
-                                        _badges[index] = _badges[index].copyWith(
-                                          isClaimed: true,
-                                          claimedAt: DateTime.now().toIso8601String(),
-                                        );
+                                        _badges[index] = _badges[index]
+                                            .copyWith(
+                                              isClaimed: true,
+                                              claimedAt: DateTime.now()
+                                                  .toIso8601String(),
+                                            );
                                       });
                                       if (widget.onBadgeClaimed != null) {
                                         widget.onBadgeClaimed!(_badges[index]);
                                       }
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(res?.message ?? loc.translate('claimed'))),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            res?.message ??
+                                                loc.translate('claimed'),
+                                          ),
+                                        ),
                                       );
                                     } catch (e) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text(loc.translate('claimed_error')),
+                                          content: Text(
+                                            loc.translate('claimed_error'),
+                                          ),
                                         ),
                                       );
                                     }

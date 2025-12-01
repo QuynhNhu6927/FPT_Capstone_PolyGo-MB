@@ -185,10 +185,6 @@ class _RequestsState extends State<Requests> {
                   ),
                 );
 
-          if (user.planType == "Plus") {
-            avatar = ShinyAvatar(avatarUrl: user.avatarUrl);
-          }
-
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(

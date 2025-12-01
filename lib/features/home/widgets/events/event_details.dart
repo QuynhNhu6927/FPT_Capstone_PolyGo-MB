@@ -83,11 +83,12 @@ class _EventDetailState extends State<EventDetail> {
       buttonText = loc.translate('joined');
     }
 
-    final dateFormatted = DateFormat('dd MMM yyyy, hh:mm a').format(event.startAt);
+    final eventLocal = event.startAt.toLocal();
+    final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal);
     final durationFormatted =
         "${event.expectedDurationInMinutes ~/ 60}h ${event.expectedDurationInMinutes % 60}m";
 
-    Future<bool?> _showPaidEventWarning() {
+    Future<bool?> showPaidEventWarning() {
       return showDialog<bool>(
         context: context,
         barrierDismissible: true,
@@ -471,7 +472,7 @@ class _EventDetailState extends State<EventDetail> {
                   if (event.isPublic)
                   AppButton(
                     variant: ButtonVariant.outline,
-                    size: ButtonSize.md,
+                    size: ButtonSize.sm,
                     icon: const Icon(Icons.share_outlined, size: 18),
                     onPressed: () {
                       showDialog(
@@ -489,7 +490,7 @@ class _EventDetailState extends State<EventDetail> {
                       variant: event.isParticipant
                           ? ButtonVariant.outline
                           : ButtonVariant.primary,
-                      size: ButtonSize.md,
+                      size: ButtonSize.sm,
                       icon: const Icon(Icons.check_circle_outline, size: 18),
                       onPressed: isDisabled ? null : () async {
                         final prefs = await SharedPreferences.getInstance();
@@ -578,7 +579,7 @@ class _EventDetailState extends State<EventDetail> {
                         }
 
                         if (event.fee > 0) {
-                          final confirmPaid = await _showPaidEventWarning();
+                          final confirmPaid = await showPaidEventWarning();
                           if (confirmPaid != true) return;
                         }
 

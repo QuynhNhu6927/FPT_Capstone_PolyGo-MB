@@ -55,16 +55,16 @@ class _ReactPopupState extends State<ReactPopup> {
     final textColor = isDark ? Colors.white70 : Colors.black87;
     final secondaryText = isDark ? Colors.white54 : Colors.grey[700]!;
     final loc = AppLocalizations.of(context);
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(loc.translate("react")),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(loc.translate("react")),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
         ),
-        body: FutureBuilder<PostModel>(
+      ),
+      body: SafeArea(
+        child: FutureBuilder<PostModel>(
           future: _fetchPostFuture,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {

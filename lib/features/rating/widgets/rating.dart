@@ -324,7 +324,7 @@ class _RatingWidgetState extends State<RatingWidget> {
                                   }
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(loc.translate("error"))),
+                                    SnackBar(content: Text(loc.translate("error_rating"))),
                                   );
                                 }
                               },

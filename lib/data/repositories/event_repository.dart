@@ -20,6 +20,8 @@ import '../models/events/joined_event_model.dart';
 import '../models/events/payout_response.dart';
 import '../models/events/update_event_status_request.dart';
 import '../models/events/update_event_status_response.dart';
+import '../models/summary/event_summary_details.dart';
+import '../models/summary/gen_summary.dart';
 import '../services/apis/event_service.dart';
 
 class EventRepository {
@@ -343,5 +345,20 @@ class EventRepository {
     return await _service.updateRating(token: token, request: request);
   }
 
+  Future<EventSummaryData?> getEventSummary(String token, String eventId) async {
+    final res = await _service.getEventSummary(token: token, eventId: eventId);
+    return res.data?.data;
+  }
+
+  Future<AiSummaryModel?> generateSummary({
+    required String token,
+    required String eventId,
+  }) async {
+    final res = await _service.generateSummary(
+      token: token,
+      eventId: eventId,
+    );
+    return res.data?.data;
+  }
 
 }

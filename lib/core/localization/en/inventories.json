@@ -27,9 +27,10 @@
   "failed_to_load_gifts": "Failed to load gifts! Please try again later!",
   "owned": "Owned",
   "no_sent_gifts": "You have not given a gift to anyone",
-  "has_received_from": "has received from",
+  "has_received_from": "has received",
   "levels": "Levels",
   "no_levels_found": "No levels found",
-  "required_xp": "EXP required:"
+  "required_xp": "EXP required",
+  "claim_now": "Claim Now"
 
 }

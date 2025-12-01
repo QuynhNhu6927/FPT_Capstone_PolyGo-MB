@@ -81,6 +81,19 @@
   "mute_all_cam": "Turn off all camera",
   "no_parti_yet": "No participants yet",
   "confirm_kick": "Confirm kick user",
-  "confirm_kick_username": "You really want to kick"
+  "confirm_kick_username": "You really want to kick",
+
+  "summary_and_vocabulary": "Summary and vocabulary",
+  "error_loading_summary": "Error! Please try again later",
+  "no_summary_available": "No available summary for this event yet! Please come back later!",
+  "meeting_summary": "Meeting summary",
+  "key_points": "Key points",
+  "vocabulary": "Vocabulary",
+  "context": "Context",
+  "close": "Close",
+  "action_items": "Action items",
+
+  "search_hosted_placeholder": "Search hosted event...",
+  "search_joined_placeholder": "Search joined event..."
 
 }

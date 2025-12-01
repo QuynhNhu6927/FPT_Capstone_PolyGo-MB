@@ -35,7 +35,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
 
   final _items = const [
     {'icon': Icons.event_rounded},
-    {'icon': Icons.people_alt_rounded},
+    {'icon': Icons.person_search},
     {'icon': Icons.videogame_asset_rounded},
     {'icon': Icons.public_rounded},
   ];

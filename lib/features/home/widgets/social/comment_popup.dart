@@ -201,29 +201,29 @@ class _CommentPopupState extends State<CommentPopup> {
     final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final Color inputBgColor = isDark ? Colors.white12 : Colors.grey[200]!;
     final loc = AppLocalizations.of(context);
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          elevation: 1,
-          leading: IconButton(
-            icon: Icon(Icons.close, color: textColor),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text(
-            loc.translate("comments"),
-            style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-          ),
-          systemOverlayStyle: isDark
-              ? SystemUiOverlayStyle.light
-              : SystemUiOverlayStyle.dark,
-          backgroundColor: theme.scaffoldBackgroundColor,
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        elevation: 1,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: textColor),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Text(
+          loc.translate("comments"),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+        ),
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        backgroundColor: theme.scaffoldBackgroundColor,
+      ),
 
-        // BODY
-        body: Column(
+      // BODY
+      body: SafeArea(
+        child: Column(
           children: [
             // input comment
             Padding(

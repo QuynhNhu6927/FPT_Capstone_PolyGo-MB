@@ -13,7 +13,11 @@ class StatisticEvent extends StatefulWidget {
   final String eventId;
   final void Function(double)? onPayoutClaimed;
 
-  const StatisticEvent({super.key, required this.eventId, this.onPayoutClaimed});
+  const StatisticEvent({
+    super.key,
+    required this.eventId,
+    this.onPayoutClaimed,
+  });
 
   @override
   State<StatisticEvent> createState() => _StatisticEventState();
@@ -69,10 +73,7 @@ class _StatisticEventState extends State<StatisticEvent> {
       if (token.isEmpty) throw Exception("Missing token");
 
       // Gọi API claim
-      await _eventRepository.claimHostPayout(
-        token: token,
-        eventId: _event!.id,
-      );
+      await _eventRepository.claimHostPayout(token: token, eventId: _event!.id);
 
       // Load lại chi tiết sự kiện
       final updatedEvent = await _eventRepository.getEventDetails(
@@ -89,20 +90,19 @@ class _StatisticEventState extends State<StatisticEvent> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("${loc.translate('payout_success')} ${claimedAmount.toStringAsFixed(0)} đ"),
+          content: Text(
+            "${loc.translate('payout_success')} ${claimedAmount.toStringAsFixed(0)} đ",
+          ),
         ),
       );
 
       widget.onPayoutClaimed?.call(claimedAmount);
-
     } catch (e, st) {
       setState(() => _payoutLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.translate('payout_failed')),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.translate('payout_failed'))));
     }
   }
 
@@ -192,37 +192,145 @@ class _StatisticEventState extends State<StatisticEvent> {
                         ),
                       ],
                     ),
-                    if (!e.hostPayoutClaimed && e.fee > 0)
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: sw(context, 200)),
-                        child: AppButton(
-                          text: loc.translate('payout'),
-                          onPressed: _payoutLoading ? null : _claimPayout,
-                          variant: ButtonVariant.primary,
-                          size: ButtonSize.lg,
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: sw(context, 16), vertical: sh(context, 12)),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade200,
-                          borderRadius: BorderRadius.circular(sw(context, 12)),
-                        ),
-                        child: Text(
-                          "${loc.translate('payouted')} ${e.hostPayoutAmount.toStringAsFixed(0)} đ",
-                          style: TextStyle(
-                            color: Colors.green.shade800,
-                            fontWeight: FontWeight.bold,
-                            fontSize: st(context, 16),
-                          ),
-                        ),
-                      ),
+                    (e.status == 'Completed' &&
+                            !e.hostPayoutClaimed &&
+                            e.fee > 0)
+                        ? ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: sw(context, 200),
+                            ),
+                            child: AppButton(
+                              text: loc.translate('payout'),
+                              onPressed: _payoutLoading ? null : _claimPayout,
+                              variant: ButtonVariant.primary,
+                              size: ButtonSize.lg,
+                            ),
+                          )
+                        : (!e.hostPayoutClaimed && e.fee > 0)
+                        ? Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: sw(context, 16),
+                              vertical: sh(context, 12),
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(
+                                sw(context, 12),
+                              ),
+                            ),
+                            child: Text(
+                              loc.translate('pending'),
+                              style: TextStyle(
+                                color: Colors.orange.shade800,
+                                fontWeight: FontWeight.bold,
+                                fontSize: st(context, 16),
+                              ),
+                            ),
+                          )
+                        : (e.status == 'Completed' && e.hostPayoutClaimed)
+                        ? Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: sw(context, 16),
+                              vertical: sh(context, 12),
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade200,
+                              borderRadius: BorderRadius.circular(
+                                sw(context, 12),
+                              ),
+                            ),
+                            child: Text(
+                              "${loc.translate('payouted')} ${e.hostPayoutAmount.toStringAsFixed(0)} đ",
+                              style: TextStyle(
+                                color: Colors.green.shade800,
+                                fontWeight: FontWeight.bold,
+                                fontSize: st(context, 16),
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),
               SizedBox(height: sh(context, 22)),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(sw(context, 20)),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(sw(context, 16)),
+                  border: Border.all(color: Colors.blue.shade300, width: 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Cột trái: Rating
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            loc.translate('event_rating'),
+                            style: t.titleMedium?.copyWith(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w700,
+                              fontSize: st(context, 18),
+                            ),
+                          ),
+                          SizedBox(height: sh(context, 8)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: st(context, 24),
+                              ),
+                              SizedBox(width: sw(context, 6)),
+                              Text(
+                                e.averageRating.toStringAsFixed(1),
+                                style: t.headlineSmall?.copyWith(
+                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: st(context, 22),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Cột phải: Total reviews
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            loc.translate('total_reviews'),
+                            style: t.titleMedium?.copyWith(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w700,
+                              fontSize: st(context, 18),
+                            ),
+                          ),
+                          SizedBox(height: sh(context, 8)),
+                          Text(
+                            "${e.totalReviews}",
+                            style: t.headlineSmall?.copyWith(
+                              color: Colors.blue.shade800,
+                              fontWeight: FontWeight.bold,
+                              fontSize: st(context, 22),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: sh(context, 22)),
+
               Text(
                 loc.translate('payout_detail'),
                 style: t.titleMedium?.copyWith(
@@ -231,19 +339,27 @@ class _StatisticEventState extends State<StatisticEvent> {
                 ),
               ),
               SizedBox(height: sh(context, 12)),
-              _buildInfoRow(Icons.people, loc.translate('number_of_participants'), "${e.numberOfParticipants}"),
-              _buildInfoRow(Icons.attach_money, loc.translate('fee'), "${e.fee} đ"),
-              _buildInfoRow(Icons.category, loc.translate('planType'), e.planType),
+              _buildInfoRow(
+                Icons.people,
+                loc.translate('number_of_participants'),
+                "${e.numberOfParticipants}",
+              ),
+              _buildInfoRow(
+                Icons.attach_money,
+                loc.translate('fee'),
+                "${e.fee} đ",
+              ),
               _buildInfoRow(
                 Icons.schedule,
                 loc.translate('start'),
                 DateFormat('dd MMM yyyy, HH:mm').format(e.startAt.toLocal()),
               ),
-              _buildInfoRow(
-                Icons.schedule,
-                loc.translate('end'),
-                DateFormat('dd MMM yyyy, HH:mm').format(e.endAt!.toLocal()),
-              ),
+              if (e.endAt != null)
+                _buildInfoRow(
+                  Icons.schedule,
+                  loc.translate('end'),
+                  DateFormat('dd MMM yyyy, HH:mm').format(e.endAt!.toLocal()),
+                ),
             ],
           ),
         ),
@@ -257,7 +373,11 @@ class _StatisticEventState extends State<StatisticEvent> {
       padding: EdgeInsets.symmetric(vertical: sh(context, 10)),
       child: Row(
         children: [
-          Icon(icon, size: st(context, 20), color: Theme.of(context).colorScheme.primary),
+          Icon(
+            icon,
+            size: st(context, 20),
+            color: Theme.of(context).colorScheme.primary,
+          ),
           SizedBox(width: sw(context, 8)),
           Expanded(
             child: Text(
@@ -265,10 +385,7 @@ class _StatisticEventState extends State<StatisticEvent> {
               style: t.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
-          Text(
-            value,
-            style: t.bodyMedium,
-          ),
+          Text(value, style: t.bodyMedium),
         ],
       ),
     );

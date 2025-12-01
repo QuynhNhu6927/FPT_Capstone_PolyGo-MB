@@ -6,6 +6,7 @@ import '../../../../routes/app_routes.dart';
 import '../../../rating/screens/rating_screen.dart';
 import '../../../rating/screens/rates_screen.dart';
 import '../../../shared/share_event_dialog.dart';
+import '../event_summary.dart';
 
 class ActionButtons extends StatelessWidget {
   final JoinedEventModel event;
@@ -36,7 +37,7 @@ class ActionButtons extends StatelessWidget {
       buttons.add(
         AppButton(
           variant: ButtonVariant.outline,
-          size: ButtonSize.md,
+          size: ButtonSize.sm,
           icon: const Icon(Icons.share_outlined, size: 18),
           onPressed: () {
             showDialog(
@@ -50,11 +51,11 @@ class ActionButtons extends StatelessWidget {
 
     /// ---------------- Join button ----------------
     if (eventStatus == 'live') {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 12));
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
       buttons.add(
         AppButton(
           text: loc.translate('join'),
-          size: ButtonSize.md,
+          size: ButtonSize.sm,
           icon: const Icon(Icons.meeting_room_outlined, size: 18),
           variant: ButtonVariant.primary,
           onPressed: () {
@@ -78,11 +79,11 @@ class ActionButtons extends StatelessWidget {
 
     /// ---------------- Join button ----------------
     if (eventStatus == 'approved') {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 12));
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
       buttons.add(
         AppButton(
           text: loc.translate('wait_for_host'),
-          size: ButtonSize.md,
+          size: ButtonSize.sm,
           icon: const Icon(Icons.lock_clock, size: 18),
           variant: ButtonVariant.outline,
         ),
@@ -91,13 +92,12 @@ class ActionButtons extends StatelessWidget {
 
     /// ---------------- Rating buttons ----------------
     if (eventStatus == 'completed') {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 12));
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
 
       if (isHost || (hasRating ?? false)) {
         buttons.add(
           AppButton(
-            text: loc.translate('rating'),
-            size: ButtonSize.md,
+            size: ButtonSize.sm,
             variant: ButtonVariant.outline,
             icon: const Icon(Icons.star_outline, size: 18),
             onPressed: () {
@@ -113,9 +113,8 @@ class ActionButtons extends StatelessWidget {
       } else {
         buttons.add(
           AppButton(
-            text: loc.translate('rate'),
-            size: ButtonSize.md,
-            variant: ButtonVariant.primary,
+            size: ButtonSize.sm,
+            variant: ButtonVariant.outline,
             icon: const Icon(Icons.star_rate_outlined, size: 18),
             onPressed: () {
               Navigator.push(
@@ -128,6 +127,29 @@ class ActionButtons extends StatelessWidget {
           ),
         );
       }
+      buttons.add(const SizedBox(width: 8));
+      buttons.add(
+        AppButton(
+          text: 'AI Summary',
+          variant: ButtonVariant.primary,
+          size: ButtonSize.sm,
+          icon: const Icon(
+            Icons.smart_toy_outlined,
+            size: 18,
+          ),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => EventSummary(
+                  eventId: event.id,
+                  token: token,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
     }
 
     return Row(

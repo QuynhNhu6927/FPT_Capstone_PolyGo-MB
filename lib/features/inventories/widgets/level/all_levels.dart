@@ -75,16 +75,13 @@ class _AllLevelsState extends State<AllLevels> {
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context);
     final t = theme.textTheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final Gradient cardBackground = isDark
-        ? const LinearGradient(
-            colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : const LinearGradient(colors: [Colors.white, Colors.white]);
 
-    const levelColor = Color(0xFF2563EB);
+    const levelBlue = Color(0xFF2563EB);
+    const levelGreen = Color(0xFF16A34A);
+    const grayBorder = Color(0xFF9CA3AF);
+    const grayLight = Color(0xFFF3F4F6);
+    const grayDarkText = Color(0xFF4B5563);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -95,7 +92,6 @@ class _AllLevelsState extends State<AllLevels> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
       ),
-
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
@@ -123,6 +119,25 @@ class _AllLevelsState extends State<AllLevels> {
                       final claimed = lv.isClaimed;
                       final isReached = lv.order <= currentUserLevel;
 
+                      // Xác định màu sắc UI
+                      Color borderColor;
+                      Color bgColor;
+                      Color titleColor;
+
+                      if (isReached && !claimed) {
+                        borderColor = levelBlue;
+                        bgColor = levelBlue.withOpacity(0.1);
+                        titleColor = levelBlue;
+                      } else if (claimed) {
+                        borderColor = levelGreen;
+                        bgColor = levelGreen.withOpacity(0.1);
+                        titleColor = levelGreen;
+                      } else {
+                        borderColor = grayBorder;
+                        bgColor = grayLight;
+                        titleColor = grayDarkText;
+                      }
+
                       return IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -136,14 +151,18 @@ class _AllLevelsState extends State<AllLevels> {
                                   height: 38,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: isReached ? levelColor : Colors.grey.shade300,
+                                    color: isReached
+                                        ? borderColor
+                                        : Colors.grey.shade300,
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
                                     lv.order.toString(),
                                     style: t.bodySmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: isReached ? Colors.white : Colors.black54,
+                                      color: isReached
+                                          ? Colors.white
+                                          : Colors.black54,
                                     ),
                                   ),
                                 ),
@@ -151,7 +170,9 @@ class _AllLevelsState extends State<AllLevels> {
                                   Expanded(
                                     child: Container(
                                       width: 3,
-                                      color: isReached ? levelColor : Colors.grey.shade300,
+                                      color: isReached
+                                          ? borderColor
+                                          : Colors.grey.shade300,
                                     ),
                                   ),
                               ],
@@ -163,15 +184,12 @@ class _AllLevelsState extends State<AllLevels> {
                                 margin: const EdgeInsets.only(bottom: 30),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  gradient: cardBackground,
+                                  color: bgColor,
                                   borderRadius: BorderRadius.circular(14),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 8,
-                                      color: Colors.black.withOpacity(.06),
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
+                                  border: Border.all(
+                                    color: borderColor,
+                                    width: 2,
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,21 +197,35 @@ class _AllLevelsState extends State<AllLevels> {
                                   children: [
                                     SizedBox(
                                       height: t.titleMedium!.fontSize! * 2.5,
-                                      child: Text(
-                                        lv.description,
-                                        style: t.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : Colors.black,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.card_giftcard,
+                                            size: 20,
+                                            color: titleColor,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              lv.description,
+                                              style: t.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: titleColor,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
                                       "${loc.translate("required_xp")}: ${lv.requiredXP}",
                                       style: t.bodyMedium?.copyWith(
-                                        color: isDark ? Colors.grey.shade300 : Colors.grey[700],
+                                        color: grayDarkText,
                                       ),
                                     ),
                                     const SizedBox(height: 10),
@@ -210,42 +242,87 @@ class _AllLevelsState extends State<AllLevels> {
                                                 ),
                                               ),
                                             );
-                                          } else if (currentUserLevel >= lv.order) {
+                                          } else if (currentUserLevel >=
+                                              lv.order) {
                                             return ShinyButton(
                                               onTap: () async {
-                                                final prefs = await SharedPreferences.getInstance();
-                                                final token = prefs.getString('token');
+                                                final prefs =
+                                                    await SharedPreferences.getInstance();
+                                                final token = prefs.getString(
+                                                  'token',
+                                                );
                                                 if (token == null) return;
                                                 try {
-                                                  final repo = LevelRepository(LevelService(ApiClient()));
-                                                  final res = await repo.claimLevel(token, lv.id.toString());
+                                                  final repo = LevelRepository(
+                                                    LevelService(ApiClient()),
+                                                  );
+                                                  final res = await repo
+                                                      .claimLevel(
+                                                        token,
+                                                        lv.id.toString(),
+                                                      );
                                                   if (!mounted) return;
                                                   setState(() {
-                                                    _levels[index] = _levels[index].copyWith(isClaimed: true);
+                                                    _levels[index] =
+                                                        _levels[index].copyWith(
+                                                          isClaimed: true,
+                                                        );
                                                   });
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text(res.message)),
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        res.message,
+                                                      ),
+                                                    ),
                                                   );
                                                 } catch (e) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text("Claim failed: $e")),
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        "Claim failed: $e",
+                                                      ),
+                                                    ),
                                                   );
                                                 }
                                               },
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                                                decoration: BoxDecoration(
-                                                  color: levelColor,
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: Text(
-                                                  loc.translate("claimed"),
-                                                  style: t.bodySmall?.copyWith(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ).animate().scale(delay: 200.ms * index, duration: 400.ms).fadeIn(duration: 400.ms),
+                                              child:
+                                                  Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 7,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: borderColor,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                        ),
+                                                        child: Text(
+                                                          loc.translate(
+                                                            "claim_now",
+                                                          ),
+                                                          style: t.bodySmall
+                                                              ?.copyWith(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                        ),
+                                                      )
+                                                      .animate()
+                                                      .scale(
+                                                        delay: 200.ms * index,
+                                                        duration: 400.ms,
+                                                      )
+                                                      .fadeIn(duration: 400.ms),
                                             );
                                           } else {
                                             return LockButton();

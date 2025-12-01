@@ -19,6 +19,8 @@ import '../../models/events/joined_event_list_response.dart';
 import '../../models/events/payout_response.dart';
 import '../../models/events/update_event_status_request.dart';
 import '../../models/events/update_event_status_response.dart';
+import '../../models/summary/event_summary_details.dart';
+import '../../models/summary/gen_summary.dart';
 
 class EventService {
   final ApiClient apiClient;
@@ -444,6 +446,49 @@ class EventService {
       return ApiResponse.fromJson(
         json,
             (data) => EventRatingResponse.fromJson(data),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<EventSummaryResponse>> getEventSummary({
+    required String token,
+    required String eventId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        ApiConstants.getSummary.replaceFirst('{eventId}', eventId),
+        headers: {ApiConstants.headerAuthorization: 'Bearer $token'},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+      return ApiResponse.fromJson(
+        json,
+            (data) => EventSummaryResponse.fromJson(json),
+      );
+    } on DioError catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<AiSummaryResponse>> generateSummary({
+    required String token,
+    required String eventId,
+  }) async {
+    try {
+      final endpoint = ApiConstants.genSummary.replaceFirst("{eventId}", eventId);
+
+      final response = await apiClient.post(
+        endpoint,
+        headers: {ApiConstants.headerAuthorization: "Bearer $token"},
+      );
+
+      final json = response.data as Map<String, dynamic>;
+
+      return ApiResponse.fromJson(
+        json,
+            (data) => AiSummaryResponse.fromJson(json),
       );
     } on DioError catch (e) {
       rethrow;

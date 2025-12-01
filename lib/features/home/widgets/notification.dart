@@ -360,7 +360,10 @@ class _NotificationPageState extends State<NotificationPage> {
                 },
         ),
       ),
-      bottomNavigationBar: AppBottomBar(currentIndex: 5),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: AppBottomBar(currentIndex: 5),
+      ),
     );
   }
 }

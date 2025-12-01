@@ -81,6 +81,19 @@
   "mute_all_cam": "Tắt cam tất cả",
   "no_parti_yet": "Chưa có người nào tham dự",
   "confirm_kick": "Xác nhận xóa người tham dự",
-  "confirm_kick_username": "Bạn có chắc muốn xóa"
+  "confirm_kick_username": "Bạn có chắc muốn xóa",
+
+  "summary_and_vocabulary": "Tóm tắt và từ vựng",
+  "error_loading_summary": "Lỗi khi tải dữ liệu",
+  "no_summary_available": "Chưa có tóm tắt cho sự kiện này! Hãy quay lại sau!",
+  "meeting_summary": "Tóm tắt cuộc họp",
+  "key_points": "Điểm chính",
+  "vocabulary": "Từ vựng",
+  "context": "Ngữ cảnh",
+  "close": "Đóng",
+  "action_items": "Mục tiêu",
+
+  "search_hosted_placeholder": "Tìm sự kiện đã tạo...",
+  "search_joined_placeholder": "Tìm sự kiện đã tham gia..."
 
 }

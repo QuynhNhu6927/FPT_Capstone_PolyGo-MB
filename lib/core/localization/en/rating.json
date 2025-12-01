@@ -14,6 +14,7 @@
   "choose_gift": "Choose gift",
   "send_rating": "Send rating",
   "rating_success": "Rating successfully",
-  "please_choose_star": "Please choose star"
+  "please_choose_star": "Please choose star",
+  "error_rating": "Cannot submit rating because the system records that you have not attended in the event"
 
 }
