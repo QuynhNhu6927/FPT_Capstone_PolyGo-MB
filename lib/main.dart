@@ -1,12 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/api/api_client.dart';
 import 'core/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_preview/device_preview.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/size_config.dart';
+import 'core/utils/auth_util.dart';
 import 'core/utils/jwt_helper.dart';
+import 'data/repositories/auth_repository.dart';
+import 'data/services/apis/auth_service.dart';
 import 'data/services/signalr/chat_signalr_service.dart';
 import 'data/services/signalr/user_presence.dart';
 import 'routes/app_routes.dart';
@@ -56,16 +60,38 @@ class _MyAppState extends State<MyApp> {
     // Theme mode
     final themeString = prefs.getString('themeMode') ?? 'system';
     _themeMode = ThemeMode.values.firstWhere(
-      (e) => e.name == themeString,
+          (e) => e.name == themeString,
       orElse: () => ThemeMode.system,
     );
 
     // token
     _token = prefs.getString('token');
 
-    if (_token != null && JwtHelper.isExpired(_token!)) {
-      await prefs.remove('token');
-      _token = null;
+    if (_token != null) {
+      if (JwtHelper.isExpired(_token!)) {
+        await prefs.remove('token');
+        _token = null;
+      } else {
+        try {
+          // tạo repo và gọi API me
+          final repo = AuthRepository(AuthService(ApiClient()));
+          final user = await repo.me(_token!);
+          final nextUnbannedAt = user.nextUnbannedAt;
+
+          print('NextUnbannedAt from API: $nextUnbannedAt');
+
+          if (nextUnbannedAt != null) {
+            print('User is currently banned, force logout');
+            await forceLogout();
+            return;
+          }
+        } catch (e) {
+          print('Error fetching user info: $e');
+          // nếu lỗi API, có thể xóa token để yêu cầu login lại
+          await forceLogout();
+          return;
+        }
+      }
     }
 
     if (mounted) setState(() {});

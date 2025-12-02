@@ -4,7 +4,7 @@ import 'package:polygo_mobile/features/profile/widgets/profileHeader/report_list
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../auth/widgets/polygo_terms.dart';
-import '../../../users/widgets/system_report_dialog.dart';
+import '../../../shared/system_report_dialog.dart';
 import 'change_password_form.dart';
 
 class SettingsFullScreenDialog extends StatelessWidget {

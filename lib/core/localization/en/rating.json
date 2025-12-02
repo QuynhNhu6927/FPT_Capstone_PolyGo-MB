@@ -15,6 +15,8 @@
   "send_rating": "Send rating",
   "rating_success": "Rating successfully",
   "please_choose_star": "Please choose star",
-  "error_rating": "Cannot submit rating because the system records that you have not attended in the event"
+  "error_rating": "Cannot submit rating because the system records that you have not attended in the event",
+  "event_rating": "Rating",
+  "total_reviews": "Reviews"
 
 }

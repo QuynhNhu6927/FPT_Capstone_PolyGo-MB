@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:polygo_mobile/features/auth/widgets/banned_screen.dart';
 import 'package:polygo_mobile/features/chat/screens/conversation_list_screen.dart';
 import 'package:polygo_mobile/features/game/screens/play_screen.dart';
 import '../data/models/wordsets/start_wordset_response.dart';
@@ -49,11 +50,15 @@ class AppRoutes {
   static const String overview = '/overview';
   static const String play = '/play';
   static const String myGames = '/my-games';
+  static const String banned = '/banned';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+
+      case banned:
+        return MaterialPageRoute(builder: (_) => const BannedScreen());
 
       case register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());

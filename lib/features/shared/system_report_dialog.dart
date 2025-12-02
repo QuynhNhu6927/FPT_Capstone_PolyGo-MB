@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../../core/localization/app_localizations.dart';
-import '../../../../core/api/api_client.dart';
-import '../../../../data/repositories/media_repository.dart';
-import '../../../../data/repositories/report_repository.dart';
-import '../../../../data/services/apis/media_service.dart';
-import '../../../../data/services/apis/report_service.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../core/api/api_client.dart';
+import '../../../data/repositories/media_repository.dart';
+import '../../../data/repositories/report_repository.dart';
+import '../../../data/services/apis/media_service.dart';
+import '../../../data/services/apis/report_service.dart';
 
 class SystemReportDialog extends StatefulWidget {
   final VoidCallback? onSubmit;

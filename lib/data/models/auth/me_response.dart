@@ -21,6 +21,7 @@ class MeResponse {
   final int xpInCurrentLevel;
   final int xpToNextLevel;
   final DateTime? nextWithdrawResetAt;
+  final DateTime? nextUnbannedAt;
   final DateTime? lastLoginAt;
 
   MeResponse({
@@ -46,6 +47,7 @@ class MeResponse {
     required this.xpInCurrentLevel,
     required this.xpToNextLevel,
     this.nextWithdrawResetAt,
+    this.nextUnbannedAt,
     this.lastLoginAt,
   });
 
@@ -99,6 +101,9 @@ class MeResponse {
           : null,
       nextWithdrawResetAt: json['nextWithdrawResetAt'] != null
           ? DateTime.tryParse(json['nextWithdrawResetAt'])
+          : null,
+      nextUnbannedAt: json['nextUnbannedAt'] != null
+          ? DateTime.tryParse(json['nextUnbannedAt'])
           : null,
     );
   }

@@ -12,6 +12,7 @@ import '../../../data/services/apis/auth_service.dart';
 import '../../../data/services/signalr/user_presence.dart';
 import '../../../routes/app_routes.dart';
 import '../../../../core/utils/responsive.dart';
+import 'banned_screen.dart';
 
 class LoginForm extends StatefulWidget {
   final bool isTablet;
@@ -66,19 +67,34 @@ class _LoginFormState extends State<LoginForm> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
       await UserPresenceManager().init();
+
       final decoded = JwtDecoder.decode(token);
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
+      final nextUnbannedAt = decoded['NextUnbannedAt'];
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.translate("login_success"))),
-      );
-
-      if (isNew) {
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.profileSetup, (route) => false);
+      if (nextUnbannedAt != null) {
+        // Token có NextUnbannedAt → user đang bị banned
+        // Vẫn giữ token, nhưng có thể hiển thị popup thông báo
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const BannedScreen(),
+        );
       } else {
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
+        // Không có NextUnbannedAt → bình thường
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate("login_success"))),
+        );
+
+        // Điều hướng bình thường
+        if (isNew) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, AppRoutes.profileSetup, (route) => false);
+        } else {
+          Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
+        }
       }
     } catch (e) {
       final msg = e.toString();
