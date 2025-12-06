@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/localization/app_localizations.dart';
 import '../../../../data/repositories/event_repository.dart';
 
-class CancelEventDialog extends StatefulWidget {
+class HostCancelEventDialog extends StatefulWidget {
   final bool isHost;
   final String token;
   final String eventId;
@@ -10,7 +10,7 @@ class CancelEventDialog extends StatefulWidget {
   final BuildContext parentContext;
   final VoidCallback? onCancelSuccess;
 
-  const CancelEventDialog({
+  const HostCancelEventDialog({
     super.key,
     required this.isHost,
     required this.token,
@@ -21,10 +21,10 @@ class CancelEventDialog extends StatefulWidget {
   });
 
   @override
-  State<CancelEventDialog> createState() => _CancelEventDialogState();
+  State<HostCancelEventDialog> createState() => _HostCancelEventDialogState();
 }
 
-class _CancelEventDialogState extends State<CancelEventDialog> {
+class _HostCancelEventDialogState extends State<HostCancelEventDialog> {
   final TextEditingController _otherController = TextEditingController();
   String? _errorText;
   String? _generalError;

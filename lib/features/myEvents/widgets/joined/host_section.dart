@@ -5,7 +5,7 @@ import '../../../../routes/app_routes.dart';
 
 class HostSection extends StatelessWidget {
   final JoinedEventModel event;
-  final Widget? trailing; // thêm widget cuối hàng
+  final Widget? trailing;
 
   const HostSection({super.key, required this.event, this.trailing});
 
@@ -72,7 +72,7 @@ class HostSection extends StatelessWidget {
             ),
           ),
         ),
-        if (trailing != null) trailing!, // widget Cancel/Unregister cuối hàng
+        if (trailing != null) trailing!,
       ],
     );
   }

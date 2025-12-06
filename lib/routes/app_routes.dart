@@ -119,6 +119,7 @@ class AppRoutes {
         final eventTitle = args?['eventTitle'] as String? ?? '';
         final eventStatus = args?['eventStatus'] as String? ?? '';
         final hostId = args?['hostId'] as String? ?? '';
+        final sourceLanguage = args?['sourceLanguage'] as String? ?? '';
         final hostName = args?['hostName'] as String? ?? '';
         final startAt = args?['startAt'] as DateTime? ?? DateTime.now();
 
@@ -130,6 +131,7 @@ class AppRoutes {
             hostName: hostName,
             startAt: startAt,
             eventStatus: eventStatus,
+            sourceLanguage: sourceLanguage,
           ),
         );
 
@@ -139,6 +141,7 @@ class AppRoutes {
         final eventId = args?['eventId'] as String? ?? '';
         final hostId = args?['hostId'] as String? ?? '';
         final eventTitle = args?['eventTitle'] as String? ?? '';
+        final sourceLanguage = args?['sourceLanguage'] as String? ?? '';
         final eventStatus = args?['eventStatus'] as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => MeetingRoomScreen(
@@ -146,6 +149,7 @@ class AppRoutes {
             eventTitle: eventTitle,
             eventStatus: eventStatus,
             hostId: hostId,
+            sourceLanguage: sourceLanguage,
           ),
         );
 

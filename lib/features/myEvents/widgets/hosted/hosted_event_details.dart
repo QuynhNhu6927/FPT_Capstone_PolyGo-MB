@@ -14,7 +14,7 @@ import '../../../../routes/app_routes.dart';
 import '../../../rating/screens/rates_screen.dart';
 import '../../../shared/share_event_dialog.dart';
 import '../event_summary.dart';
-import '../hosted/cancel_event_dialog.dart';
+import '../hosted/host_cancel_event_dialog.dart';
 import 'hosted_user_list.dart';
 
 class HostedEventDetails extends StatefulWidget {
@@ -199,7 +199,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                             if (value == 'cancel') {
                               showDialog(
                                 context: context,
-                                builder: (_) => CancelEventDialog(
+                                builder: (_) => HostCancelEventDialog(
                                   isHost: true,
                                   token: widget.token,
                                   eventId: widget.event.id,
@@ -438,6 +438,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                         builder: (_) => EventSummary(
                                           eventId: widget.event.id,
                                           token: widget.token,
+                                          isHost: true,
                                         ),
                                       ),
                                     );
@@ -485,13 +486,12 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                             arguments: {
                                               'eventId': widget.event.id,
                                               'eventTitle': widget.event.title,
-                                              'eventStatus':
-                                                  widget.event.status,
+                                              'eventStatus': widget.event.status,
                                               'isHost': true,
                                               'hostId': widget.event.host.id,
-                                              'hostName':
-                                                  widget.event.host.name,
+                                              'hostName': widget.event.host.name,
                                               'startAt': widget.event.startAt,
+                                              'sourceLanguage': widget.event.language.code,
                                             },
                                           );
                                         }

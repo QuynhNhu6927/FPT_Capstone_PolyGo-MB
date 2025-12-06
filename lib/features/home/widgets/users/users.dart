@@ -550,35 +550,95 @@ class _UsersState extends State<Users> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: SizedBox(
-                  height: 48,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        user.name ?? loc.translate('Unknown'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          height: 1,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.name ?? loc.translate('Unknown'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        height: 1,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "EXP: ${user.experiencePoints}",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, height: 1, color: Colors.grey[500]),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // ---------- NEW TAG ROW ----------
+                    SizedBox(
+                      height: 26,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          // Plus tag
+                          if (user.planType == "Plus")
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Colors.orangeAccent, Colors.yellow],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.stars_sharp,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+
+                          // Merit tag
+                          if (user.merit != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: BoxDecoration(
+                                gradient: user.merit >= 80
+                                    ? const LinearGradient(
+                                  colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                    : user.merit >= 40
+                                    ? const LinearGradient(
+                                  colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                    : const LinearGradient(
+                                  colors: [Color(0xFFF44336), Color(0xFFE57373)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.verified_user, size: 14, color: Colors.white),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "${user.merit}",
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: SizedBox(

@@ -36,7 +36,9 @@ class UserMatchingItem {
   final String? id;
   final String? name;
   final String? avatarUrl;
+  final String? planType;
   final int experiencePoints;
+  final int merit;
   final List<UserLang> speakingLanguages;
   final List<UserLang> learningLanguages;
   final List<UserInterest> interests;
@@ -45,7 +47,9 @@ class UserMatchingItem {
     this.id,
     this.name,
     this.avatarUrl,
+    this.planType,
     required this.experiencePoints,
+    required this.merit,
     required this.speakingLanguages,
     required this.learningLanguages,
     required this.interests,
@@ -56,7 +60,9 @@ class UserMatchingItem {
       id: json['id'],
       name: json['name'],
       avatarUrl: json['avatarUrl'],
+      planType: json['planType'],
       experiencePoints: json['experiencePoints'] ?? 0,
+      merit: json['merit'] ?? 0,
       speakingLanguages: (json['speakingLanguages'] as List<dynamic>?)
           ?.map((e) => UserLang.fromJson(e))
           .toList() ??

@@ -23,6 +23,7 @@ class MeetingRoomScreen extends StatefulWidget {
   final bool initialMicOn;
   final bool initialCameraOn;
   final String hostId;
+  final String sourceLanguage;
 
   const MeetingRoomScreen({
     super.key,
@@ -33,6 +34,7 @@ class MeetingRoomScreen extends StatefulWidget {
     this.initialMicOn = true,
     this.initialCameraOn = true,
     required this.hostId,
+    required this.sourceLanguage,
   });
 
   @override
@@ -58,12 +60,16 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
   bool _chatListenerAdded = false;
   bool isHandRaised = false;
   bool showControls = true;
+
   @override
   void initState() {
     super.initState();
 
     isCameraOn = widget.initialCameraOn;
     isMicOn = widget.initialMicOn;
+
+    final normalizedSourceLang =
+        languageCodeMap[widget.sourceLanguage] ?? widget.sourceLanguage;
 
     if (widget.isHost && widget.eventStatus.toLowerCase() == 'live') {
       hasStartedEvent = true;
@@ -74,6 +80,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isHost: widget.isHost,
       localAudioEnabled: widget.initialMicOn,
       localVideoEnabled: widget.initialCameraOn,
+      sourceLanguage: normalizedSourceLang,
       onRoomEnded: () {
         if (!widget.isHost && mounted) {
           final hostName = _controller.hostId != null
@@ -130,36 +137,215 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         );
       }
     };
+
+    _controller.onKicked = (message) {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: true,  // user có thể bấm back
+        builder: (_) => WillPopScope(
+          onWillPop: () async {
+            // Khi user bấm Back → thoát khỏi call
+            Navigator.pop(context);  // đóng dialog
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.myEvents,
+                  (route) => false,
+            );
+            return false; // ngăn dialog tự đóng mặc định
+          },
+          child: AlertDialog(
+            title: const Text("Bạn đã bị mời ra khỏi sự kiện"),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);  // đóng dialog
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.myEvents,
+                        (route) => false,
+                  );
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        ),
+      );
+    };
     _initMeeting();
   }
 
   Future<void> _showSubtitleLanguageDialog() async {
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Chọn ngôn ngữ phụ đề"),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView(
-            shrinkWrap: true,
-            children: subtitleLanguages.entries.map((entry) {
-              final isCurrent = _controller.targetLanguage == entry.key;
-              return ListTile(
-                title: Text(entry.value),
-                trailing: isCurrent ? const Icon(Icons.check, color: Colors.green) : null,
-                onTap: () => Navigator.of(context).pop(entry.key),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
+    bool captionsEnabled = _controller.isCaptionsEnabled;
+    String currentLang = _controller.targetLanguage;
 
-    if (selected != null && selected != _controller.targetLanguage) {
-      setState(() {
-        _controller.setTargetLanguage(selected);
-      });
-    }
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Cài đặt phụ đề"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Toggle Captions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Bật phụ đề"),
+                      Switch(
+                        value: captionsEnabled,
+                        onChanged: (value) {
+                          setStateDialog(() {
+                            captionsEnabled = value;
+                          });
+
+                          if (value) {
+                            _controller.enableCaptions();
+                          } else {
+                            _controller.disableCaptions();
+                          }
+
+                          setState(() {});
+                        },
+                      )
+                    ],
+                  ),
+
+                  const Divider(),
+
+                  // List languages (disabled when captions OFF)
+                  SizedBox(
+                    height: 250,
+                    width: double.maxFinite,
+                    child: ListView(
+                      children: subtitleLanguages.entries.map((entry) {
+                        final isCurrent = currentLang == entry.key;
+
+                        return ListTile(
+                          enabled: captionsEnabled,
+                          title: Text(
+                            entry.value,
+                            style: TextStyle(
+                              color: captionsEnabled ? null : Colors.grey,
+                            ),
+                          ),
+                          trailing: isCurrent && captionsEnabled
+                              ? const Icon(Icons.check, color: Colors.green)
+                              : null,
+                          onTap: captionsEnabled
+                              ? () {
+                            Navigator.pop(context);
+                            _controller.setTargetLanguage(entry.key);
+                            setState(() {});
+                          }
+                              : null,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showTranscriptionDialog() async {
+    bool tempEnabled = _controller.isTranscriptionEnabled;
+
+    // ⭐ copy language hiện tại
+    String tempSourceLang = _controller.sourceLanguage;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Cài đặt chuyển giọng nói"),
+              content: SizedBox(
+                height: 400,
+                width: double.maxFinite,
+                child: Column(
+                  children: [
+                    // Toggle transcription
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Bật Transcription"),
+                        Switch(
+                          value: tempEnabled,
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              tempEnabled = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const Divider(),
+
+                    // ⭐ Danh sách ngôn ngữ
+                    Expanded(
+                      child: ListView(
+                        children: languageCodeMap.entries.map((entry) {
+                          final code = entry.key;
+                          final locale = entry.value;
+                          final isSelected = locale == tempSourceLang;
+
+                          return ListTile(
+                            title: Text("${code.toUpperCase()}  ($locale)"),
+                            trailing: isSelected
+                                ? const Icon(Icons.check, color: Colors.green)
+                                : null,
+                            onTap: () {
+                              setStateDialog(() {
+                                tempSourceLang = locale;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Hủy"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Cập nhật source language vào controller
+                    _controller.sourceLanguage = tempSourceLang;
+
+                    if (tempEnabled) {
+                      await _controller.enableMobileTranscription(tempSourceLang);
+                    } else {
+                      await _controller.disableMobileTranscription();
+                    }
+
+                    setState(() {});
+                    Navigator.pop(context);
+                  },
+
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -183,11 +369,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
 
       if (!_chatListenerAdded) {
         _controller.addChatListener((msg) {
-          if (mounted) {
-            setState(() {
-              // _chatMessages.add(msg);
-            });
-          }
+          if (mounted) setState(() {});
         });
         _chatListenerAdded = true;
       }
@@ -197,22 +379,25 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isCameraOn = _controller.localVideoEnabled;
       _localRenderer.srcObject = _controller.localStream;
 
+      // ---- CHỈ LẤY USER MỘT LẦN ----
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
+
+      String? userId;
       if (token != null && token.isNotEmpty) {
         try {
           final user = await AuthRepository(AuthService(ApiClient())).me(token);
           _controller.userName = user.name;
+          userId = user.id;
         } catch (e) {
           print("Failed to get user info: $e");
         }
       }
 
-      // Sử dụng widget.isHost để quyết định isHost khi joinRoom
-      final isUserHost = widget.isHost;
-
+      // ---- JOIN ROOM ----
       await _controller.joinRoom(
-        isHost: isUserHost,
+        isHost: widget.isHost,
+        userId: userId,
       );
 
       print("Controller hostId: ${_controller.hostId}");
@@ -220,24 +405,13 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         print("Participant: id=${v.id}, name=${v.name}, role=${v.role}");
       });
 
-      final prefs2 = await SharedPreferences.getInstance();
-      final token2 = prefs2.getString('token');
-      String? userId;
-
-      if (token2 != null && token2.isNotEmpty) {
-        try {
-          final me = await AuthRepository(AuthService(ApiClient())).me(token2);
-          userId = me.id;
-        } catch (e) {
-          //
-        }
-      }
-
+      // ---- CONFIRM ----
       if (userId != null) {
-        final ok = await _controller.joinRoomConfirm(userId);
+        await _controller.joinRoomConfirm(userId);
       }
 
-      if (isUserHost) {
+      // ---- HOST START CALL ----
+      if (widget.isHost) {
         Future.delayed(const Duration(seconds: 1), () async {
           await _controller.startCall();
         });
@@ -248,7 +422,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         if (mounted) setState(() {});
       });
     } catch (e) {
-      //
+      print("InitMeeting error: $e");
     }
   }
 
@@ -316,46 +490,13 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     }
   }
 
-  // void _handleEndEvent() async {
-  //   if (!widget.isHost) return;
-  //   final loc = AppLocalizations.of(context);
-  //
-  //   try {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final token = prefs.getString('token');
-  //     if (token == null || token.isEmpty) {
-  //       _showSnack(loc.translate("missing_token"));
-  //       return;
-  //     }
-  //
-  //     final eventRepository = EventRepository(EventService(ApiClient()));
-  //     final updatedEvent = await eventRepository.updateEventStatus(
-  //       token: token,
-  //       eventId: widget.eventId,
-  //       status: 'Completed',
-  //     );
-  //
-  //     if (updatedEvent != null) {
-  //       _showSnack(loc.translate('event_status_update_completed'));
-  //     } else {
-  //       _showSnack(loc.translate('event_status_update_failed'));
-  //     }
-  //
-  //     await _controller.endEvent();
-  //
-  //     if (mounted) {
-  //       Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
-  //     }
-  //   } catch (e) {
-  //     _showSnack(loc.translate('event_status_update_failed'));
-  //   }
-  // }
-
-  void _handleEndEvent() async {
+  Future<void> _handleEndEvent() async {
     if (!widget.isHost) return;
     final loc = AppLocalizations.of(context);
 
     try {
+      await _controller.endEvent();
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
@@ -364,8 +505,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       }
 
       final eventRepository = EventRepository(EventService(ApiClient()));
-
-      // 1) Update event status
       final updatedEvent = await eventRepository.updateEventStatus(
         token: token,
         eventId: widget.eventId,
@@ -378,25 +517,34 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         _showSnack(loc.translate('event_status_update_failed'));
       }
 
-      () async {
-        try {
-          await eventRepository.generateSummary(
-            token: token,
-            eventId: widget.eventId,
-          );
-        } catch (_) {
-
-        }
-      }();
-
-      await _controller.endEvent();
+      // () async {
+      //   try {
+      //     await eventRepository.generateSummary(
+      //       token: token,
+      //       eventId: widget.eventId,
+      //     );
+      //   } catch (_) {}
+      // }();
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
       }
+
     } catch (e) {
-      _showSnack(loc.translate('event_status_update_failed'));
+      final raw = e.toString();
+      String cleaned = raw;
+
+      final marker = "Please wait at least";
+      if (raw.contains(marker)) {
+        cleaned = raw.substring(raw.indexOf(marker));
+      } else {
+        cleaned = raw.replaceAll("Exception:", "");
+      }
+
+      _showSnack(cleaned.trim());
+      rethrow;
     }
+
   }
 
   @override
@@ -474,23 +622,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                           onLeave: () => setState(() => showLeaveDialog = true),
                           onStartEvent: _handleStartEvent,
                           onEndEvent: () => setState(() => showEndDialog = true),
-                          onTranscribeToggle: () async {
-                            if (_controller.isTranscriptionEnabled) {
-                              await _controller.disableMobileTranscription();
-                            } else {
-                              await _controller.enableMobileTranscription();
-                            }
-                            setState(() {});
-                          },
-                          onCaptionsToggle: () {
-                            if (_controller.isCaptionsEnabled) {
-                              _controller.disableCaptions();
-                            } else {
-                              _controller.enableCaptions();
-                            }
-                            setState(() {});
-                          },
-                          onCaptionsLongPress: _showSubtitleLanguageDialog,
+                          onTranscribeToggle: _showTranscriptionDialog,
+                          onCaptionsToggle: _showSubtitleLanguageDialog,
                           isTranscriptionEnabled: _controller.isTranscriptionEnabled,
                           isCaptionsEnabled: _controller.isCaptionsEnabled,
                         )
@@ -564,7 +697,18 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 title: loc.translate('confirm_end_call_title'),
                 message: loc.translate('confirm_end_call'),
                 confirmText: loc.translate('end'),
-                onConfirm: _handleEndEvent,
+                // onConfirm: _handleEndEvent,
+                onConfirm: () async {
+                  try {
+                    await _handleEndEvent();
+                  } catch (_) {
+                    //
+                  }
+
+                  if (mounted) {
+                    setState(() => showEndDialog = false);
+                  }
+                },
                 onCancel: () => setState(() => showEndDialog = false),
                 loc: loc,
               ),
@@ -610,3 +754,22 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     'th': "ไทย",
   };
 }
+
+const Map<String, String> languageCodeMap = {
+  "en": "en-US",
+  "vi": "vi-VN",
+  "ja": "ja-JP",
+  "ko": "ko-KR",
+  "zh": "zh-CN",
+  "fr": "fr-FR",
+  "de": "de-DE",
+  "es": "es-ES",
+  "it": "it-IT",
+  "pt": "pt-BR",
+  "ru": "ru-RU",
+  "th": "th-TH",
+  "id": "id-ID",
+  "ms": "ms-MY",
+  "ar": "ar-SA",
+  "hi": "hi-IN",
+};

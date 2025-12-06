@@ -19,7 +19,6 @@ class MeetingControls extends StatelessWidget {
   final VoidCallback onCaptionsToggle;
   final bool isTranscriptionEnabled;
   final bool isCaptionsEnabled;
-  final VoidCallback? onCaptionsLongPress;
 
   const MeetingControls({
     Key? key,
@@ -39,7 +38,6 @@ class MeetingControls extends StatelessWidget {
     required this.onCaptionsToggle,
     required this.isTranscriptionEnabled,
     required this.isCaptionsEnabled,
-    required this.onCaptionsLongPress,
     this.onStartEvent,
     this.onEndEvent,
   }) : super(key: key);
@@ -73,7 +71,6 @@ class MeetingControls extends StatelessWidget {
         icon: isCaptionsEnabled ? Icons.closed_caption : Icons.closed_caption_disabled_rounded,
         color: isCaptionsEnabled ? Colors.white : Colors.redAccent,
         onPressed: onCaptionsToggle,
-        onLongPress: isCaptionsEnabled ? onCaptionsLongPress : null,
       ),
 
     ];
@@ -153,14 +150,12 @@ class MeetingControls extends StatelessWidget {
     required IconData icon,
     required Color color,
     required VoidCallback onPressed,
-    VoidCallback? onLongPress,
     String? tooltip,
   }) {
     return Tooltip(
       message: tooltip ?? '',
       child: InkWell(
         onTap: onPressed,
-        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(50),
         child: Container(
           padding: const EdgeInsets.all(12),

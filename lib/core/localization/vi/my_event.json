@@ -94,6 +94,7 @@
   "action_items": "Mục tiêu",
 
   "search_hosted_placeholder": "Tìm sự kiện đã tạo...",
-  "search_joined_placeholder": "Tìm sự kiện đã tham gia..."
+  "search_joined_placeholder": "Tìm sự kiện đã tham gia...",
+  "cancel_event": "Hủy"
 
 }

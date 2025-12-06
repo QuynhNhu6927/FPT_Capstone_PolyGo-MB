@@ -94,6 +94,7 @@
   "action_items": "Action items",
 
   "search_hosted_placeholder": "Search hosted event...",
-  "search_joined_placeholder": "Search joined event..."
+  "search_joined_placeholder": "Search joined event...",
+  "cancel_event": "Cancel"
 
 }

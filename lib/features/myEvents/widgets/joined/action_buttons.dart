@@ -49,6 +49,106 @@ class ActionButtons extends StatelessWidget {
       );
     }
 
+    if (isHost) {
+      // 1) Completed → Rate + Summary
+      if (eventStatus == 'completed') {
+        if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
+
+        buttons.add(
+          AppButton(
+            variant: ButtonVariant.outline,
+            size: ButtonSize.sm,
+            icon: const Icon(Icons.star_outline, size: 18),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RatesScreen(eventId: event.id),
+                ),
+              );
+            },
+          ),
+        );
+
+        buttons.add(const SizedBox(width: 8));
+
+        buttons.add(
+          AppButton(
+            text: 'AI Summary',
+            variant: ButtonVariant.primary,
+            size: ButtonSize.sm,
+            icon: const Icon(Icons.smart_toy_outlined, size: 18),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => EventSummary(
+                    eventId: event.id,
+                    token: token,
+                    isHost: isHost,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+      // 2) Approved / Live → Start / Join / Wait
+      if (event.status == 'Approved' || eventStatus == 'live') {
+        if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
+
+        final now = DateTime.now();
+        final isEventStarted = now.isAfter(event.startAt);
+        final isLive = eventStatus == 'live';
+
+        final buttonText =
+        isLive ? loc.translate('join')
+            : isEventStarted ? loc.translate('start')
+            : loc.translate('wait');
+
+        final canJoin = isLive || isEventStarted;
+
+        buttons.add(
+          AppButton(
+            text: buttonText,
+            size: ButtonSize.sm,
+            icon: Icon(
+              isLive ? Icons.login : Icons.access_time,
+              size: 18,
+              color: canJoin ? null : Colors.grey[400],
+            ),
+            onPressed: canJoin
+                ? () {
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.eventWaiting,
+                arguments: {
+                  'eventId': event.id,
+                  'eventTitle': event.title,
+                  'eventStatus': event.status,
+                  'isHost': true,
+                  'hostId': event.host.id,
+                  'hostName': event.host.name,
+                  'startAt': event.startAt,
+                  'sourceLanguage': event.language.code,
+                },
+              );
+            }
+                : null,
+            variant: canJoin ? ButtonVariant.primary : ButtonVariant.outline,
+            color: canJoin
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey[300],
+          ),
+        );
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: buttons,
+      );
+    }
+
     /// ---------------- Join button ----------------
     if (eventStatus == 'live') {
       if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
@@ -70,6 +170,7 @@ class ActionButtons extends StatelessWidget {
                 'hostId': event.host.id,
                 'hostName': event.host.name,
                 'initialMic': true,
+                'sourceLanguage': event.language.code,
               },
             );
           },
@@ -143,6 +244,7 @@ class ActionButtons extends StatelessWidget {
                 builder: (_) => EventSummary(
                   eventId: event.id,
                   token: token,
+                  isHost: isHost,
                 ),
               ),
             );

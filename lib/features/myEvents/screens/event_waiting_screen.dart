@@ -14,6 +14,7 @@ class WaitingRoomScreen extends StatefulWidget {
   final String eventStatus;
   final String hostName;
   final DateTime startAt;
+  final String sourceLanguage;
 
   const WaitingRoomScreen({
     super.key,
@@ -23,6 +24,7 @@ class WaitingRoomScreen extends StatefulWidget {
     required this.hostId,
     required this.hostName,
     required this.startAt,
+    required this.sourceLanguage,
   });
 
   @override
@@ -127,6 +129,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
           isHost: _isHost,
           hostId: widget.hostId,
           eventStatus: widget.eventStatus,
+          sourceLanguage: widget.sourceLanguage,
           initialMicOn: isMicOn,
           initialCameraOn: isCameraOn,
         ),

@@ -165,15 +165,23 @@ class _ChatBubbleState extends State<ChatBubble> {
               : (widget.isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDFDFDF)),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          widget.message.content,
-          style: TextStyle(
-            color: widget.isMine
-                ? Colors.white
-                : (widget.isDark ? Colors.white : Colors.black),
-            fontSize: 14,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.7, // bubble tối đa 70% màn hình
+          ),
+          child: Text(
+            widget.message.content,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            style: TextStyle(
+              color: widget.isMine
+                  ? Colors.white
+                  : (widget.isDark ? Colors.white : Colors.black),
+              fontSize: 14,
+            ),
           ),
         ),
+
       );
 
       return Row(

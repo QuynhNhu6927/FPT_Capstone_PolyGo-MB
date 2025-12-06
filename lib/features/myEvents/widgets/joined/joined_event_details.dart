@@ -7,6 +7,7 @@ import '../../../../../core/localization/app_localizations.dart';
 import '../../../../../core/utils/responsive.dart';
 import '../../../../data/models/events/joined_event_model.dart';
 import '../../../../data/repositories/event_repository.dart';
+import '../hosted/host_cancel_event_dialog.dart';
 import '../hosted/hosted_user_list.dart';
 import 'action_buttons.dart';
 import 'banner_section.dart';
@@ -104,120 +105,256 @@ class _JoinedEventDetailsState extends State<JoinedEventDetails> {
 
                   HostSection(
                     event: widget.event,
-                    trailing:
-                        (widget.event.status != "Completed" &&
-                                widget.event.status != "Cancelled" &&
-                                widget.event.status != "Live") ||
-                            (widget.currentUserId != widget.event.host.id)
-                        ? PopupMenuButton<String>(
-                            icon: Icon(
-                              Icons.more_vert,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
-                            ),
+                    // trailing:
+                    //     (widget.event.status != "Completed" &&
+                    //             widget.event.status != "Cancelled" &&
+                    //             widget.event.status != "Live") ||
+                    //         (widget.currentUserId != widget.event.host.id)
+                    //     ? PopupMenuButton<String>(
+                    //         icon: Icon(
+                    //           Icons.more_vert,
+                    //           color: isDark
+                    //               ? Colors.grey[400]
+                    //               : Colors.grey[600],
+                    //         ),
+                    //         position: PopupMenuPosition.under,
+                    //         offset: const Offset(-16, 8),
+                    //         onSelected: (value) async {
+                    //           final loc = AppLocalizations.of(context);
+                    //           if (value == 'cancel') {
+                    //             showDialog(
+                    //               context: context,
+                    //               barrierDismissible: false,
+                    //               builder: (_) => CancelEventDialog(
+                    //                 isHost:
+                    //                     widget.currentUserId ==
+                    //                     widget.event.host.id,
+                    //                 token: widget.token,
+                    //                 eventId: widget.event.id,
+                    //                 parentContext: context,
+                    //                 eventRepository: widget.eventRepository,
+                    //                 onCancelSuccess: () {
+                    //                   widget.onCancel?.call();
+                    //                   widget.onEventCanceled?.call();
+                    //                 },
+                    //               ),
+                    //             );
+                    //           } else if (value == 'report') {
+                    //             showDialog(
+                    //               context: context,
+                    //               builder: (_) => ReportEventDialog(
+                    //                 eventId: widget.event.id,
+                    //                 onSubmit: () {
+                    //                   Navigator.of(context).pop();
+                    //                   widget.onCancel?.call();
+                    //                 },
+                    //               ),
+                    //             );
+                    //           }
+                    //
+                    //         },
+                    //         itemBuilder: (ctx) {
+                    //           final List<PopupMenuEntry<String>> items = [];
+                    //
+                    //           // Report luôn hiển thị nếu currentUser khác host
+                    //           if (widget.currentUserId !=
+                    //               widget.event.host.id) {
+                    //             items.add(
+                    //               PopupMenuItem(
+                    //                 value: 'report',
+                    //                 child: Row(
+                    //                   children: [
+                    //                     const Icon(
+                    //                       Icons.report_outlined,
+                    //                       color: Colors.orange,
+                    //                       size: 20,
+                    //                     ),
+                    //                     const SizedBox(width: 8),
+                    //                     Text(
+                    //                       AppLocalizations.of(
+                    //                         context,
+                    //                       ).translate('report'),
+                    //                       style: const TextStyle(
+                    //                         color: Colors.orange,
+                    //                         fontWeight: FontWeight.w500,
+                    //                       ),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //               ),
+                    //             );
+                    //           }
+                    //
+                    //           // Cancel/Unregister chỉ hiển thị khi event chưa Completed/Cancelled/Live
+                    //           if (widget.event.status != "Completed" &&
+                    //               widget.event.status != "Cancelled" &&
+                    //               widget.event.status != "Live") {
+                    //             items.add(
+                    //               PopupMenuItem(
+                    //                 value: 'cancel',
+                    //                 child: Row(
+                    //                   children: [
+                    //                     const Icon(
+                    //                       Icons.cancel_outlined,
+                    //                       color: Colors.redAccent,
+                    //                       size: 20,
+                    //                     ),
+                    //                     const SizedBox(width: 8),
+                    //                     Text(
+                    //                       AppLocalizations.of(
+                    //                         context,
+                    //                       ).translate('unregister_cancel'),
+                    //                       style: const TextStyle(
+                    //                         color: Colors.redAccent,
+                    //                         fontWeight: FontWeight.w500,
+                    //                       ),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //               ),
+                    //             );
+                    //           }
+                    //
+                    //           return items;
+                    //         },
+                    //       )
+                    //     : null,
+
+                    trailing: (() {
+                      final isHost = widget.currentUserId == widget.event.host.id;
+                      final status = widget.event.status;
+
+                      // ==========================================================
+                      //                     HOST LOGIC
+                      // ==========================================================
+                      if (isHost) {
+                        if (status == 'Approved' || status == 'Pending') {
+                          return PopupMenuButton<String>(
+                            icon: Icon(Icons.more_vert, color: isDark ? Colors.grey[400] : Colors.grey[600]),
                             position: PopupMenuPosition.under,
                             offset: const Offset(-16, 8),
-                            onSelected: (value) async {
-                              final loc = AppLocalizations.of(context);
+                            onSelected: (value) {
                               if (value == 'cancel') {
                                 showDialog(
                                   context: context,
-                                  barrierDismissible: false,
-                                  builder: (_) => CancelEventDialog(
-                                    isHost:
-                                        widget.currentUserId ==
-                                        widget.event.host.id,
+                                  builder: (_) => HostCancelEventDialog(
+                                    isHost: true,
                                     token: widget.token,
                                     eventId: widget.event.id,
-                                    parentContext: context,
                                     eventRepository: widget.eventRepository,
-                                    onCancelSuccess: () {
-                                      widget.onCancel?.call();
-                                      widget.onEventCanceled?.call();
-                                    },
-                                  ),
-                                );
-                              } else if (value == 'report') {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => ReportEventDialog(
-                                    eventId: widget.event.id,
-                                    onSubmit: () {
-                                      Navigator.of(context).pop();
-                                      widget.onCancel?.call();
-                                    },
+                                    parentContext: context,
+                                    onCancelSuccess: widget.onCancel,
                                   ),
                                 );
                               }
-
                             },
-                            itemBuilder: (ctx) {
-                              final List<PopupMenuEntry<String>> items = [];
-
-                              // Report luôn hiển thị nếu currentUser khác host
-                              if (widget.currentUserId !=
-                                  widget.event.host.id) {
-                                items.add(
-                                  PopupMenuItem(
-                                    value: 'report',
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.report_outlined,
-                                          color: Colors.orange,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).translate('report'),
-                                          style: const TextStyle(
-                                            color: Colors.orange,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: 'cancel',
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.redAccent,
+                                      size: 20,
                                     ),
-                                  ),
-                                );
-                              }
-
-                              // Cancel/Unregister chỉ hiển thị khi event chưa Completed/Cancelled/Live
-                              if (widget.event.status != "Completed" &&
-                                  widget.event.status != "Cancelled" &&
-                                  widget.event.status != "Live") {
-                                items.add(
-                                  PopupMenuItem(
-                                    value: 'cancel',
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.cancel_outlined,
-                                          color: Colors.redAccent,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).translate('unregister_cancel'),
-                                          style: const TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      loc.translate('cancel_event'),
+                                      style: const TextStyle(color: Colors.redAccent),
                                     ),
-                                  ),
-                                );
-                              }
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        }
 
-                              return items;
-                            },
-                          )
-                        : null,
+                        // Host ở Completed / Cancelled / Live → không có menu
+                        return null;
+                      }
+
+                      // ==========================================================
+                      //                    NORMAL USER LOGIC
+                      // ==========================================================
+                      return PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                        position: PopupMenuPosition.under,
+                        offset: const Offset(-16, 8),
+                        onSelected: (value) async {
+                          if (value == 'cancel') {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => CancelEventDialog(
+                                isHost: false,
+                                token: widget.token,
+                                eventId: widget.event.id,
+                                parentContext: context,
+                                eventRepository: widget.eventRepository,
+                                onCancelSuccess: () {
+                                  widget.onCancel?.call();
+                                  widget.onEventCanceled?.call();
+                                },
+                              ),
+                            );
+                          } else if (value == 'report') {
+                            showDialog(
+                              context: context,
+                              builder: (_) => ReportEventDialog(
+                                eventId: widget.event.id,
+                                onSubmit: () {
+                                  Navigator.of(context).pop();
+                                  widget.onCancel?.call();
+                                },
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (_) {
+                          final List<PopupMenuEntry<String>> items = [];
+
+                          // Report nếu không phải host
+                          items.add(
+                            PopupMenuItem(
+                              value: 'report',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.report_outlined, color: Colors.orange, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    loc.translate('report'),
+                                    style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          // Cancel nếu chưa Completed / Cancelled / Live
+                          if (status != "Completed" && status != "Cancelled" && status != "Live") {
+                            items.add(
+                              PopupMenuItem(
+                                value: 'cancel',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      loc.translate('unregister_cancel'),
+                                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return items;
+                        },
+                      );
+                    })(),
+
                   ),
 
                   const SizedBox(height: 20),

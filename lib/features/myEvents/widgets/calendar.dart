@@ -10,6 +10,7 @@ import '../../../data/repositories/event_repository.dart';
 import '../../../data/services/apis/auth_service.dart';
 import '../../../data/services/apis/event_service.dart';
 import '../../shared/app_error_state.dart';
+import 'hosted/hosted_event_details.dart';
 import 'joined/joined_event_details.dart';
 
 class Calendar extends StatefulWidget {
@@ -298,6 +299,7 @@ class _CalendarState extends State<Calendar> {
           ).showSnackBar(const SnackBar(content: Text('Bạn chưa đăng nhập')));
           return;
         }
+
         showDialog(
           context: context,
           builder: (context) => JoinedEventDetails(
