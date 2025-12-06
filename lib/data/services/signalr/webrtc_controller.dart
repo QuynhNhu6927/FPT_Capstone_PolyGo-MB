@@ -93,7 +93,7 @@ class WebRTCController extends ChangeNotifier {
   final String eventId;
   String userName;
   final bool isHost;
-  final String sourceLanguage;
+  String sourceLanguage;
 
   final VoidCallback? onRoomEnded;
   HubConnection? _hub;
@@ -132,6 +132,9 @@ class WebRTCController extends ChangeNotifier {
   bool _isRecording = false;
   StreamController<Uint8List>? _audioStreamController;
 
+  VoidCallback? onKickedMessage;
+  Function(String message)? onKicked;
+
   WebRTCController({
     required this.eventId,
     required this.userName,
@@ -139,6 +142,7 @@ class WebRTCController extends ChangeNotifier {
     this.localAudioEnabled = true,
     this.localVideoEnabled = true,
     this.onRoomEnded,
+    this.onKicked,
     required this.sourceLanguage,
   });
 
@@ -288,7 +292,7 @@ class WebRTCController extends ChangeNotifier {
         // Reset flag trước
         isTranscriptionEnabled = false;
         // Gọi lại enable
-        await enableMobileTranscription();
+        await enableMobileTranscription(sourceLanguage);
       }
     });
 
@@ -473,11 +477,19 @@ class WebRTCController extends ChangeNotifier {
     });
 
     // Khi bị host kick
+    // Khi bị kick khỏi phòng
     _hub!.on("KickedFromRoom", (args) async {
-      final room = args?[0];
-      print("❌ You were kicked from room: $room");
+      final roomName = args?[0];
+      final message = args?[1] ?? "You were removed from the event.";
 
-      // Tự rời room
+      print("❌ Kicked from room: $message");
+
+      // Gửi message lên UI
+      if (onKicked != null) {
+        onKicked!(message);
+      }
+
+      // Rời phòng
       await leaveRoom();
     });
 
@@ -557,46 +569,35 @@ class WebRTCController extends ChangeNotifier {
     isConnected = true;
   }
 
-  Future<void> enableMobileTranscription() async {
-    // Prevent double toggle
-    if (_isTranscriptionToggling) {
-      print(
-        "⚠️ [FLUTTER] enableMobileTranscription BLOCKED - already toggling!",
-      );
-      return;
-    }
-    if (isTranscriptionEnabled) {
-      print(
-        "⚠️ [FLUTTER] enableMobileTranscription BLOCKED - already enabled!",
-      );
-      return;
-    }
+  Future<void> enableMobileTranscription(String newSourceLanguage) async {
+    if (_isTranscriptionToggling) return;
+    if (isTranscriptionEnabled) return;
 
     _isTranscriptionToggling = true;
+
     try {
-      print("📞 [FLUTTER] enableMobileTranscription called");
-      print(
-        "📞 [FLUTTER] Current state: isTranscriptionEnabled=$isTranscriptionEnabled",
+      print("📞 [FLUTTER] Enabling transcription with $newSourceLanguage");
+
+      // luôn update trong controller
+      sourceLanguage = newSourceLanguage;
+
+      await _hub?.invoke(
+        "EnableMobileTranscription",
+        args: [eventId, newSourceLanguage],
       );
 
-      // Bật transcription trên server
-      await _hub?.invoke("EnableMobileTranscription", args: [eventId, sourceLanguage]);
-      print("📞 [FLUTTER] EnableMobileTranscription invoke completed");
-
-      // Cập nhật trạng thái local
       isTranscriptionEnabled = true;
       isTranscriptionEnabledRef.value = true;
       notifyListeners();
 
-      // Bắt đầu gửi audio
       await startSendingAudio();
-      print("📞 [FLUTTER] enableMobileTranscription completed");
     } catch (e) {
-      print("❌ [FLUTTER] Failed to enable mobile transcription: $e");
+      print("❌ Failed to enable transcription: $e");
     } finally {
       _isTranscriptionToggling = false;
     }
   }
+
 
   Future<void> disableMobileTranscription() async {
     // Prevent double toggle
@@ -761,7 +762,14 @@ class WebRTCController extends ChangeNotifier {
 
     String actualName = userName;
 
-    await _hub!.invoke("JoinRoom", args: [eventId, actualName, isHost, userId]);
+    try {
+      await _hub!.invoke("JoinRoom", args: [eventId, actualName, isHost, userId]);
+    } catch (e) {
+      print("JoinRoom error: $e");
+
+      // báo lỗi lên UI
+      throw Exception(e.toString());
+    }
 
     if (localStream != null) {
       localAudioEnabled = localStream!.getAudioTracks().isNotEmpty
@@ -856,7 +864,7 @@ class WebRTCController extends ChangeNotifier {
   // =========================
   // KICK USER (HOST ONLY)
   // =========================
-  Future<void> kickUser(String targetConnId) async {
+  Future<void> kickUser(String targetConnId, {String reason = ""}) async {
     if (!isHost) {
       print("❌ Only host can kick user");
       return;
@@ -865,8 +873,8 @@ class WebRTCController extends ChangeNotifier {
     if (_hub == null || !isConnected) return;
 
     try {
-      await _hub!.invoke("KickUser", args: [eventId, targetConnId]);
-      print("🚫 Host kicked: $targetConnId");
+      await _hub!.invoke("KickUser", args: [eventId, targetConnId, reason]);
+      print("🚫 Host kicked: $targetConnId with reason: $reason");
     } catch (e) {
       print("Error kicking user: $e");
     }
@@ -1018,7 +1026,9 @@ class WebRTCController extends ChangeNotifier {
     if (!isHost) return;
     try {
       await _hub?.invoke("EndRoom", args: [eventId]);
-    } catch (e) {}
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 
   Future<void> muteAllParticipants() async {

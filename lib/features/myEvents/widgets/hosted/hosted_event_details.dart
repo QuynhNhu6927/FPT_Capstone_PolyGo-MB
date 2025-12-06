@@ -438,6 +438,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                                         builder: (_) => EventSummary(
                                           eventId: widget.event.id,
                                           token: widget.token,
+                                          isHost: true,
                                         ),
                                       ),
                                     );

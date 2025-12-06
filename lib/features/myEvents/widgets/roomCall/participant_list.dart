@@ -236,8 +236,42 @@ class _ParticipantListState extends State<ParticipantList> {
                                     );
 
                                     if (confirm == true) {
-                                      await widget.controller?.kickUser(p.id);
+                                      final reason = await showDialog<String>(
+                                        context: context,
+                                        builder: (context) {
+                                          String input = "";
+
+                                          return AlertDialog(
+                                            title: Text(loc.translate('kick_reason')),
+                                            content: TextField(
+                                              autofocus: true,
+                                              maxLines: 2,
+                                              decoration: InputDecoration(
+                                                hintText: loc.translate('kick_reason_hint'),
+                                                border: OutlineInputBorder(),
+                                              ),
+                                              onChanged: (value) => input = value,
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context, null),
+                                                child: Text(loc.translate('cancel')),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () => Navigator.pop(context, input),
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                                child: Text(loc.translate('confirm')),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+
+                                      if (reason != null) {
+                                        await widget.controller?.kickUser(p.id, reason: reason);
+                                      }
                                     }
+
                                   },
                                   child: const Icon(
                                     Icons.remove_circle,

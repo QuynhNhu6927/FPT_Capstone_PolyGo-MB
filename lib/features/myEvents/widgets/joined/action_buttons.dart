@@ -84,6 +84,7 @@ class ActionButtons extends StatelessWidget {
                   builder: (_) => EventSummary(
                     eventId: event.id,
                     token: token,
+                    isHost: isHost,
                   ),
                 ),
               );
@@ -243,6 +244,7 @@ class ActionButtons extends StatelessWidget {
                 builder: (_) => EventSummary(
                   eventId: event.id,
                   token: token,
+                  isHost: isHost,
                 ),
               ),
             );
