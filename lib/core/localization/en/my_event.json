@@ -100,6 +100,7 @@
   "setting_voice_to_text": "Transcription setting",
   "toggle_transcript": "Transcription",
   "setting_subtitle": "Subtitle setting",
-  "you_have_been_kicked_from_room": "You have been kicked!"
+  "you_have_been_kicked_from_room": "You have been kicked!",
+  "chat_banned": "You have been banned!"
 
 }

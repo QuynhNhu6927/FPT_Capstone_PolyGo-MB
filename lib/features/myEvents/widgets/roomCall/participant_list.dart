@@ -208,6 +208,30 @@ class _ParticipantListState extends State<ParticipantList> {
 
                                 GestureDetector(
                                   onTap: () async {
+                                    // toggle chat
+                                    final newState = !p.isChatEnabled;
+
+                                    await widget.controller
+                                        ?.toggleParticipantChat(
+                                        p.id,
+                                        newState,
+                                    );
+
+                                    setState(() {
+                                      p.isChatEnabled = newState;
+                                    });
+                                  },
+                                  child: Icon(
+                                    p.isChatEnabled ? Icons.chat : Icons.chat,
+                                    color: p.isChatEnabled ? Colors.green : Colors.red,
+                                    size: 22,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 20),
+
+                                GestureDetector(
+                                  onTap: () async {
                                     final confirm = await showDialog<bool>(
                                       context: context,
                                       builder: (context) {

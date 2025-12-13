@@ -633,8 +633,27 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                 myName: _controller.userName,
                 onSend: (text) async {
                   if (text.trim().isEmpty) return;
+
+                  if (!_controller.isChatEnabled) {
+                    setState(() => isChatOpen = false);
+
+                    Future.delayed(const Duration(milliseconds: 200), () {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(loc.translate("chat_banned")),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    });
+
+                    return;
+                  }
+
                   await _controller.sendChatMessage(text);
                 },
+
                 onClose: () => setState(() => isChatOpen = false),
               ),
             ],

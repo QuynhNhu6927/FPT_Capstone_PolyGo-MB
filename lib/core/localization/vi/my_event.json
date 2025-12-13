@@ -100,6 +100,7 @@
   "setting_voice_to_text": "Cài đặt giọng nói",
   "toggle_transcript": "Thu âm thanh",
   "setting_subtitle": "Cài đặt phụ đề",
-  "you_have_been_kicked_from_room": "Bạn đã bị mời ra khỏi phòng!"
+  "you_have_been_kicked_from_room": "Bạn đã bị mời ra khỏi phòng!",
+  "chat_banned": "Bạn đã bị cấm chat!"
 
 }

@@ -17,7 +17,7 @@ import 'routes/app_routes.dart';
 
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 void main() {
-  runApp(DevicePreview(enabled: true, builder: (context) => const MyApp()));
+  runApp(DevicePreview(enabled: false, builder: (context) => const MyApp()));
 }
 
 class MyApp extends StatefulWidget {

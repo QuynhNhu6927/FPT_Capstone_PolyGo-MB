@@ -14,6 +14,7 @@ class Participant {
   bool audioEnabled;
   bool videoEnabled;
   bool isHandRaised;
+  bool isChatEnabled;
 
   Participant({
     required this.id,
@@ -22,6 +23,7 @@ class Participant {
     this.stream,
     this.audioEnabled = true,
     this.videoEnabled = true,
+    this.isChatEnabled = true,
     this.isHandRaised = false,
   });
 }
@@ -115,8 +117,8 @@ class WebRTCController extends ChangeNotifier {
   List<TranscriptionMessage> transcriptions = [];
   bool isTranscriptionEnabled = false;
   bool isCaptionsEnabled = false;
-  bool _isTranscriptionToggling = false; 
-
+  bool _isTranscriptionToggling = false;
+  bool isChatEnabled = true;
   String targetLanguage = "en";
 
   MeetingSummary? meetingSummary;
@@ -410,6 +412,26 @@ class WebRTCController extends ChangeNotifier {
       notifyListeners();
     });
 
+    _hub!.on("ToggleChatCommand", (args) {
+      final enabled = args?[0] ?? true;
+      print("💬 Received ToggleChatCommand: $enabled");
+
+      isChatEnabled = enabled;
+      notifyListeners();
+    });
+
+    _hub!.on("ChatStateChanged", (args) {
+      final targetId = args?[0];
+      final enabled = args?[1] ?? true;
+
+      print("📢 ChatStateChanged: $targetId -> $enabled");
+
+      if (participants.containsKey(targetId)) {
+        participants[targetId]!.isChatEnabled = enabled;
+        notifyListeners();
+      }
+    });
+
     _hub!.on('ReceiveOffer', (args) async {
       final fromConnId = args?[0];
       final sdp = args?[1];
@@ -476,7 +498,6 @@ class WebRTCController extends ChangeNotifier {
       }
     });
 
-    // Khi bị host kick
     // Khi bị kick khỏi phòng
     _hub!.on("KickedFromRoom", (args) async {
       final roomName = args?[0];
@@ -597,7 +618,6 @@ class WebRTCController extends ChangeNotifier {
       _isTranscriptionToggling = false;
     }
   }
-
 
   Future<void> disableMobileTranscription() async {
     // Prevent double toggle
@@ -981,6 +1001,27 @@ class WebRTCController extends ChangeNotifier {
     }
   }
 
+  Future<void> toggleParticipantChat(String participantId, bool enabled) async {
+    if (_hub == null) return;
+
+    try {
+      // cập nhật local
+      if (participants.containsKey(participantId)) {
+        participants[participantId]!.isChatEnabled = enabled;
+        notifyListeners();
+      }
+
+      await _hub!.invoke(
+        "ToggleChat",
+        args: [eventId, participantId, enabled],
+      );
+
+      print("💬 Sent ToggleChat to $participantId = $enabled");
+    } catch (e) {
+      print("Error toggling chat for $participantId: $e");
+    }
+  }
+
   Future<void> leaveRoom() async {
     try {
       await _hub?.invoke("LeaveRoom", args: [eventId]);
@@ -1000,6 +1041,11 @@ class WebRTCController extends ChangeNotifier {
   }
 
   Future<void> sendChatMessage(String message) async {
+    if (!isChatEnabled) {
+      print("⛔ Chat disabled — cannot send");
+      return;
+    }
+
     if (_hub == null || !isConnected || eventId.isEmpty) return;
 
     final chatMessage = ChatMessage(sender: userName, message: message);
