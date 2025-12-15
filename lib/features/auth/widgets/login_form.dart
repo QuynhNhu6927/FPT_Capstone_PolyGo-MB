@@ -113,6 +113,54 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
+  Future<void> _loginWithGoogle() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final repo = AuthRepository(AuthService(ApiClient()));
+      final token = await repo.loginWithGoogleAccount();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      await UserPresenceManager().init();
+
+      final decoded = JwtDecoder.decode(token);
+      final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
+      final nextUnbannedAt = decoded['NextUnbannedAt'];
+
+      if (!mounted) return;
+
+      if (nextUnbannedAt != null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const BannedScreen(),
+        );
+      } else {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          isNew ? AppRoutes.profileSetup : AppRoutes.home,
+              (_) => false,
+        );
+      }
+    } catch (e, s) {
+      // 🔥 LOG ĐẦY ĐỦ
+      debugPrint('❌ Google login failed');
+      debugPrint('❌ Error: $e');
+      debugPrintStack(stackTrace: s);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -266,7 +314,9 @@ class _LoginFormState extends State<LoginForm> {
                 icon: const Icon(Icons.g_mobiledata, size: 28),
                 variant: ButtonVariant.outline,
                 size: ButtonSize.lg,
-                onPressed: () {},
+                onPressed: _isLoading
+                    ? null
+                    : _loginWithGoogle,
               ),
 
               SizedBox(height: sh(context, 24)),

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../models/auth/change_password_request.dart';
 import '../models/auth/me_response.dart';
@@ -82,4 +83,44 @@ class AuthRepository {
       throw Exception('Change password failed: ${e.toString()}');
     }
   }
+
+  Future<String> loginWithGoogle(String idToken) async {
+    final res = await _service.loginWithGoogle(idToken);
+
+    if (res.data == null) {
+      throw res.message ?? 'Error.GoogleLoginFailed';
+    }
+
+    return res.data!;
+  }
+
+  Future<String> loginWithGoogleAccount() async {
+    try {
+      final idToken = await _service.getGoogleIdToken();
+
+      debugPrint('🟢 Google idToken: ${idToken != null ? "OK" : "NULL"}');
+
+      if (idToken == null) {
+        throw 'Error.GoogleCanceled';
+      }
+
+      final res = await _service.loginWithGoogle(idToken);
+
+      debugPrint('🟢 Backend response data: ${res.data}');
+      debugPrint('🟢 Backend message: ${res.message}');
+
+      if (res.data == null) {
+        throw res.message ?? 'Error.GoogleLoginFailed';
+      }
+
+      return res.data!;
+    } catch (e, s) {
+      debugPrint('❌ loginWithGoogleAccount error: $e');
+      debugPrintStack(stackTrace: s);
+      rethrow;
+    }
+  }
+
+
+
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/config/api_constants.dart';
 import '../../models/auth/change_password_request.dart';
@@ -7,6 +8,7 @@ import '../../models/auth/register_request.dart';
 import '../../models/auth/login_request.dart';
 import '../../models/api_response.dart';
 import '../../models/auth/reset_password_request.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final ApiClient apiClient;
@@ -117,4 +119,76 @@ class AuthService {
       }
     }
   }
+
+  /// Login bằng Google (idToken)
+  Future<ApiResponse<String>> loginWithGoogle(String idToken) async {
+    try {
+      debugPrint('🟡 Sending Google idToken to backend');
+
+      final response = await apiClient.post(
+        ApiConstants.googleLogin,
+        data: {'idToken': idToken},
+      );
+
+      debugPrint('🟢 API status: ${response.statusCode}');
+      debugPrint('🟢 API data: ${response.data}');
+
+      final json = response.data as Map<String, dynamic>;
+
+      return ApiResponse.fromJson(
+        json,
+            (data) => data.toString(),
+      );
+    } on DioException catch (e, s) {
+      debugPrint('❌ API Google login error');
+      debugPrint('❌ Dio error: ${e.message}');
+      debugPrint('❌ Response: ${e.response?.data}');
+      debugPrintStack(stackTrace: s);
+
+      if (e.response?.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        return ApiResponse<String>(
+          data: null,
+          message: data['message']?.toString() ?? 'Error.System',
+        );
+      }
+
+      return ApiResponse<String>(
+        data: null,
+        message: 'Error.System',
+      );
+    }
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    serverClientId: '368271231724-fmnffol42ki90lroodm6q7slm3nts3h0.apps.googleusercontent.com',
+  );
+
+  Future<String?> getGoogleIdToken() async {
+    try {
+      debugPrint('🟡 Google signIn start');
+
+      final googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        debugPrint('⚠️ Google signIn canceled by user');
+        return null;
+      }
+
+      debugPrint('🟢 Google user email: ${googleUser.email}');
+
+      final googleAuth = await googleUser.authentication;
+
+      debugPrint('🟢 accessToken: ${googleAuth.accessToken != null}');
+      debugPrint('🟢 idToken: ${googleAuth.idToken != null}');
+
+      return googleAuth.idToken;
+    } catch (e, s) {
+      debugPrint('❌ getGoogleIdToken error: $e');
+      debugPrintStack(stackTrace: s);
+      rethrow;
+    }
+  }
+
 }

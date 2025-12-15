@@ -3,15 +3,19 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:polygo_mobile/features/auth/widgets/polygo_terms.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/auth/register_request.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/apis/auth_service.dart';
+import '../../../data/services/signalr/user_presence.dart';
 import '../../../routes/app_routes.dart';
 import '../../../../core/utils/responsive.dart';
+import 'banned_screen.dart';
 
 class RegisterForm extends StatefulWidget {
   final bool isTablet;
@@ -178,6 +182,54 @@ class _RegisterFormState extends State<RegisterForm> {
       );
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final repo = AuthRepository(AuthService(ApiClient()));
+      final token = await repo.loginWithGoogleAccount();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      await UserPresenceManager().init();
+
+      final decoded = JwtDecoder.decode(token);
+      final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
+      final nextUnbannedAt = decoded['NextUnbannedAt'];
+
+      if (!mounted) return;
+
+      if (nextUnbannedAt != null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const BannedScreen(),
+        );
+      } else {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          isNew ? AppRoutes.profileSetup : AppRoutes.home,
+              (_) => false,
+        );
+      }
+    } catch (e, s) {
+      // 🔥 LOG ĐẦY ĐỦ
+      debugPrint('❌ Google login failed');
+      debugPrint('❌ Error: $e');
+      debugPrintStack(stackTrace: s);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -488,7 +540,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 icon: const Icon(Icons.g_mobiledata, size: 28),
                 variant: ButtonVariant.outline,
                 size: ButtonSize.lg,
-                onPressed: () {},
+                onPressed: _isLoading
+                    ? null
+                    : _loginWithGoogle,
               ),
 
               SizedBox(height: sh(context, 24)),
