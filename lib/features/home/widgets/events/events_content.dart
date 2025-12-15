@@ -14,7 +14,12 @@ import '../../../../core/utils/string_extensions.dart';
 
 class EventsContent extends StatefulWidget {
   final String searchQuery;
-  const EventsContent({super.key, this.searchQuery = ''});
+  final ScrollController controller;
+  const EventsContent({
+    super.key,
+    this.searchQuery = '',
+    required this.controller,
+  });
 
   @override
   State<EventsContent> createState() => _EventsContentState();
@@ -37,7 +42,7 @@ class _EventsContentState extends State<EventsContent> {
   Locale? _currentLocale;
   bool _initialized = false;
 
-  final ScrollController _scrollController = ScrollController();
+  // final ScrollController _scrollController = ScrollController();
   bool _showFilterBar = true;
   double _lastOffset = 0;
 
@@ -51,21 +56,33 @@ class _EventsContentState extends State<EventsContent> {
   void initState() {
     super.initState();
     _repository = EventRepository(EventService(ApiClient()));
-    _scrollController.addListener(_handleScroll);
+    // _scrollController.addListener(_handleScroll);
+    widget.controller.addListener(_handleScroll);
+
   }
 
+  // void _handleScroll() {
+  //   final offset = _scrollController.offset;
+  //
+  //   if (offset > _lastOffset && offset - _lastOffset > 10) {
+  //     if (_showFilterBar) setState(() => _showFilterBar = false);
+  //   } else if (offset < _lastOffset && _lastOffset - offset > 10) {
+  //     if (!_showFilterBar) setState(() => _showFilterBar = true);
+  //   }
+  //   _lastOffset = offset;
+  //
+  //   if (_scrollController.position.pixels >=
+  //       _scrollController.position.maxScrollExtent - 200) {
+  //     if (_shouldLoadUpcoming) return;
+  //     _loadMatchingEvents(lang: _currentLocale?.languageCode);
+  //   }
+  // }
+
   void _handleScroll() {
-    final offset = _scrollController.offset;
+    final controller = widget.controller;
 
-    if (offset > _lastOffset && offset - _lastOffset > 10) {
-      if (_showFilterBar) setState(() => _showFilterBar = false);
-    } else if (offset < _lastOffset && _lastOffset - offset > 10) {
-      if (!_showFilterBar) setState(() => _showFilterBar = true);
-    }
-    _lastOffset = offset;
-
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    if (controller.position.pixels >=
+        controller.position.maxScrollExtent - 200) {
       if (_shouldLoadUpcoming) return;
       _loadMatchingEvents(lang: _currentLocale?.languageCode);
     }
@@ -82,7 +99,8 @@ class _EventsContentState extends State<EventsContent> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    // _scrollController.dispose();
+    widget.controller.removeListener(_handleScroll);
     super.dispose();
   }
 
@@ -327,7 +345,9 @@ class _EventsContentState extends State<EventsContent> {
             child: eventsToShow.isEmpty
                 ? Center(child: Text(loc.translate("no_events_found")))
                 : MasonryGridView.count(
-              controller: _scrollController,
+              // controller: _scrollController,
+              controller: widget.controller, // ✅ controller từ HomeScreen
+
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
