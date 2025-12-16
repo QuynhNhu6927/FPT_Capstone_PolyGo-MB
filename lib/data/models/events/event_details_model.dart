@@ -21,7 +21,6 @@ class EventDetailsModel {
   final List<CategoryModel> categories;
   final List<ParticipantModel> participants;
 
-  // Fields mới nullable / default
   final DateTime? endAt;
   final double revenue;
   final double averageRating;

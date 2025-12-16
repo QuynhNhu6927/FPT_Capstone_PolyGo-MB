@@ -1,0 +1,27 @@
+{
+  "call_ended": "通話が終了しました",
+  "calling": "発信中...",
+  "video_call": "ビデオ通話",
+  "voice_call": "音声通話",
+  "conversation_list": "会話一覧",
+  "video_from": "ビデオ通話の着信",
+  "voice_from": "音声通話の着信",
+  "type_mess": "入力中...",
+  "loading...": "読み込み中...",
+  "permission_denied": "権限が拒否されました！もう一度お試しください！",
+  "user_offline": "ユーザーはオフラインです！後でもう一度お試しください！",
+  "cannot_check_status": "システムエラー！後でもう一度お試しください！",
+  "online": "オンライン",
+  "last_seen": "最終アクティブ",
+  "search_conversation_placeholder": "検索中...",
+  "load_more": "さらに読み込む",
+  "you_sent": "あなた",
+  "sent_one_image": "画像を1枚送信しました",
+  "sent_multiple_images": "複数の画像を送信しました",
+  "sent_audio": "音声を送信しました",
+  "erase_mess": "メッセージを削除",
+
+  "conversation_settings": "会話設定",
+  "choose_language_to_translate": "翻訳する言語を選択",
+  "chat_images": "チャット画像"
+}

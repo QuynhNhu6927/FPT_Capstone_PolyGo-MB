@@ -1,5 +1,3 @@
-// models/events/joined_event_model.dart
-
 class JoinedEventModel {
   final String id;
   final String title;

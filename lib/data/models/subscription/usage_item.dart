@@ -1,4 +1,3 @@
-// usage_item.dart
 class UsageItem {
   final String featureType;
   final String featureName;
@@ -41,7 +40,6 @@ class UsageItem {
   }
 }
 
-// subscription_usage_response.dart
 class SubscriptionUsageResponse {
   final List<UsageItem> items;
   final int totalItems;

@@ -1,0 +1,20 @@
+{
+  "hosted_by": "主催者：",
+  "event_has_ended": "終了しました",
+  "thanks_for_joining": "イベントにご参加いただきありがとうございます",
+  "please_rate_host": "評価をお願いします",
+  "home": "ホーム",
+  "rating_event": "イベント評価",
+  "update_rating_success": "評価が正常に更新されました",
+  "error": "エラーが発生しました。しばらくしてから再度お試しください。",
+  "your_event_rating": "あなたの評価",
+  "fix_rating": "評価を編集",
+  "others_rating": "他の人の評価",
+  "choose_gift": "ギフトを選択",
+  "send_rating": "評価を送信",
+  "rating_success": "評価が送信されました",
+  "please_choose_star": "星を選択してください",
+  "error_rating": "イベントに参加していないため、評価を送信できません",
+  "event_rating": "評価",
+  "total_reviews": "レビュー数"
+}

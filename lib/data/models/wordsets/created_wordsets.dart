@@ -35,16 +35,30 @@ class CreatedWordSet {
     description: json['description'] ?? '',
     status: json['status'] ?? '',
     difficulty: json['difficulty'] ?? '',
-    estimatedTimeInMinutes: (json['estimatedTimeInMinutes'] ?? 0) as int,
-    playCount: (json['playCount'] ?? 0) as int,
-    averageTimeInSeconds: (json['averageTimeInSeconds'] ?? 0) as int,
-    averageRating: (json['averageRating'] ?? 0).toDouble(),
-    wordCount: (json['wordCount'] ?? 0) as int,
-    totalPlays: (json['totalPlays'] ?? 0) as int,
+
+    estimatedTimeInMinutes:
+    (json['estimatedTimeInMinutes'] as num?)?.toInt() ?? 0,
+
+    playCount:
+    (json['playCount'] as num?)?.toInt() ?? 0,
+
+    averageTimeInSeconds:
+    (json['averageTimeInSeconds'] as num?)?.toInt() ?? 0,
+
+    averageRating:
+    (json['averageRating'] as num?)?.toDouble() ?? 0.0,
+
+    wordCount:
+    (json['wordCount'] as num?)?.toInt() ?? 0,
+
+    totalPlays:
+    (json['totalPlays'] as num?)?.toInt() ?? 0,
+
     language: json['language'] != null
         ? Language.fromJson(json['language'])
         : Language(id: '', code: '', name: 'Unknown', iconUrl: ''),
-    createdAt: DateTime.parse(json['createdAt']),
+
+    createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
   );
 
   Map<String, dynamic> toJson() => {

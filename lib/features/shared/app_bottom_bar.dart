@@ -18,7 +18,7 @@ class _AppBottomBarState extends State<AppBottomBar> {
   final _items = const [
     {'icon': Icons.home_rounded, 'labelKey': 'bottom_home'},
     {'icon': Icons.edit_calendar, 'labelKey': 'bottom_my_events'},
-    {'icon': Icons.videogame_asset_rounded, 'labelKey': 'bottom_my_games'},
+    {'icon': Icons.sports_esports_outlined, 'labelKey': 'bottom_my_games'},
     {'icon': Icons.storefront_rounded, 'labelKey': 'bottom_shop'},
     {'icon': Icons.person_rounded, 'labelKey': 'bottom_me'},
   ];

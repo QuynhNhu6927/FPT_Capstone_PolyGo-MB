@@ -1,4 +1,3 @@
-// models/events/update_event_status_response.dart
 class UpdateEventStatusResponse {
   final String message;
 

@@ -22,6 +22,7 @@
   "light_mode": "Light mode",
   "dark_mode": "Dark mode",
   "search_placeholder": "Searching...",
-  "about_plus": "Register now to receive unlimited features"
+  "about_plus": "Register now to receive unlimited features",
+  "no_notifications": "No notifications yet"
 
 }

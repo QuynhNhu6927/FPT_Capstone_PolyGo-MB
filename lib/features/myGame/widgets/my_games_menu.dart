@@ -19,7 +19,7 @@ class _MyGameMenuState extends State<MyGameMenu> {
   late int _selectedIndex;
 
   final _items = const [
-    {'icon': Icons.videogame_asset},
+    {'icon': Icons.edit},
     {'icon': Icons.group},
   ];
 

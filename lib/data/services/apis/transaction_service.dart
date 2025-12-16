@@ -44,40 +44,6 @@ class TransactionService {
     }
   }
 
-  // Future<ApiResponse<WalletTransactionListResponse>> getWalletTransactions({
-  //   required String token,
-  //   int pageNumber = 1,
-  //   int pageSize = 10,
-  // }) async {
-  //   try {
-  //     final response = await apiClient.get(
-  //       ApiConstants.transactions,
-  //       queryParameters: {
-  //         'pageNumber': pageNumber.toString(),
-  //         'pageSize': pageSize.toString(),
-  //       },
-  //       headers: {
-  //         ApiConstants.headerAuthorization: 'Bearer $token',
-  //       },
-  //     );
-  //
-  //     final json = response.data as Map<String, dynamic>;
-  //     return ApiResponse.fromJson(
-  //       json,
-  //           (data) => WalletTransactionListResponse.fromJson(json),
-  //     );
-  //   } on DioError catch (e) {
-  //     if (e.response != null && e.response?.data != null) {
-  //       return ApiResponse<WalletTransactionListResponse>(
-  //         data: null,
-  //         message: e.response?.data['message'] ?? e.message,
-  //         statusCode: e.response?.statusCode,
-  //       );
-  //     }
-  //     rethrow;
-  //   }
-  // }
-
   Future<ApiResponse<WalletTransactionListResponse>> getWalletTransactions({
     required String token,
     int pageNumber = 1,
@@ -94,7 +60,6 @@ class TransactionService {
         'pageSize': pageSize.toString(),
       };
 
-      // ⬇️ Chỉ thêm filter nếu có giá trị
       if (description != null && description.isNotEmpty) {
         queryParams['description'] = description;
       }

@@ -23,6 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isRetrying = false;
   String _searchQuery = '';
 
+  final ScrollController _scrollController = ScrollController();
+  bool _showHeader = true;
+  double _lastOffset = 0;
+
   void _onMenuSelected(int index) {
     setState(() => _menuIndex = index);
   }
@@ -54,6 +58,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _menuIndex = widget.initialIndex;
+
+    _scrollController.addListener(() {
+      final currentOffset = _scrollController.offset;
+
+      if (currentOffset > _lastOffset && _showHeader) {
+        // scroll xuống
+        setState(() => _showHeader = false);
+      } else if (currentOffset < _lastOffset && !_showHeader) {
+        // scroll lên
+        setState(() => _showHeader = true);
+      }
+
+      _lastOffset = currentOffset;
+    });
   }
 
   @override
@@ -62,16 +80,30 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final List<Widget> pages = [
-      EventsContent(key: const ValueKey('events'), searchQuery: _searchQuery),
+      EventsContent(
+        key: const ValueKey('events'),
+        searchQuery: _searchQuery,
+        controller: _scrollController,
+      ),
       Users(
         key: const ValueKey('users'),
         onLoaded: _onChildLoaded,
         onError: _onChildError,
         isRetrying: _isRetrying,
         searchQuery: _searchQuery,
+        controller: _scrollController,
       ),
-      WordSetContent(key: const ValueKey('games'), searchQuery: _searchQuery),
-      PostContent(key: const ValueKey('social'), searchQuery: _searchQuery),
+      WordSetContent(
+        key: const ValueKey('games'),
+        searchQuery: _searchQuery,
+        // controller: _scrollController,
+
+      ),
+      PostContent(
+        key: const ValueKey('social'),
+        searchQuery: _searchQuery,
+        // controller: _scrollController,
+      ),
     ];
 
     return PopScope(
@@ -88,12 +120,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ? AppErrorState(onRetry: _onRetry)
               : Column(
                   children: [
-                    HomeHeader(
-                      currentIndex: _menuIndex,
-                      onItemSelected: _onMenuSelected,
-                      onSearchChanged: (query) {
-                        setState(() => _searchQuery = query);
-                      },
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      child: _showHeader
+                          ? HomeHeader(
+                        currentIndex: _menuIndex,
+                        onItemSelected: _onMenuSelected,
+                        onSearchChanged: (query) {
+                          setState(() => _searchQuery = query);
+                        },
+                      )
+                          : const SizedBox.shrink(),
                     ),
                     Expanded(
                       child: AnimatedSwitcher(

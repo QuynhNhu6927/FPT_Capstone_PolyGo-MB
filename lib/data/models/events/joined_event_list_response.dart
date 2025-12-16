@@ -1,4 +1,3 @@
-// models/events/joined_event_list_response.dart
 import 'joined_event_model.dart';
 
 class JoinedEventListResponse {

@@ -1,4 +1,3 @@
-// event_rating_item.dart
 class EventRatingItem {
   final String id;
   final int rating;
@@ -45,7 +44,6 @@ class EventRatingUser {
   }
 }
 
-// event_rating_list_response.dart
 class EventRatingListResponse {
   final List<EventRatingItem> items;
   final int totalItems;

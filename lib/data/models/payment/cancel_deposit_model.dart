@@ -1,4 +1,3 @@
-// cancel_deposit_model.dart
 class CancelDepositRequest {
   final int orderCode;
 

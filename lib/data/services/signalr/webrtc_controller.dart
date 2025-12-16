@@ -881,9 +881,6 @@ class WebRTCController extends ChangeNotifier {
     }
   }
 
-  // =========================
-  // KICK USER (HOST ONLY)
-  // =========================
   Future<void> kickUser(String targetConnId, {String reason = ""}) async {
     if (!isHost) {
       print("❌ Only host can kick user");

@@ -70,7 +70,6 @@ class SubscriptionService {
             (data) => SubscriptionResponse.fromJson(data),
       );
     } on DioError catch (e) {
-      // Nếu server trả về lỗi, parse message
       if (e.response != null && e.response?.data != null) {
         return ApiResponse<SubscriptionResponse>(
           data: null,

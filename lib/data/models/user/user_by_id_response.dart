@@ -10,7 +10,6 @@ class UserByIdResponse {
   final int? experiencePoints;
   final String? planType;
 
-  // ==== các trường mới thêm ====
   final int? level;
   final int? xpInCurrentLevel;
   final int? xpToNextLevel;
@@ -34,7 +33,6 @@ class UserByIdResponse {
     this.experiencePoints,
     this.planType,
 
-    // new fields
     this.level,
     this.xpInCurrentLevel,
     this.xpToNextLevel,
@@ -60,7 +58,6 @@ class UserByIdResponse {
       experiencePoints: json['experiencePoints'],
       planType: json['planType'],
 
-      // new
       level: json['level'],
       xpInCurrentLevel: json['xpInCurrentLevel'],
       xpToNextLevel: json['xpToNextLevel'],

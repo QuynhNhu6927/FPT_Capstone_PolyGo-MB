@@ -53,7 +53,7 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
 
   void _validateAmount() {
     final loc = AppLocalizations.of(context);
-    if (amount < 50000 || amount > 10000000) {
+    if (amount < 10000) {
       setState(() {
         _amountError = loc.translate("50k-10tr");
       });
@@ -136,7 +136,7 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
 
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.translate("error"))),
+        SnackBar(content: Text(loc.translate("out_of_withdraw"))),
       );
       return;
     }

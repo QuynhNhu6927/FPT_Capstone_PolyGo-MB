@@ -47,7 +47,7 @@ class ConversationRepository {
     final res = await _service.getConversations(
       token: token,
       pageNumber: 1,
-      pageSize: 1000, // giả sử max
+      pageSize: 100,
       name: name,
     );
 

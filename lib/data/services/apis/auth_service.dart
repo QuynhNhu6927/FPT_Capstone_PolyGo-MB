@@ -169,30 +169,20 @@ class AuthService {
     try {
       debugPrint('🟡 Google signIn start');
 
-      // XÓA SESSION GOOGLE CŨ
       await _googleSignIn.signOut();
 
       // await _googleSignIn.disconnect();
 
-      // BẮT ĐẦU SIGN IN
       final googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        debugPrint('⚠️ Google signIn canceled by user');
         return null;
       }
 
-      debugPrint('🟢 Google user email: ${googleUser.email}');
-
       final googleAuth = await googleUser.authentication;
 
-      debugPrint('🟢 accessToken: ${googleAuth.accessToken != null}');
-      debugPrint('🟢 idToken: ${googleAuth.idToken != null}');
-
       return googleAuth.idToken;
-    } catch (e, s) {
-      debugPrint('❌ getGoogleIdToken error: $e');
-      debugPrintStack(stackTrace: s);
+    } catch (e) {
       rethrow;
     }
   }
@@ -202,7 +192,7 @@ class AuthService {
       await _googleSignIn.signOut();
       debugPrint('🟢 Google signOut success');
     } catch (e) {
-      debugPrint('❌ Google signOut error: $e');
+      //
     }
   }
 

@@ -241,7 +241,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                     (_filterCategory?.isNotEmpty ?? false) ||
                     true)
                   SizedBox(
-                    height: 38,
+                    height: 45,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount:
@@ -361,7 +361,7 @@ class _JoinedGamesState extends State<JoinedGames> {
                 : const SizedBox.shrink(),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
 
           // --- GRID VIEW ---
           Expanded(

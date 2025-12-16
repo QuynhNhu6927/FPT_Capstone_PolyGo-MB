@@ -101,13 +101,16 @@ class _CreatedGamesState extends State<CreatedGames> {
         _applyFilters();
         _loading = false;
       });
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('CreatedGames error: $e');
+      debugPrintStack(stackTrace: s);
       if (!mounted) return;
       setState(() {
         _hasError = true;
         _loading = false;
       });
     }
+
   }
 
   void _applyFilters() {
@@ -245,7 +248,7 @@ class _CreatedGamesState extends State<CreatedGames> {
                     (_filterCategory?.isNotEmpty ?? false) ||
                     true)
                   SizedBox(
-                    height: 38,
+                    height: 45,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount:
@@ -365,7 +368,7 @@ class _CreatedGamesState extends State<CreatedGames> {
                 : const SizedBox.shrink(),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
 
           // --- GRID VIEW ---
           Expanded(

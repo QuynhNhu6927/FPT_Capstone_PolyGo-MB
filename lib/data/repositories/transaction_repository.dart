@@ -16,23 +16,6 @@ class TransactionRepository {
     return res.data;
   }
 
-  // Future<WalletTransactionListResponse?> getWalletTransactions({
-  //   required String token,
-  //   int pageNumber = 1,
-  //   int pageSize = 10,
-  // }) async {
-  //   try {
-  //     final res = await _service.getWalletTransactions(
-  //       token: token,
-  //       pageNumber: pageNumber,
-  //       pageSize: pageSize,
-  //     );
-  //     return res.data;
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
   Future<WalletTransactionListResponse?> getWalletTransactions({
     required String token,
     int pageNumber = 1,

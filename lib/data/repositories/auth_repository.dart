@@ -49,7 +49,6 @@ class AuthRepository {
   Future<String> login(LoginRequest req) async {
     final res = await _service.login(req);
 
-    // Nếu không có token (data = null) thì ném message gốc
     if (res.data == null) {
       throw res.message ?? 'Error.System';
     }

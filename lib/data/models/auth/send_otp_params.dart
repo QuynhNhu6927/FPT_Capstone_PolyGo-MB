@@ -1,6 +1,6 @@
 class SendOtpParams {
   final String mail;
-  final int verificationType; // bắt buộc
+  final int verificationType;
 
   SendOtpParams({required this.mail, required this.verificationType});
 

@@ -1,4 +1,3 @@
-// event_kick_request.dart
 class EventKickRequest {
   final String eventId;
   final String userId;

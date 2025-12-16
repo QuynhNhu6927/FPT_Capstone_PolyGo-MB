@@ -6,7 +6,7 @@ class StartWordSetResponse {
 
   factory StartWordSetResponse.fromJson(Map<String, dynamic> json) {
     return StartWordSetResponse(
-      data: WordSetData.fromJson(json['data']), // chỉ lấy data
+      data: WordSetData.fromJson(json['data']),
       message: json['message'] ?? '',
     );
   }

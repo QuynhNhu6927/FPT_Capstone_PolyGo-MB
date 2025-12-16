@@ -80,7 +80,6 @@ class PostModel {
   final List<PostReaction> reactions;
   final String? myReaction;
 
-  // Added fields
   final bool isShare;
   final String? shareType;
   final String? sharedPostId;
@@ -126,7 +125,6 @@ class PostModel {
           .toList(),
       myReaction: json['myReaction'],
 
-      // new fields
       isShare: json['isShare'] ?? false,
       shareType: json['shareType'],
       sharedPostId: json['sharedPostId'],

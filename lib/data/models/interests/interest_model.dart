@@ -35,5 +35,4 @@ class InterestModel {
     };
   }
 
-  // String get fullIconUrl => '${ApiConstants.baseUrl}/$iconUrl';
 }

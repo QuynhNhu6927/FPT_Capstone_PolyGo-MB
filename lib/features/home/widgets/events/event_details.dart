@@ -65,7 +65,7 @@ class _EventDetailState extends State<EventDetail> {
 
     final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
+    final secondaryText = isDark ? Colors.grey[400] : Colors.black;
 
     final now = DateTime.now();
     final isPastRegisterDeadline = event.registerDeadline.isBefore(now);
@@ -383,7 +383,7 @@ class _EventDetailState extends State<EventDetail> {
 
                   Container(
                     constraints: BoxConstraints(
-                      maxHeight: st(context, 14) * 1.4 * 4 + 8,
+                      maxHeight: st(context, 14) * 1.4 * 9 + 8,
                     ),
                     child: SingleChildScrollView(
                       child: RenderUtils.selectableMarkdownText(

@@ -1,4 +1,3 @@
-// =================== WORDSET MODEL ===================
 class WordSetModel {
   final String id;
   final String title;
@@ -68,7 +67,6 @@ class WordSetModel {
   );
 }
 
-// =================== LANGUAGE MODEL ===================
 class Language {
   final String id;
   final String code;
@@ -90,8 +88,6 @@ class Language {
   );
 }
 
-
-// =================== INTEREST MODEL ===================
 class Interest {
   final String id;
   final String name;
@@ -110,7 +106,6 @@ class Interest {
   );
 }
 
-// =================== CREATOR MODEL ===================
 class Creator {
   final String id;
   final String name;
@@ -129,7 +124,6 @@ class Creator {
   );
 }
 
-// =================== WORD MODEL ===================
 class Word {
   final String id;
   final String word;
@@ -150,7 +144,6 @@ class Word {
   );
 }
 
-// =================== PAGED RESPONSE MODEL ===================
 class WordSetListResponse {
   final List<WordSetModel> items;
   final int totalItems;

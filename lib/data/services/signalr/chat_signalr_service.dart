@@ -156,11 +156,9 @@ class ChatSignalrService {
     }
 
     try {
-      // Gọi backend DeleteMessage
       await _hubConnection!.invoke('DeleteMessage', args: [messageId]);
       debugPrint('[SignalR] Yêu cầu xóa message thành công: $messageId');
 
-      // Phát event cho các widget lắng nghe (Stream)
       _messageController.add({
         'type': 'deleted',
         'messageId': messageId,
@@ -273,7 +271,6 @@ class _ChatHubManagerState extends State<ChatHubManager> with WidgetsBindingObse
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    // Nếu hub đang chạy mà login lại
     if (_hubStarted) {
       await ChatSignalrService().stop();
       _hubStarted = false;

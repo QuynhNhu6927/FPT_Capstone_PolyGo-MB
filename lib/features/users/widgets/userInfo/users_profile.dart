@@ -334,16 +334,7 @@ class _UserProfileState extends State<UserProfile> {
     required AppLocalizations loc,
   }) {
     if (items.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Text(
-          "${loc.translate("no_user_info_yet")} $title",
-          style: const TextStyle(
-            fontStyle: FontStyle.italic,
-            color: Colors.grey,
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return _buildTagRow(title, items, icons, color);

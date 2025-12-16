@@ -303,7 +303,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
 
     final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
+    final secondaryText = isDark ? Colors.grey[400] : Colors.black;
 
     final now = DateTime.now();
     final isPastRegisterDeadline = event?.registerDeadline.isBefore(now);

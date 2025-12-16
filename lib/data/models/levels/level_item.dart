@@ -26,7 +26,6 @@ class LevelItem {
     );
   }
 
-  // 🔹 Thêm copyWith
   LevelItem copyWith({bool? isClaimed}) {
     return LevelItem(
       id: id,

@@ -17,7 +17,7 @@ class DescriptionSection extends StatelessWidget {
 
     final double fontSize = 14;
     final double lineHeight = 1.4;
-    final double maxLines = 4;
+    final double maxLines = 9;
     final double maxHeight = fontSize * lineHeight * maxLines + 8; // + padding nhỏ
 
     return Container(

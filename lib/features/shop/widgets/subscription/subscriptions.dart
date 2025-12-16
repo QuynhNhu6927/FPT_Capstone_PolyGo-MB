@@ -127,12 +127,9 @@ class _SubscriptionsState extends State<Subscriptions> {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final loc = AppLocalizations.of(context);
 
-        // Format số tiền theo kiểu Việt Nam
-        String formatVND(double amount) {
-          final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 2);
-          String formatted = formatter.format(amount);
-          if (formatted.endsWith(',00')) formatted = formatted.replaceAll(',00', '');
-          return '$formatted đ';
+        String formatMoney(num amount) {
+          final formatter = NumberFormat("#,##0.##", "de_DE");
+          return '${formatter.format(amount)} đ';
         }
 
         Gradient cardBackground = isDark
@@ -179,7 +176,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                   const SizedBox(height: 12),
                   // Hiển thị số dư khả dụng
                   Text(
-                    '${loc.translate("available_balance")}: ${formatVND(balance)}',
+                    '${loc.translate("available_balance")}: ${formatMoney(balance)}',
                     style: TextStyle(
                       color: isDark ? Colors.grey[300] : Colors.grey[800],
                       fontSize: 14,
@@ -188,7 +185,7 @@ class _SubscriptionsState extends State<Subscriptions> {
                   const SizedBox(height: 8),
                   // Giá gói
                   Text(
-                    '${loc.translate("plan_price")}: ${formatVND(plan.price)}',
+                    '${loc.translate("plan_price")}: ${formatMoney(plan.price)}',
                     style: TextStyle(
                       color: isDark ? Colors.grey[300] : Colors.grey[800],
                       fontSize: 14,

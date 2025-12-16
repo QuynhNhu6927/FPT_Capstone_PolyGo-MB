@@ -26,7 +26,7 @@ class InfoRow extends StatelessWidget {
         : Colors.black87;
     final secondaryText = theme.brightness == Brightness.dark
         ? Colors.grey[400]
-        : Colors.grey[600];
+        : Colors.black;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

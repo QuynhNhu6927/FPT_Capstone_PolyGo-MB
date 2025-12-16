@@ -178,11 +178,11 @@ class EventService {
       );
 
       final json = response.data as Map<String, dynamic>;
-      final data = json['data'] as Map<String, dynamic>? ?? {}; // an toàn với null
+      final data = json['data'] as Map<String, dynamic>? ?? {};
 
       return ApiResponse.fromJson(
         json,
-            (_) => HostedEventListResponse.fromJson(data), // chỉ dùng data một lần
+            (_) => HostedEventListResponse.fromJson(data),
       );
     } on DioError catch (e) {
       rethrow;

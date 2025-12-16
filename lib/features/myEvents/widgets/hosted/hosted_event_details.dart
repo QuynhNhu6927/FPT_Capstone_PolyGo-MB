@@ -56,7 +56,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
 
     final dividerColor = isDark ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final secondaryText = isDark ? Colors.grey[400] : Colors.grey[600];
+    final secondaryText = isDark ? Colors.grey[400] : Colors.black;
 
     final eventLocal = widget.event.startAt.toLocal();
     final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal);
@@ -66,7 +66,7 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
 
     final double fontSize = st(context, 14);
     final double lineHeight = 1.4;
-    final int maxLines = 4;
+    final int maxLines = 9;
     final double maxHeight =
         fontSize * lineHeight * maxLines + 8; // + padding nhỏ
 

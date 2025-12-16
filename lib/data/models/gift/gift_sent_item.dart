@@ -1,4 +1,3 @@
-// models/gift/gift_sent_item.dart
 class GiftSentItem {
   final String presentationId;
   final String lang;
@@ -43,7 +42,6 @@ class GiftSentItem {
   }
 }
 
-// models/gift/gift_sent_response.dart
 class GiftSentResponse {
   final List<GiftSentItem> items;
   final int totalItems;

@@ -1,4 +1,3 @@
-// lib/data/models/user/user_all_response.dart
 class UserAllResponse {
   final List<UserItem> items;
   final int totalItems;

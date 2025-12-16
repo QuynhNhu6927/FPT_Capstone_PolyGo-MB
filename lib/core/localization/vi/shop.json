@@ -68,7 +68,7 @@
   "expired": "Quá hạn",
   "5k-2tr": "Số tiền phải trong khoảng 5000 đến 2.000.000",
 
-  "50k-10tr": "Số tiền phải trong khoảng 50.000 đến 10.000.000",
+  "50k-10tr": "Số tiền phải lớn hơn 10.000đ",
   "please_select_account": "Vui lòng chọn tài khoản để rút tiền về!",
   "withdraw_amount_exceeds_balance": "Số dư trong ví không đủ",
   "otp_confirm": "Xác nhận OTP",
@@ -143,6 +143,8 @@
 
   "confirm_subscription": "Xác nhận thanh toán",
   "available_balance": "Số dư khả dụng",
-  "plan_price": "Giá gói"
+  "plan_price": "Giá gói",
+  "no_transactions": "Chưa có thông tin",
+  "out_of_withdraw": "Bạn đã sử dụng hết số lần rút tiền tháng này!"
 
 }

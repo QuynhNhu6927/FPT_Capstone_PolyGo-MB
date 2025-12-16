@@ -1,5 +1,3 @@
-// =================== PLAYED WORDSET MODELS ===================
-
 class PlayedCreator {
   final String id;
   final String name;

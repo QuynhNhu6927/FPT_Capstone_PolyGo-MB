@@ -19,6 +19,7 @@ class Users extends StatefulWidget {
   final VoidCallback? onError;
   final bool isRetrying;
   final String searchQuery;
+  final ScrollController controller;
 
   const Users({
     super.key,
@@ -26,6 +27,7 @@ class Users extends StatefulWidget {
     this.onError,
     this.isRetrying = false,
     this.searchQuery = '',
+    required this.controller,
   });
 
   @override
@@ -54,7 +56,7 @@ class _UsersState extends State<Users> {
     ..._filterInterests.map((e) => e['name'] ?? ''),
   ];
 
-  final ScrollController _scrollController = ScrollController();
+  // final ScrollController _scrollController = ScrollController();
   bool _showFilterBar = true;
   double _lastOffset = 0;
 
@@ -62,34 +64,45 @@ class _UsersState extends State<Users> {
   void initState() {
     super.initState();
     _repository = UserRepository(UserService(ApiClient()));
+    widget.controller.addListener(_handleScroll);
 
-    _scrollController.addListener(() {
-      final offset = _scrollController.offset;
+    // _scrollController.addListener(() {
+    //   final offset = _scrollController.offset;
+    //
+    //   if (offset > _lastOffset && offset - _lastOffset > 10) {
+    //     if (_showFilterBar) {
+    //       setState(() => _showFilterBar = false);
+    //     }
+    //   } else if (offset < _lastOffset && _lastOffset - offset > 10) {
+    //     if (!_showFilterBar) {
+    //       setState(() => _showFilterBar = true);
+    //     }
+    //   }
+    //
+    //   _lastOffset = offset;
+    //
+    //   if (_scrollController.position.pixels >=
+    //       _scrollController.position.maxScrollExtent - 200) {
+    //     if (_isShowingMatching && !_hasActiveFilter) {
+    //       _loadMoreMatchingUsers();
+    //     }
+    //   }
+    // });
+  }
 
-      if (offset > _lastOffset && offset - _lastOffset > 10) {
-        if (_showFilterBar) {
-          setState(() => _showFilterBar = false);
-        }
-      } else if (offset < _lastOffset && _lastOffset - offset > 10) {
-        if (!_showFilterBar) {
-          setState(() => _showFilterBar = true);
-        }
+  void _handleScroll() {
+    if (widget.controller.position.pixels >=
+        widget.controller.position.maxScrollExtent - 200) {
+      if (_isShowingMatching && !_hasActiveFilter) {
+        _loadMoreMatchingUsers();
       }
-
-      _lastOffset = offset;
-
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        if (_isShowingMatching && !_hasActiveFilter) {
-          _loadMoreMatchingUsers();
-        }
-      }
-    });
+    }
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    // _scrollController.dispose();
+    widget.controller.removeListener(_handleScroll);
     super.dispose();
   }
 
@@ -452,7 +465,8 @@ class _UsersState extends State<Users> {
 
           Expanded(
             child: MasonryGridView.count(
-              controller: _scrollController,
+              // controller: _scrollController,
+              controller: widget.controller,
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
@@ -599,13 +613,13 @@ class _UsersState extends State<Users> {
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               margin: const EdgeInsets.only(right: 6),
                               decoration: BoxDecoration(
-                                gradient: user.merit >= 80
+                                gradient: user.merit >= 70
                                     ? const LinearGradient(
                                   colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 )
-                                    : user.merit >= 40
+                                    : user.merit >= 50
                                     ? const LinearGradient(
                                   colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)],
                                   begin: Alignment.topLeft,

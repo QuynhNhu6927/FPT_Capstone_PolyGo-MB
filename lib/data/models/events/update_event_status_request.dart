@@ -1,8 +1,7 @@
-// models/events/update_event_status_request.dart
 class UpdateEventStatusRequest {
   final String eventId;
-  final String status; // "Live", "Completed", "Pending", ...
-  final String? adminNote; // optional
+  final String status;
+  final String? adminNote;
 
   UpdateEventStatusRequest({
     required this.eventId,

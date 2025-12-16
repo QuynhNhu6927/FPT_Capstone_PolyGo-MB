@@ -1,4 +1,3 @@
-// add_bank_request.dart
 class AddBankRequest {
   final String bankName;
   final String bankNumber;

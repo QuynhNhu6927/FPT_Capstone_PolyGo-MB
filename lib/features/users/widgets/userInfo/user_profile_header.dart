@@ -405,14 +405,14 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                       ),
                       margin: EdgeInsets.only(right: sw(context, 8)),
                       decoration: BoxDecoration(
-                        gradient: merit >= 80
+                        gradient: merit >= 70
                             ? const LinearGradient(
                                 colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
                                 // xanh lá đậm -> xanh lá nhạt
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
-                            : merit >= 40
+                            : merit >= 50
                             ? const LinearGradient(
                                 colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)],
                                 // vàng đậm -> vàng nhạt

@@ -70,13 +70,13 @@ class Reporter {
 
 class TargetInfo {
   final String? id;
-  final String? name; // cho User
-  final String? mail; // cho User
-  final String? content; // cho Post
-  final Creator? creator; // cho Post
-  final String? title; // cho Event
-  final String? description; // cho Event
-  final String? status; // cho Event
+  final String? name; // User
+  final String? mail; // User
+  final String? content; // Post
+  final Creator? creator; // Post
+  final String? title; // Event
+  final String? description; // Event
+  final String? status; // Event
 
   TargetInfo({
     this.id,

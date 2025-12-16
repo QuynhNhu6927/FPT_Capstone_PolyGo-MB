@@ -10,7 +10,7 @@
   "no_badges_found": "You do not have any badges",
   "claimed": "Claimed",
   "claimed_error": "Claim error! Please try again later!",
-  "claimed_on": "Received on:",
+  "claimed_on": "Received on",
   "friends": "Friends",
   "posts": "Posts",
   "friend_request_accept": "Friend request accepted",
@@ -31,6 +31,7 @@
   "levels": "Levels",
   "no_levels_found": "No levels found",
   "required_xp": "EXP required",
-  "claim_now": "Claim Now"
+  "claim_now": "Claim Now",
+  "no_gifts": "No gifts yet"
 
 }

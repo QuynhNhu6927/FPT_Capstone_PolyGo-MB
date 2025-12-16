@@ -146,7 +146,6 @@ class UserPresenceService {
 
         if (connection!.state != HubConnectionState.disconnected) {
           await connection!.stop();
-          // optional: đợi thêm chút thời gian để server kịp nhận disconnect
           await Future.delayed(const Duration(milliseconds: 500));
         }
 
@@ -245,7 +244,6 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
       }) {
         debugPrint('📞 Incoming call from $callerName ($callerId)');
 
-        // Đảm bảo chạy trên main thread
         scheduleMicrotask(() {
           if (!mounted) return;
           CallSoundManager().playComingCall();
@@ -401,7 +399,7 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Incoming call
     connection!.on("IncomingCall", (args) {
-      debugPrint("📞 IncomingCall event received: $args"); // <- log thêm
+      debugPrint("📞 IncomingCall event received: $args");
       if (args != null && args.length >= 4) {
         final callerId = args[0] as String;
         final isVideoCall = args[1] as bool;
