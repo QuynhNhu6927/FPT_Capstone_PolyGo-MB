@@ -5,6 +5,7 @@ import '../../../../data/models/api_response.dart';
 import '../../../../data/models/post/post_model.dart';
 import '../../../../data/repositories/post_repository.dart';
 import '../../../../data/services/apis/post_service.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../home/widgets/social/postCard/post/post_card.dart';
 import '../../home/widgets/social/post_card_old.dart';
 import '../../shared/app_error_state.dart';
@@ -68,45 +69,73 @@ class _UserPostContentState extends State<UserPostContent> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 32),
-        child: Center(child: CircularProgressIndicator()),
-      );
+    final theme = Theme.of(context);
+    final t = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context);
+
+    String timeAgo(DateTime dateTime) {
+      final diff = DateTime.now().difference(dateTime);
+      if (diff.inSeconds < 60) return loc.translate("just_now");
+      if (diff.inMinutes < 60) {
+        return '${diff.inMinutes} ${loc.translate("minutes_ago")}';
+      }
+      if (diff.inHours < 24) {
+        return '${diff.inHours} ${loc.translate("hours_ago")}';
+      }
+      if (diff.inDays < 7) {
+        return '${diff.inDays} ${loc.translate("days_ago")}';
+      }
+      if (diff.inDays < 30) {
+        return '${(diff.inDays / 7).floor()} ${loc.translate("weeks_ago")}';
+      }
+      if (diff.inDays < 365) {
+        return '${(diff.inDays / 30).floor()} ${loc.translate("months_ago")}';
+      }
+      return '${(diff.inDays / 365).floor()} ${loc.translate("year_ago")}';
     }
 
-    if (_error != null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32.0),
+    return Scaffold(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          loc.translate('posts'),
+          style: t.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+          ? Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: AppErrorState(onRetry: _loadPosts),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadPosts,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        itemCount: _posts.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
-        itemBuilder: (context, index) {
-          final post = _posts[index];
-          return PostCard(
-            post: post,
-            avatarUrl: post.creator.avatarUrl,
-            userName: post.creator.name,
-            timeAgo:
-            "${DateTime.now().difference(post.createdAt).inHours} giờ trước",
-            contentText: post.content,
-            contentImage:
-            post.imageUrls.isNotEmpty ? post.imageUrls.first : null,
-            reactCount: post.reactionsCount,
-            commentCount: post.commentsCount,
-            onPostDeleted: (_) => _loadPosts(),
-            onPostUpdated: (_) => _loadPosts(),
-          );
-        },
+      )
+          : RefreshIndicator(
+        onRefresh: _loadPosts,
+        child: ListView(
+          padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          children: [
+            ..._posts.map((post) {
+              return PostCard(
+                post: post,
+                avatarUrl: post.creator.avatarUrl,
+                userName: post.creator.name,
+                timeAgo: timeAgo(post.createdAt),
+                contentText: post.content,
+                contentImage: post.imageUrls.isNotEmpty
+                    ? post.imageUrls.first
+                    : null,
+                reactCount: post.reactionsCount,
+                commentCount: post.commentsCount,
+                onPostDeleted: (_) => _loadPosts(),
+                onPostUpdated: (_) => _loadPosts(),
+              );
+            }).toList(),
+          ],
+        ),
       ),
     );
   }

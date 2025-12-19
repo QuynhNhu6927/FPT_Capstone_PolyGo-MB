@@ -29,7 +29,7 @@ class BadgeDetailData {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       iconUrl: json['iconUrl'] ?? '',
-      badgeCategory: json['badgeCategory'] ?? '',
+      badgeCategory: json['badgeCategory']?.toString() ?? '',
       createdAt: json['createdAt'] ?? '',
       lastUpdatedAt: json['lastUpdatedAt'] ?? '',
     );

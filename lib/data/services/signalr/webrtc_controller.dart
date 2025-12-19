@@ -424,7 +424,7 @@ class WebRTCController extends ChangeNotifier {
           ? rawTime
           : DateTime.tryParse(rawTime.toString()) ?? DateTime.now();
 
-      // 🔒 chống duplicate
+      //
       final exists = chatMessages.any((m) => m.id == id);
       if (exists) {
         debugPrint("🔁 [CHAT] Duplicate ignored: $id");

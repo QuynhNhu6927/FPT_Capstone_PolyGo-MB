@@ -11,6 +11,7 @@ import '../../../data/services/apis/event_service.dart';
 import '../../../data/services/signalr/webrtc_controller.dart';
 import '../../../routes/app_routes.dart';
 import '../widgets/roomCall/chat_panel.dart';
+import '../widgets/roomCall/event_room_intro.dart';
 import '../widgets/roomCall/meeting_controls.dart';
 import '../widgets/roomCall/participant_list.dart';
 import '../widgets/roomCall/video_grid.dart';
@@ -413,6 +414,14 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
     if (mounted) Navigator.pop(context);
   }
 
+  void _showEventIntro() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => EventRoomIntro(eventId: widget.eventId),
+    );
+  }
+
   void _handleStartEvent() async {
     if (!widget.isHost) return;
     final loc = AppLocalizations.of(context);
@@ -576,6 +585,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                               setState(() => isParticipantsOpen = !isParticipantsOpen),
                           onSettings: () =>
                               setState(() => isSettingsOpen = !isSettingsOpen),
+                          onDescription: _showEventIntro,
                           onLeave: () => setState(() => showLeaveDialog = true),
                           onStartEvent: _handleStartEvent,
                           onEndEvent: () => setState(() => showEndDialog = true),

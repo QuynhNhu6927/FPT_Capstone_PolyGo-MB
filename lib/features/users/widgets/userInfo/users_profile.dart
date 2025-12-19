@@ -172,7 +172,7 @@ class _UserProfileState extends State<UserProfile> {
     return Align(
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

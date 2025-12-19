@@ -13,6 +13,7 @@ import '../../../../../../data/services/apis/auth_service.dart';
 import '../../../../../../data/services/apis/event_service.dart';
 import '../../../../../../routes/app_routes.dart';
 import '../../../../../myEvents/widgets/joined/report_event_dialog.dart';
+import '../../../../../rating/screens/rates_screen.dart';
 import '../../../events/event_details.dart';
 
 class SharedEventDetail extends StatefulWidget {
@@ -322,9 +323,8 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
       buttonText = loc.translate('joined');
     }
 
-    final dateFormatted = DateFormat(
-      'dd MMM yyyy, hh:mm a',
-    ).format(event!.startAt);
+    final eventLocal = event?.startAt.toLocal();
+    final dateFormatted = DateFormat('dd MMM yyyy, HH:mm').format(eventLocal!);
     final durationFormatted =
         "${event!.expectedDurationInMinutes ~/ 60}h ${event!.expectedDurationInMinutes % 60}m";
 
@@ -554,6 +554,22 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (event!.status == 'Completed') ...[
+                    AppButton(
+                      size: ButtonSize.sm,
+                      variant: ButtonVariant.primary,
+                      icon: const Icon(Icons.star, size: 18),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RatesScreen(eventId: event!.id),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(width: sw(context, 8)),
+                  ],
                   if (!shouldHideJoinButton) ...[
                     SizedBox(width: sw(context, 12)),
                     AppButton(

@@ -61,7 +61,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         child: _hasError
             ? AppErrorState(onRetry: _onRetry)
             : SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

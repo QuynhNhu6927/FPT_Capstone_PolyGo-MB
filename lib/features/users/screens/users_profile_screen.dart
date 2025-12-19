@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../shared/app_bottom_bar.dart';
 import '../../shared/app_error_state.dart';
+import '../widgets/userInfo/event_social.dart';
 import '../widgets/userInfo/users_profile.dart';
-import '../widgets/user_post_content.dart'; // import widget bài viết
 
 class UserProfileScreen extends StatefulWidget {
   final String? userId;
@@ -16,8 +16,6 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _hasError = false;
   bool _isRetrying = false;
-  bool _loadPosts = false;
-  final ScrollController _scrollController = ScrollController();
 
   void _onChildError() {
     if (!_hasError) {
@@ -39,37 +37,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final screenWidth = MediaQuery.of(context).size.width;
-      if (screenWidth >= 800) {
-        setState(() {
-          _loadPosts = true;
-        });
-      }
-    });
-
-    _scrollController.addListener(() {
-      if (!_loadPosts &&
-          _scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 100) {
-        setState(() {
-          _loadPosts = true;
-        });
-      }
-    });
-  }
-
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
@@ -80,7 +47,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: _hasError
             ? AppErrorState(onRetry: _onRetry)
             : SingleChildScrollView(
-          controller: _scrollController, // gắn controller
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -102,13 +68,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ),
                 ),
               ),
+
               UserProfile(userId: widget.userId),
-              Divider(
-                color: Colors.grey.withOpacity(0.3),
-                thickness: 1,
-              ),
-              if (widget.userId != null && _loadPosts)
-                UserPostContent(userId: widget.userId!),
+              EventSocialSection(userId: widget.userId),
             ],
           ),
         ),

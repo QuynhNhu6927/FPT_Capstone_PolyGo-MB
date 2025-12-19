@@ -346,7 +346,7 @@ class _EventsContentState extends State<EventsContent> {
                 ? Center(child: Text(loc.translate("no_events_found")))
                 : MasonryGridView.count(
               // controller: _scrollController,
-              controller: widget.controller, // ✅ controller từ HomeScreen
+              controller: widget.controller,
 
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 12,

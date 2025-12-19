@@ -19,6 +19,7 @@ import '../../models/events/joined_event_list_response.dart';
 import '../../models/events/payout_response.dart';
 import '../../models/events/update_event_status_request.dart';
 import '../../models/events/update_event_status_response.dart';
+import '../../models/events/user_hosted_event_model.dart';
 import '../../models/summary/event_summary_details.dart';
 import '../../models/summary/gen_summary.dart';
 
@@ -498,6 +499,51 @@ class EventService {
     } on DioError catch (e) {
       rethrow;
     }
+  }
+
+  Future<ApiResponse<UserHostedEventListResponse>> getUserHostedEvents({
+    required String token,
+    required String hostId,
+    String lang = 'en',
+    int pageNumber = 1,
+    int pageSize = 10,
+    List<String>? languageIds,
+    List<String>? interestIds,
+    String? name,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'lang': lang,
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    if (languageIds != null && languageIds.isNotEmpty) {
+      queryParameters['languageIds'] = languageIds;
+    }
+    if (interestIds != null && interestIds.isNotEmpty) {
+      queryParameters['interestIds'] = interestIds;
+    }
+    if (name != null && name.isNotEmpty) {
+      queryParameters['name'] = name;
+    }
+
+    final endpoint =
+    ApiConstants.userEvent.replaceFirst('{hostId}', hostId);
+
+    final response = await apiClient.get(
+      endpoint,
+      queryParameters: queryParameters,
+      headers: {
+        ApiConstants.headerAuthorization: 'Bearer $token',
+      },
+    );
+
+    final json = response.data as Map<String, dynamic>;
+
+    return ApiResponse.fromJson(
+      json,
+          (data) => UserHostedEventListResponse.fromJson(data),
+    );
   }
 
 }

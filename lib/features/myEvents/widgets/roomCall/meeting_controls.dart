@@ -189,6 +189,7 @@ class MeetingPanel extends StatefulWidget {
   final VoidCallback? onEndEvent;
   final VoidCallback onTranscribeToggle;
   final VoidCallback onCaptionsToggle;
+  final VoidCallback onDescription;
   final bool isTranscriptionEnabled;
   final bool isCaptionsEnabled;
   final List<String> subtitles;
@@ -207,6 +208,7 @@ class MeetingPanel extends StatefulWidget {
     required this.onParticipants,
     required this.onSettings,
     required this.onLeave,
+    required this.onDescription,
     required this.isHandRaised,
     required this.onToggleHand,
     required this.onTranscribeToggle,
@@ -274,9 +276,9 @@ class _MeetingPanelState extends State<MeetingPanel> {
                   children: [
                     const SizedBox(height: 10),
                     _buildButton(
-                      icon: Icons.description,
+                      icon: Icons.error_outline,
                       color: Colors.white,
-                      onPressed: (){},
+                      onPressed: widget.onDescription,
                     ),
                     const SizedBox(height: 10),
                     _buildButton(

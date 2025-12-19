@@ -29,18 +29,18 @@ class BadgeModel {
 
   factory BadgeModel.fromJson(Map<String, dynamic> json) {
     return BadgeModel(
-      id: json['id'] ?? '',
-      lang: json['lang'] ?? '',
-      code: json['code'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      iconUrl: json['iconUrl'] ?? '',
-      badgeCategory: json['badgeCategory'] ?? '',
-      createdAt: json['createdAt'] ?? '',
-      claimedAt: json['claimedAt'] ?? '',
-      lastUpdatedAt: json['lastUpdatedAt'] ?? '',
-      has: json['has'] ?? true,
-      isClaimed: json['isClaimed'] ?? true,
+      id: json['id']?.toString() ?? '',
+      lang: json['lang']?.toString() ?? '',
+      code: json['code']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      iconUrl: json['iconUrl']?.toString() ?? '',
+      badgeCategory: json['badgeCategory']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+      claimedAt: json['claimedAt']?.toString() ?? '',
+      lastUpdatedAt: json['lastUpdatedAt']?.toString() ?? '',
+      has: json['has'] == true,
+      isClaimed: json['isClaimed'] == true,
     );
   }
 

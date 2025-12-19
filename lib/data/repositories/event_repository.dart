@@ -20,6 +20,7 @@ import '../models/events/joined_event_model.dart';
 import '../models/events/payout_response.dart';
 import '../models/events/update_event_status_request.dart';
 import '../models/events/update_event_status_response.dart';
+import '../models/events/user_hosted_event_model.dart';
 import '../models/summary/event_summary_details.dart';
 import '../models/summary/gen_summary.dart';
 import '../services/apis/event_service.dart';
@@ -359,6 +360,42 @@ class EventRepository {
       eventId: eventId,
     );
     return res.data?.data;
+  }
+
+  Future<UserHostedEventListResponse> getUserHostedEventsPaged(
+      String token, {
+        required String hostId,
+        String lang = 'en',
+        int pageNumber = 1,
+        int pageSize = 10,
+        List<String>? languageIds,
+        List<String>? interestIds,
+        String? name,
+      }) async {
+    final res = await _service.getUserHostedEvents(
+      token: token,
+      hostId: hostId,
+      lang: lang,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      languageIds: languageIds,
+      interestIds: interestIds,
+      name: name,
+    );
+
+    if (res.data == null) {
+      return UserHostedEventListResponse(
+        items: [],
+        totalItems: 0,
+        currentPage: 1,
+        totalPages: 1,
+        pageSize: pageSize,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      );
+    }
+
+    return res.data!;
   }
 
 }
