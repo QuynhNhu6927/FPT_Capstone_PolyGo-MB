@@ -57,5 +57,8 @@
   "edit_post": "投稿を編集",
   "save": "保存",
   "post_details": "投稿の詳細",
-  "notification": "通知"
+  "notification": "通知",
+  "post_deleted": "この投稿は削除されました",
+  "event_deleted": "このイベントは削除されました"
+
 }

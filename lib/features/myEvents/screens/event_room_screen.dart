@@ -25,6 +25,7 @@ class MeetingRoomScreen extends StatefulWidget {
   final bool initialCameraOn;
   final String hostId;
   final String sourceLanguage;
+  final String? localAvatarUrl;
 
   const MeetingRoomScreen({
     super.key,
@@ -36,6 +37,7 @@ class MeetingRoomScreen extends StatefulWidget {
     this.initialCameraOn = true,
     required this.hostId,
     required this.sourceLanguage,
+    this.localAvatarUrl,
   });
 
   @override
@@ -68,7 +70,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
   @override
   void initState() {
     super.initState();
-
+    print("🔹 MeetingRoomScreen localAvatarUrl: ${widget.localAvatarUrl}");
     isCameraOn = widget.initialCameraOn;
     isMicOn = widget.initialMicOn;
 
@@ -539,6 +541,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                         .toList(),
                     controller: _controller,
                     widgetIsHost: widget.isHost,
+                    localAvatarUrl: widget.localAvatarUrl,
                   ),
                 ),
 

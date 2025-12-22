@@ -58,6 +58,8 @@
   "edit_post": "Chỉnh sửa bài viết",
   "save": "Lưu",
   "post_details": "Chi tiết bài đăng",
-  "notification": "Thông báo"
+  "notification": "Thông báo",
+  "post_deleted": "Bài viết này đã bị xóa",
+  "event_deleted": "Sự kiện này đã bị xóa"
 
 }

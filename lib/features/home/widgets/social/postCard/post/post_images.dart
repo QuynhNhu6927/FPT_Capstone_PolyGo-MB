@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class PostImages extends StatelessWidget {
   final List<String> imageUrls;
-  final List<Color?> imageBgColors;
+  // final List<Color?> imageBgColors;
 
   const PostImages({
     super.key,
     required this.imageUrls,
-    required this.imageBgColors,
+    // required this.imageBgColors,
   });
 
   @override
@@ -28,7 +28,7 @@ class PostImages extends StatelessWidget {
               width: w,
               height: h,
               decoration: BoxDecoration(
-                color: (imageBgColors[i] ?? Colors.grey).withOpacity(0.3),
+                color: (Colors.grey).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ClipRRect(

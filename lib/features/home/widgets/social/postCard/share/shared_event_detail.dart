@@ -556,7 +556,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                 children: [
                   if (event!.status == 'Completed') ...[
                     AppButton(
-                      size: ButtonSize.sm,
+                      size: ButtonSize.md,
                       variant: ButtonVariant.primary,
                       icon: const Icon(Icons.star, size: 18),
                       onPressed: () {
@@ -568,7 +568,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                         );
                       },
                     ),
-                    SizedBox(width: sw(context, 8)),
+
                   ],
                   if (!shouldHideJoinButton) ...[
                     SizedBox(width: sw(context, 12)),

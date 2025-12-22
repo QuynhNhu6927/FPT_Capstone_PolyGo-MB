@@ -134,6 +134,7 @@ class _StatisticEventState extends State<StatisticEvent> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         elevation: 1,
+        centerTitle: true,
         title: Text(loc.translate('statistic_event')),
       ),
       body: SafeArea(
@@ -142,12 +143,6 @@ class _StatisticEventState extends State<StatisticEvent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (e.bannerUrl.isNotEmpty)
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.network(e.bannerUrl, fit: BoxFit.cover),
-                ),
-              SizedBox(height: sh(context, 12)),
               Text(
                 e.title,
                 style: t.titleLarge?.copyWith(
@@ -155,6 +150,12 @@ class _StatisticEventState extends State<StatisticEvent> {
                   fontSize: st(context, 20),
                 ),
               ),
+              SizedBox(height: sh(context, 12)),
+              if (e.bannerUrl.isNotEmpty)
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.network(e.bannerUrl, fit: BoxFit.cover),
+                ),
               SizedBox(height: sh(context, 20)),
               Container(
                 width: double.infinity,
@@ -349,17 +350,6 @@ class _StatisticEventState extends State<StatisticEvent> {
                 loc.translate('fee'),
                 "${e.fee} đ",
               ),
-              _buildInfoRow(
-                Icons.schedule,
-                loc.translate('start'),
-                DateFormat('dd MMM yyyy, HH:mm').format(e.startAt.toLocal()),
-              ),
-              if (e.endAt != null)
-                _buildInfoRow(
-                  Icons.schedule,
-                  loc.translate('end'),
-                  DateFormat('dd MMM yyyy, HH:mm').format(e.endAt!.toLocal()),
-                ),
             ],
           ),
         ),

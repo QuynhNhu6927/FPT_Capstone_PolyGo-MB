@@ -94,6 +94,7 @@ class _ConversationListState extends State<ConversationList> {
       final sentAt = data['sentAt'] as String?;
       final type = data['type'] is int ? data['type'] as int : 0;
       final isSentByYou = data['isSentByYou'] as bool? ?? false;
+      final isFriend = data['isFriend'] as bool? ?? false;
 
       if (!mounted) return;
 
@@ -116,6 +117,7 @@ class _ConversationListState extends State<ConversationList> {
             Conversation(
               id: convId,
               hasSeen: isSentByYou,
+              isFriend: isFriend,
               user: User(id: data['senderId'] ?? '', name: "Người dùng mới"),
               lastMessage: LastMessage(
                 type: type,
@@ -286,6 +288,7 @@ class _ConversationListState extends State<ConversationList> {
                       MaterialPageRoute(
                         builder: (_) => ConversationScreen(
                           conversationId: conv.id,
+                          isFriend: conv.isFriend,
                           userName: conv.user.name,
                           receiverId: conv.user.id,
                           lastActiveAt: conv.user.lastActiveAt ?? '',

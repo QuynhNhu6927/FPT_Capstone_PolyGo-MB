@@ -299,9 +299,11 @@ class _HostedEventDetailsState extends State<HostedEventDetails> {
                             eventId: widget.event.id,
                             eventStatus: widget.event.status,
                             eventRepository: widget.eventRepository,
-                            onKick: (kickedUserId) {
+                            onKick: (kickedUserId, allowRejoin) {
                               setState(() {
-                                currentParticipantCount--;
+                                if (allowRejoin) {
+                                  currentParticipantCount--;
+                                }
                               });
                             },
                           ),

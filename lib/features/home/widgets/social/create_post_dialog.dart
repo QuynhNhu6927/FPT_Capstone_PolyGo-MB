@@ -315,7 +315,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
       );
 
       if (mounted) {
-        Navigator.pop(context, true); // Trả về true báo thành công
+        Navigator.pop(context, true);
       }
       widget.onPosted();
     } catch (e) {

@@ -29,6 +29,7 @@ class Conversation extends StatefulWidget {
   final String avatarHeader;
   final String lastActiveAt;
   final bool isOnline;
+  final bool isFriend;
 
   const Conversation({
     super.key,
@@ -38,6 +39,7 @@ class Conversation extends StatefulWidget {
     required this.lastActiveAt,
     required this.receiverId,
     required this.isOnline,
+    required this.isFriend,
   });
 
   @override
@@ -520,6 +522,7 @@ class _ConversationState extends State<Conversation> {
                   ),
                 ),
                 ChatInputBar(
+                  isFriend: widget.isFriend,
                   isUploadingImages: _isUploadingImages,
                   isDark: isDark,
                   colorPrimary: colorPrimary,

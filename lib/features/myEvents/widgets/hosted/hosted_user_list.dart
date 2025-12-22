@@ -16,7 +16,7 @@ class HostedUserList extends StatefulWidget {
   final String eventStatus;
   final EventRepository eventRepository;
   final VoidCallback? onClose;
-  final void Function(String kickedUserId)? onKick;
+  final void Function(String kickedUserId, bool allowRejoin)? onKick;
 
   const HostedUserList({
     super.key,
@@ -43,12 +43,45 @@ class _HostedUserListState extends State<HostedUserList> {
     participants = [...widget.participants];
   }
 
-  void _handleKick(String userId) {
+  // void _handleKick(String userId) {
+  //   setState(() {
+  //     final index = participants.indexWhere((u) => u.id == userId);
+  //     if (index == -1) return;
+  //
+  //     final user = participants[index];
+  //
+  //     if (user.status == 2) {
+  //       // Nếu user đã bị khóa, chỉ update status thành locked
+  //       participants[index] = user.copyWith(status: 2);
+  //     } else {
+  //       // Xóa user khỏi danh sách
+  //       participants.removeAt(index);
+  //     }
+  //   });
+  //
+  //   widget.onKick?.call(userId);
+  // }
+
+  void _handleKick(String userId, {required bool allowRejoin}) {
     setState(() {
-      participants.removeWhere((u) => u.id == userId);
+      final index = participants.indexWhere((u) => u.id == userId);
+      if (index == -1) return;
+
+      final user = participants[index];
+
+      if (allowRejoin) {
+        // Xóa user khỏi danh sách
+        participants.removeAt(index);
+      } else {
+        // Chỉ update status thành locked
+        participants[index] = user.copyWith(status: 2);
+      }
     });
-    widget.onKick?.call(userId);
+
+    // Gọi callback về parent, truyền cả allowRejoin
+    widget.onKick?.call(userId, allowRejoin);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +122,36 @@ class _HostedUserListState extends State<HostedUserList> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            /// Icon Legend / Chú thích icon
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.lock, size: 16, color: Colors.redAccent),
+                    SizedBox(width: 4),
+                    Text('Banned'),
+                    SizedBox(width: 20),
+                    Icon(Icons.check_circle, size: 16, color: Colors.green),
+                    SizedBox(width: 4),
+                    Text('Attended'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: const [
+                    Icon(Icons.check_circle, size: 16, color: Colors.grey),
+                    SizedBox(width: 4),
+                    Text('Absent'),
+                    SizedBox(width: 23),
+                    Icon(Icons.remove_circle_outline_sharp, size: 16, color: Colors.red),
+                    SizedBox(width: 4),
+                    Text('Kickable'),
+                  ],
+                ),
+              ],
+            ),
 
             const SizedBox(height: 12),
 
@@ -110,18 +173,34 @@ class _HostedUserListState extends State<HostedUserList> {
       ),
     );
   }
-
   Widget _buildUserCard(BuildContext context, ParticipantModel user) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final hasAvatar = (user.avatarUrl ?? '').isNotEmpty;
-    final isLocked = user.status == 3;
     final loc = AppLocalizations.of(context);
 
+    bool isKickVisible = widget.hostId != user.id && widget.eventStatus == "Approved";
+
+    Widget? statusIcon;
+
+    if (user.status == 2) {
+      statusIcon = Icon(Icons.lock, size: 18, color: Colors.redAccent);
+    } else {
+      switch (widget.eventStatus) {
+        case "Completed":
+          if (user.status == 1) {
+            statusIcon = Icon(Icons.check_circle, size: 18, color: Colors.green);
+          } else if (user.status == 0) {
+            statusIcon = Icon(Icons.check_circle, size: 18, color: Colors.grey);
+          }
+          break;
+        default:
+          statusIcon = null;
+      }
+    }
+
     return GestureDetector(
-      onTap: isLocked
-          ? null
-          : () {
+      onTap: () {
         Navigator.pushNamed(
           context,
           AppRoutes.userProfile,
@@ -136,8 +215,7 @@ class _HostedUserListState extends State<HostedUserList> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color:
-                  isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
+                  color: isDark ? Colors.black.withOpacity(0.3) : Colors.black12,
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -149,46 +227,33 @@ class _HostedUserListState extends State<HostedUserList> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// Avatar
-                  Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 1,
-                        child: hasAvatar
-                            ? Image.network(
-                          user.avatarUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey[400],
-                            child: const Center(
-                              child: Icon(
-                                Icons.person,
-                                size: 80,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        )
-                            : Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          color: Colors.grey[400],
-                          child: const Center(
-                            child: Icon(
-                              Icons.person,
-                              size: 80,
-                              color: Colors.white,
-                            ),
-                          ),
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: hasAvatar
+                        ? Image.network(
+                      user.avatarUrl!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey[400],
+                        child: const Center(
+                          child: Icon(Icons.person, size: 80, color: Colors.white),
                         ),
                       ),
-                    ],
+                    )
+                        : Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      color: Colors.grey[400],
+                      child: const Center(
+                        child: Icon(Icons.person, size: 80, color: Colors.white),
+                      ),
+                    ),
                   ),
 
-                  /// Name + Kick
+                  /// Name + Icon / Kick
                   Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -205,10 +270,10 @@ class _HostedUserListState extends State<HostedUserList> {
                           ),
                         ),
 
-                        /// Kick button
-                        if (widget.hostId != user.id &&
-                            !isLocked &&
-                            widget.eventStatus == "Approved")
+                        /// Status Icon hoặc Kick Button
+                        if (statusIcon != null)
+                          statusIcon
+                        else if (isKickVisible)
                           GestureDetector(
                             onTap: () async {
                               final reasonController = TextEditingController();
@@ -218,17 +283,12 @@ class _HostedUserListState extends State<HostedUserList> {
                                 context: context,
                                 builder: (context) {
                                   final theme = Theme.of(context);
-                                  final isDark =
-                                      theme.brightness == Brightness.dark;
-                                  final textColor =
-                                  isDark ? Colors.white : Colors.black;
+                                  final isDark = theme.brightness == Brightness.dark;
+                                  final textColor = isDark ? Colors.white : Colors.black;
 
                                   final Gradient cardBackground = isDark
                                       ? const LinearGradient(
-                                    colors: [
-                                      Color(0xFF1E1E1E),
-                                      Color(0xFF2C2C2C)
-                                    ],
+                                    colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   )
@@ -243,77 +303,57 @@ class _HostedUserListState extends State<HostedUserList> {
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
                                           gradient: cardBackground,
-                                          borderRadius:
-                                          BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
                                               loc.translate('kick_user'),
-                                              style: theme
-                                                  .textTheme.titleMedium
-                                                  ?.copyWith(
+                                              style: theme.textTheme.titleMedium?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: textColor,
                                               ),
                                             ),
                                             const SizedBox(height: 16),
-
-                                            /// Reason
                                             TextField(
                                               controller: reasonController,
                                               decoration: InputDecoration(
-                                                labelText:
-                                                loc.translate('reason'),
-                                                border:
-                                                const OutlineInputBorder(),
+                                                labelText: loc.translate('reason'),
+                                                border: const OutlineInputBorder(),
                                               ),
                                             ),
-
                                             const SizedBox(height: 16),
-
-                                            /// Allow Rejoin Switch
+                                            // Row(
+                                            //   children: [
+                                            //     Expanded(
+                                            //       child: Text(
+                                            //         loc.translate('allow_rejoin'),
+                                            //         style: TextStyle(color: textColor),
+                                            //       ),
+                                            //     ),
+                                            //     Switch(
+                                            //       value: allowRejoin,
+                                            //       onChanged: (v) => setState(() => allowRejoin = v),
+                                            //     ),
+                                            //   ],
+                                            // ),
+                                            // const SizedBox(height: 16),
                                             Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    loc.translate(
-                                                        'allow_rejoin'),
-                                                    style: TextStyle(
-                                                        color: textColor),
-                                                  ),
-                                                ),
-                                                Switch(
-                                                  value: allowRejoin,
-                                                  onChanged: (v) => setState(
-                                                          () => allowRejoin = v),
-                                                ),
-                                              ],
-                                            ),
-
-                                            const SizedBox(height: 16),
-
-                                            Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.end,
                                               children: [
                                                 TextButton(
                                                   onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(false),
-                                                  child: Text(
-                                                      loc.translate('cancel')),
+                                                      Navigator.of(context).pop(false),
+                                                  child: Text(loc.translate('cancel')),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 AppButton(
                                                   text: loc.translate('kick'),
                                                   onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(true),
+                                                      Navigator.of(context).pop(true),
                                                   size: ButtonSize.sm,
-                                                  variant:
-                                                  ButtonVariant.primary,
+                                                  variant: ButtonVariant.primary,
                                                 ),
                                               ],
                                             ),
@@ -338,15 +378,11 @@ class _HostedUserListState extends State<HostedUserList> {
                                   );
 
                                   if (!mounted) return;
-                                  _handleKick(user.id);
+                                  _handleKick(user.id, allowRejoin: allowRejoin);
                                 } catch (e) {
                                   if (!mounted) return;
-                                  ScaffoldMessenger.maybeOf(context)
-                                      ?.showSnackBar(
-                                    SnackBar(
-                                      content:
-                                      Text(loc.translate('kick_failed')),
-                                    ),
+                                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                                    SnackBar(content: Text(loc.translate('kick_failed'))),
                                   );
                                 }
                               }
@@ -368,4 +404,5 @@ class _HostedUserListState extends State<HostedUserList> {
       ).animate().fadeIn(duration: 300.ms),
     );
   }
+
 }

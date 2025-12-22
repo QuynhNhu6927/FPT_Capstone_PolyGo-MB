@@ -34,6 +34,7 @@ class WaitingRoomScreen extends StatefulWidget {
 class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   String? _currentUserId;
   bool _isHost = false;
+  String? _localAvatarUrl;
   bool _eventStarted = false;
   bool isCameraOn = true;
   bool isMicOn = true;
@@ -57,8 +58,10 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
     try {
       final user = await AuthRepository(AuthService(ApiClient())).me(token);
       if (!mounted) return;
+
       setState(() {
         _currentUserId = user.id;
+        _localAvatarUrl = user.avatarUrl;
         _isHost = user.id == widget.hostId;
       });
       _initStream();
@@ -132,6 +135,7 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
           sourceLanguage: widget.sourceLanguage,
           initialMicOn: isMicOn,
           initialCameraOn: isCameraOn,
+          localAvatarUrl: _localAvatarUrl,
         ),
       ),
     );

@@ -12,8 +12,8 @@ class ChatInputBar extends StatelessWidget {
   final Future<void> Function(String text) onSendText;
   final bool isRecording;
   final bool isRecordingDone;
+  final bool isFriend;
   final Future<void> Function({bool cancel})? onStopRecording;
-  // Callback cho audio
   final Future<void> Function()? onStartRecording;
 
   const ChatInputBar({
@@ -25,6 +25,7 @@ class ChatInputBar extends StatelessWidget {
     required this.scrollController,
     required this.onPickImages,
     required this.onSendText,
+    required this.isFriend,
     this.onStartRecording,
     this.onStopRecording,
     this.isRecording = false,
@@ -34,6 +35,30 @@ class ChatInputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+    if (!isFriend) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Text(
+          loc.translate("no_longer_friend"),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 14,
+          ),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(

@@ -70,21 +70,21 @@ class _PostCardByIdState extends State<PostCardById> {
       final post = response.data;
 
       // Load dominant colors for images
-      final imageColors = List<Color?>.filled(post!.imageUrls.length, null);
-      for (int i = 0; i < post.imageUrls.length; i++) {
-        getDominantColor(post.imageUrls[i]).then((color) {
-          if (!mounted) return;
-          setState(() => imageColors[i] = color);
-        });
-      }
+      // final imageColors = List<Color?>.filled(post!.imageUrls.length, null);
+      // for (int i = 0; i < post.imageUrls.length; i++) {
+      //   getDominantColor(post.imageUrls[i]).then((color) {
+      //     if (!mounted) return;
+      //     setState(() => imageColors[i] = color);
+      //   });
+      // }
 
       if (!mounted) return;
       setState(() {
         _post = post;
-        _reactCount = post.reactionsCount;
+        _reactCount = post!.reactionsCount;
         _commentCount = post.commentsCount;
         _selectedReaction = reactionIndexFromName(post.myReaction);
-        _imageBgColors = imageColors;
+        // _imageBgColors = imageColors;
         _loading = false;
       });
     } catch (e) {
@@ -180,7 +180,7 @@ class _PostCardByIdState extends State<PostCardById> {
               ],
               PostImages(
                 imageUrls: post.imageUrls,
-                imageBgColors: _imageBgColors,
+                // imageBgColors: _imageBgColors,
               ),
               const SizedBox(height: 12),
               PostFooter(

@@ -58,6 +58,8 @@
   "edit_post": "Edit post",
   "save": "Save",
   "post_details": "Post details",
-  "notification": "Notifications"
+  "notification": "Notifications",
+  "post_deleted": "This post has been deleted",
+  "event_deleted": "This event has been deleted"
 
 }

@@ -144,12 +144,17 @@ class _ParticipantListState extends State<ParticipantList> {
                         final p = participants[index];
                         return ListTile(
                           leading: CircleAvatar(
+                            radius: 20, // bạn có thể điều chỉnh kích thước
                             backgroundColor: theme.dividerColor,
-                            child: const Icon(
+                            backgroundImage: p.avatarUrl != null ? NetworkImage(p.avatarUrl!) : null,
+                            child: p.avatarUrl == null
+                                ? const Icon(
                               Icons.person,
                               color: Colors.white70,
-                            ),
+                            )
+                                : null,
                           ),
+
                           title: Row(
                             children: [
                               Expanded(

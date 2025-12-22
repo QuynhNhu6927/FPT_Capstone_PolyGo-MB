@@ -13,6 +13,8 @@ import '../../../data/services/signalr/user_presence.dart';
 import '../../../routes/app_routes.dart';
 import '../../../../core/utils/responsive.dart';
 import 'banned_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 class LoginForm extends StatefulWidget {
   final bool isTablet;
@@ -35,6 +37,11 @@ class _LoginFormState extends State<LoginForm> {
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  Future<void> _requestMicCamPermission() async {
+    await Permission.microphone.request();
+    await Permission.camera.request();
+  }
 
   Future<void> _onSubmit() async {
     setState(() {
@@ -83,7 +90,7 @@ class _LoginFormState extends State<LoginForm> {
           builder: (_) => const BannedScreen(),
         );
       } else {
-        // Không có NextUnbannedAt → bình thường
+        await _requestMicCamPermission();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(loc.translate("login_success"))),
         );
@@ -138,6 +145,7 @@ class _LoginFormState extends State<LoginForm> {
           builder: (_) => const BannedScreen(),
         );
       } else {
+        await _requestMicCamPermission();
         Navigator.pushNamedAndRemoveUntil(
           context,
           isNew ? AppRoutes.profileSetup : AppRoutes.home,

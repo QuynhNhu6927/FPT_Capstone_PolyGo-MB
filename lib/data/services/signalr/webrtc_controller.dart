@@ -10,6 +10,7 @@ class Participant {
   final String id;
   final String name;
   String role;
+  String? avatarUrl;
   MediaStream? stream;
   bool audioEnabled;
   bool videoEnabled;
@@ -20,6 +21,7 @@ class Participant {
     required this.id,
     required this.name,
     required this.role,
+    this.avatarUrl,
     this.stream,
     this.audioEnabled = true,
     this.videoEnabled = true,
@@ -27,18 +29,6 @@ class Participant {
     this.isHandRaised = false,
   });
 }
-
-// class ChatMessage {
-//   final String sender;
-//   final String message;
-//   final DateTime timestamp;
-//
-//   ChatMessage({
-//     required this.sender,
-//     required this.message,
-//     DateTime? timestamp,
-//   }) : timestamp = timestamp ?? DateTime.now();
-// }
 
 class ChatMessage {
   final String id;
@@ -53,7 +43,6 @@ class ChatMessage {
     required this.timestamp,
   });
 }
-
 
 class TranscriptionMessage {
   final String id;
@@ -335,36 +324,56 @@ class WebRTCController extends ChangeNotifier {
       }
     });
 
+    // --- UserJoined ---
     _hub!.on('UserJoined', (args) async {
       final name = args?[0] ?? "Unknown";
+      final role = args?[1] ?? "attendee";
       final connId = args?[2];
+      final avatarUrl = args?[3];
 
-      // Giả lập trạng thái audio/video là false ban đầu
-      participants[connId] = Participant(
-        id: connId,
-        name: name,
-        role: connId == hostId ? "host" : "attendee",
-        audioEnabled: localAudioEnabled,
-        videoEnabled: localVideoEnabled,
-      );
-      notifyListeners();
-
-      // Log trạng thái ban đầu
-      if (connId != myConnectionId) {
-        final p = participants[connId]!;
-        print(
-          "[Participant Joined] id=${p.id}, name=${p.name}, "
-              "audio=${p.audioEnabled}, video=${p.videoEnabled}, role=${p.role}",
+      if (!participants.containsKey(connId)) {
+        participants[connId] = Participant(
+          id: connId,
+          name: name,
+          role: connId == hostId ? "host" : role,
+          avatarUrl: avatarUrl,
         );
       }
+      notifyListeners();
 
+      // Tạo peer nếu không phải local
       if (connId != myConnectionId) {
         final pc = await createPeer(connId);
         final offer = await pc.createOffer();
-        await pc.setLocalDescription(
-          RTCSessionDescription(offer.sdp!, 'offer'),
-        );
+        await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, 'offer'));
         await _hub?.invoke("SendOffer", args: [eventId, connId, offer.sdp]);
+      }
+    });
+
+// --- HostInfo ---
+    _hub!.on('HostInfo', (args) {
+      final name = args?[0] ?? 'Host';
+      final hostId = args?[1];
+      final avatarUrl = args?[2];
+
+      if (hostId != null) {
+        final existing = participants[hostId];
+        participants[hostId] = Participant(
+          id: hostId,
+          name: (existing?.name != null && !(existing!.name.startsWith('Guest-')))
+              ? existing.name
+              : name,
+          role: 'host',
+          avatarUrl: existing?.avatarUrl ?? avatarUrl,
+          stream: existing?.stream,
+          audioEnabled: existing?.audioEnabled ?? true,
+          videoEnabled: existing?.videoEnabled ?? true,
+          isChatEnabled: existing?.isChatEnabled ?? true,
+          isHandRaised: existing?.isHandRaised ?? false,
+        );
+
+        this.hostId = hostId;
+        notifyListeners();
       }
     });
 
@@ -397,17 +406,6 @@ class WebRTCController extends ChangeNotifier {
       participants.remove(connId);
       notifyListeners();
     });
-
-    // _hub!.on('ReceiveChatMessage', (args) {
-    //   final sender = args?[1] ?? "Unknown";
-    //   final message = args?[2] ?? "";
-    //   final chatMessage = ChatMessage(sender: sender, message: message);
-    //   chatMessages.add(chatMessage);
-    //   for (var listener in _chatListeners) {
-    //     listener(chatMessage);
-    //   }
-    //   notifyListeners();
-    // });
 
     _hub!.on('ReceiveChatMessage', (args) {
       if (args == null || args.length < 4) {
@@ -868,17 +866,21 @@ class WebRTCController extends ChangeNotifier {
     try {
       final result = await _hub!.invoke("GetParticipants", args: [eventId]);
       if (result is Map) {
-        result.forEach((id, name) {
+        result.forEach((id, value) {
           if (id != myConnectionId) {
+            final name = (value as Map<String, dynamic>)['name'] ?? 'Guest-$id';
+            final avatarUrl = (value)['avatarUrl'];
             participants[id] = Participant(
               id: id,
               name: name,
               role: id == hostId ? "host" : "attendee",
+              avatarUrl: avatarUrl,
             );
           }
         });
       }
       notifyListeners();
+
     } catch (e) {
       if (kDebugMode) print("Failed to get participants: $e");
     }
@@ -1088,26 +1090,6 @@ class WebRTCController extends ChangeNotifier {
       //
     }
   }
-
-  // Future<void> sendChatMessage(String message) async {
-  //   if (!isChatEnabled) {
-  //     print("⛔ Chat disabled — cannot send");
-  //     return;
-  //   }
-  //
-  //   if (_hub == null || !isConnected || eventId.isEmpty) return;
-  //
-  //   final chatMessage = ChatMessage(sender: userName, message: message);
-  //
-  //   try {
-  //     await _hub!.invoke("SendChatMessage", args: [eventId, userName, message]);
-  //   } catch (e) {}
-  //
-  //   for (var listener in _chatListeners) {
-  //     listener(chatMessage);
-  //   }
-  //   notifyListeners();
-  // }
 
   Future<void> sendChatMessage(String message) async {
     if (!isChatEnabled) {

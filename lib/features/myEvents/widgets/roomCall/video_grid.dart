@@ -8,6 +8,7 @@ class VideoGrid extends StatelessWidget {
   final List<Participant> participants;
   final WebRTCController controller;
   final bool widgetIsHost;
+  final String? localAvatarUrl;
 
   const VideoGrid({
     super.key,
@@ -16,20 +17,34 @@ class VideoGrid extends StatelessWidget {
     required this.eventTitle,
     required this.controller,
     required this.widgetIsHost,
+    this.localAvatarUrl,
   });
 
   @override
   Widget build(BuildContext context) {
+    String displayName(Participant p) {
+      final isLocal = p.id == 'local';
+      final isHost = p.id == controller.hostId;
+
+      String baseName = isLocal ? controller.userName : p.name;
+
+      if (isHost && isLocal) return '$baseName (Host, You)';
+      if (isHost) return '$baseName (Host)';
+      if (isLocal) return '$baseName (You)';
+
+      return baseName;
+    }
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
         final localParticipant = Participant(
           id: 'local',
-          name: widgetIsHost ? 'You (Host)' : 'You',
+          name: controller.userName,
           role: widgetIsHost ? 'host' : 'attendee',
           stream: controller.localStream,
           audioEnabled: controller.localAudioEnabled,
           videoEnabled: controller.localVideoEnabled,
+          avatarUrl: localAvatarUrl,
         );
 
         // --- Phân loại host và các participant khác ---
@@ -69,23 +84,6 @@ class VideoGrid extends StatelessWidget {
 
         return Column(
           children: [
-            // Header
-            // Container(
-            //   width: double.infinity,
-            //   color: Colors.black87,
-            //   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            //   child: Text(
-            //     eventTitle,
-            //     style: const TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 18,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //     maxLines: 1,
-            //     overflow: TextOverflow.ellipsis,
-            //   ),
-            // ),
-
             // Video lớn nhất là host
             Expanded(
               flex: 2,
@@ -96,6 +94,7 @@ class VideoGrid extends StatelessWidget {
                   isLarge: true,
                   isHost: true,
                   subtitle: hostSubtitle,
+                  displayName: displayName(hostParticipant),
                   onSwitchCamera: hostParticipant.id == 'local' ? () => controller.switchCamera() : null,
                 ),
               ),
@@ -118,6 +117,7 @@ class VideoGrid extends StatelessWidget {
                         child: ParticipantCard(
                           participant: p,
                           isLarge: false,
+                          displayName: displayName(p),
                           isHost: p.id == controller.hostId,
                           onSwitchCamera: p.id == 'local' ? () => controller.switchCamera() : null,
                         ),
@@ -162,6 +162,7 @@ class VideoGrid extends StatelessWidget {
     final Participant participant;
     final bool isLarge;
     final bool isHost;
+    final String? displayName;
     final VoidCallback? onSwitchCamera;
     final String? subtitle;
 
@@ -169,6 +170,7 @@ class VideoGrid extends StatelessWidget {
     required this.participant,
     this.isLarge = false,
     this.isHost = false,
+    this.displayName,
     this.onSwitchCamera,
     this.subtitle,
   });
@@ -179,7 +181,6 @@ class VideoGrid extends StatelessWidget {
 
 class _ParticipantCardState extends State<ParticipantCard> {
   final RTCVideoRenderer _renderer = RTCVideoRenderer();
-
   @override
   void initState() {
     super.initState();
@@ -231,10 +232,17 @@ class _ParticipantCardState extends State<ParticipantCard> {
               : Container(
             color: Colors.grey.shade700,
             alignment: Alignment.center,
-            child: Icon(
-              Icons.person,
-              size: widget.isLarge ? 100 : 50,
-              color: Colors.white54,
+            child: CircleAvatar(
+              radius: widget.isLarge ? 50 : 25,
+              backgroundColor: Colors.grey.shade800,
+              backgroundImage: p.avatarUrl != null ? NetworkImage(p.avatarUrl!) : null,
+              child: p.avatarUrl == null
+                  ? Icon(
+                Icons.person,
+                size: widget.isLarge ? 50 : 25,
+                color: Colors.white54,
+              )
+                  : null,
             ),
           ),
           if (p.isHandRaised)
@@ -270,7 +278,7 @@ class _ParticipantCardState extends State<ParticipantCard> {
                 children: [
                   Expanded(
                     child: Text(
-                      p.name,
+                      widget.displayName ?? p.name,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

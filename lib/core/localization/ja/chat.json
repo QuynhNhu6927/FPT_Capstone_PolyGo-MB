@@ -23,5 +23,6 @@
 
   "conversation_settings": "会話設定",
   "choose_language_to_translate": "翻訳する言語を選択",
-  "chat_images": "チャット画像"
+  "chat_images": "チャット画像",
+  "no_longer_friend": "このユーザーとはフレンドではありません"
 }

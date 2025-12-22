@@ -8,6 +8,7 @@ class ConversationScreen extends StatefulWidget {
   final String lastActiveAt;
   final String receiverId;
   final bool isOnline;
+  final bool isFriend;
 
   const ConversationScreen({
     super.key,
@@ -17,6 +18,7 @@ class ConversationScreen extends StatefulWidget {
     required this.userName,
     required this.avatarHeader,
     required this.isOnline,
+    required this.isFriend,
   });
 
   @override
@@ -33,6 +35,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       backgroundColor: isDark ? Colors.black : Colors.white,
       body: SafeArea(
         child: Conversation(
+          isFriend: widget.isFriend,
           receiverId: widget.receiverId,
           conversationId: widget.conversationId,
           userName: widget.userName,

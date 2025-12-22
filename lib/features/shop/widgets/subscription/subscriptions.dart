@@ -441,35 +441,35 @@ class _SubscriptionsState extends State<Subscriptions> {
                 SizedBox(height: sh(context, 16)),
                 Row(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _actions.showCancelDialog(
-                            context: context,
-                            currentSubscription: _currentSubscription,
-                            onSuccess: () async {
-                              await _loadCurrentSubscription();
-                              await _fetchPlans(
-                                  lang: _currentLocale?.languageCode);
-                            },
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            vertical: sh(context, 8),
-                            horizontal: sw(context, 12),
-                          ),
-                          backgroundColor: Colors.white,
-                          foregroundColor: colorPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(sw(context, 8)),
-                          ),
-                        ),
-                        child: Text(loc.translate("cancel")),
-                      ),
-                    ),
-                    SizedBox(width: sw(context, 12)),
+                    // Expanded(
+                    //   flex: 2,
+                    //   child: ElevatedButton(
+                    //     onPressed: () {
+                    //       _actions.showCancelDialog(
+                    //         context: context,
+                    //         currentSubscription: _currentSubscription,
+                    //         onSuccess: () async {
+                    //           await _loadCurrentSubscription();
+                    //           await _fetchPlans(
+                    //               lang: _currentLocale?.languageCode);
+                    //         },
+                    //       );
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       padding: EdgeInsets.symmetric(
+                    //         vertical: sh(context, 8),
+                    //         horizontal: sw(context, 12),
+                    //       ),
+                    //       backgroundColor: Colors.white,
+                    //       foregroundColor: colorPrimary,
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(sw(context, 8)),
+                    //       ),
+                    //     ),
+                    //     child: Text(loc.translate("cancel")),
+                    //   ),
+                    // ),
+                    // SizedBox(width: sw(context, 12)),
                     Expanded(
                       flex: 3,
                       child: ElevatedButton(

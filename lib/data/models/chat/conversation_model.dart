@@ -19,12 +19,14 @@ class LastMessage {
 class Conversation {
   final String id;
   bool hasSeen;
+  bool isFriend;
   LastMessage lastMessage;
   final User user;
 
   Conversation({
     required this.id,
     required this.hasSeen,
+    required this.isFriend,
     required this.lastMessage,
     required this.user,
   });
@@ -33,6 +35,7 @@ class Conversation {
     return Conversation(
       id: json['id'],
       hasSeen: json['hasSeen'] ?? false,
+      isFriend: json['isFriend'] ?? false,
       lastMessage: LastMessage.fromJson(json['lastMessage']),
       user: User.fromJson(json['user']),
     );

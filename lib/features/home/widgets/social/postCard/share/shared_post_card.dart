@@ -101,10 +101,10 @@ class SharedPostCard extends StatelessWidget {
               const SizedBox(height: 8),
               PostImages(
                 imageUrls: post.imageUrls,
-                imageBgColors: List.generate(
-                  post.imageUrls.length,
-                      (_) => Colors.grey,
-                ),
+                // imageBgColors: List.generate(
+                //   post.imageUrls.length,
+                //       (_) => Colors.grey,
+                // ),
               )
             ]
           ],

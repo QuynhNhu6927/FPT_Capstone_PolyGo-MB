@@ -193,6 +193,7 @@ class AppRoutes {
         final userName = args?['userName'] as String? ?? '';
         final avatarHeader = args?['avatarHeader'] as String? ?? '';
         final isOnline = args?['isOnline'] as bool? ?? false;
+        final isFriend = args?['isFriend'] as bool? ?? false;
         return MaterialPageRoute(
           builder: (_) => ConversationScreen(
             receiverId: receiverId,
@@ -201,6 +202,7 @@ class AppRoutes {
             avatarHeader: avatarHeader,
             lastActiveAt: lastActiveAt,
             isOnline: isOnline,
+            isFriend: isFriend,
           ),
         );
       case overview:

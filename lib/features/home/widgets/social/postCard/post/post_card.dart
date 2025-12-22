@@ -3,6 +3,7 @@ import 'package:polygo_mobile/features/home/widgets/social/postCard/share/shared
 import 'package:polygo_mobile/features/home/widgets/social/postCard/share/shared_post_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../../core/api/api_client.dart';
+import '../../../../../../core/localization/app_localizations.dart';
 import '../../../../../../core/utils/audioplayers.dart';
 import '../../../../../../data/models/post/post_model.dart';
 import '../../../../../../data/repositories/post_repository.dart';
@@ -54,7 +55,7 @@ class _PostCardState extends State<PostCard> {
   late int _commentCount;
   int? _selectedReaction;
 
-  List<Color?> _imageBgColors = [];
+  // List<Color?> _imageBgColors = [];
 
   @override
   void initState() {
@@ -67,15 +68,15 @@ class _PostCardState extends State<PostCard> {
 
     _selectedReaction = reactionIndexFromName(widget.post.myReaction);
 
-    _imageBgColors = List<Color?>.filled(widget.post.imageUrls.length, null);
+    // _imageBgColors = List<Color?>.filled(widget.post.imageUrls.length, null);
 
     // Load dominant color for images
-    for (int i = 0; i < widget.post.imageUrls.length; i++) {
-      getDominantColor(widget.post.imageUrls[i]).then((color) {
-        if (!mounted) return;
-        setState(() => _imageBgColors[i] = color);
-      });
-    }
+    // for (int i = 0; i < widget.post.imageUrls.length; i++) {
+    //   getDominantColor(widget.post.imageUrls[i]).then((color) {
+    //     if (!mounted) return;
+    //     setState(() => _imageBgColors[i] = color);
+    //   });
+    // }
   }
 
   Future<void> _handleReaction(int index) async {
@@ -149,20 +150,13 @@ class _PostCardState extends State<PostCard> {
               /// Render shared content (post hoặc event)
               if (widget.post.isShare) ...[
                 const SizedBox(height: 8),
-
-                /// Share Post
-                if (widget.post.sharedPost != null)
-                  SharedPostCard(post: widget.post.sharedPost!),
-
-                /// Share Event
-                if (widget.post.sharedEvent != null)
-                  SharedEventCard(event: widget.post.sharedEvent!),
-
+                _buildSharedContent(),
                 const SizedBox(height: 12),
               ],
+
               PostImages(
                 imageUrls: widget.post.imageUrls,
-                imageBgColors: _imageBgColors,
+                // imageBgColors: _imageBgColors,
               ),
 
               const SizedBox(height: 12),
@@ -188,4 +182,36 @@ class _PostCardState extends State<PostCard> {
       ),
     );
   }
+
+  Widget _buildSharedContent() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context);
+    if (widget.post.shareType == "Post") {
+      if (widget.post.sharedPost != null) return SharedPostCard(post: widget.post.sharedPost!);
+      return _buildDeletedContainer(loc.translate('post_deleted'), isDark);
+    }
+
+    if (widget.post.shareType == "Event") {
+      if (widget.post.sharedEvent != null) return SharedEventCard(event: widget.post.sharedEvent!);
+      return _buildDeletedContainer(loc.translate('event_deleted'), isDark);
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildDeletedContainer(String text, bool isDark) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: isDark ? Colors.black26 : Colors.grey[200],
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontStyle: FontStyle.italic,
+        color: isDark ? Colors.white70 : Colors.black54,
+      ),
+    ),
+  );
+
 }
