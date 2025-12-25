@@ -30,6 +30,7 @@ class EventSummaryData {
   final List<String> actionItems;
   final String createdAt;
   final bool hasSummary;
+  final bool isPublic;
 
   EventSummaryData({
     required this.id,
@@ -40,6 +41,7 @@ class EventSummaryData {
     required this.actionItems,
     required this.createdAt,
     required this.hasSummary,
+    required this.isPublic,
   });
 
   factory EventSummaryData.fromJson(Map<String, dynamic> json) {
@@ -54,8 +56,34 @@ class EventSummaryData {
       actionItems: List<String>.from(json['actionItems'] ?? []),
       createdAt: json['createdAt'] ?? '',
       hasSummary: json['hasSummary'] ?? false,
+      isPublic: json['isPublic'] ?? false,
     );
   }
+
+  EventSummaryData copyWith({
+    String? id,
+    String? eventId,
+    String? summary,
+    List<String>? keyPoints,
+    List<EventSummaryVocabulary>? vocabulary,
+    List<String>? actionItems,
+    String? createdAt,
+    bool? hasSummary,
+    bool? isPublic,
+  }) {
+    return EventSummaryData(
+      id: id ?? this.id,
+      eventId: eventId ?? this.eventId,
+      summary: summary ?? this.summary,
+      keyPoints: keyPoints ?? this.keyPoints,
+      vocabulary: vocabulary ?? this.vocabulary,
+      actionItems: actionItems ?? this.actionItems,
+      createdAt: createdAt ?? this.createdAt,
+      hasSummary: hasSummary ?? this.hasSummary,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
+
 }
 
 class EventSummaryResponse {

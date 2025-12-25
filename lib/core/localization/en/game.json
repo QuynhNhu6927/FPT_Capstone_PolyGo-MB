@@ -59,5 +59,7 @@
   "scoring_1": "• Ranking will be calculated based on total score and completion time.",
   "scoring_2": "• Each set has its own leaderboard",
   "scoring_3": "• You can replay to improve your time",
-  "scoring_4": "• You will earn XP when finishing a puzzle"
+  "scoring_4": "• You will earn XP when finishing a puzzle",
+  "game_warning_des": "Please prepare and install the appropriate keyboard according to the language of this word set to enhance your playing experience!",
+  "game_warning": "Attention!"
 }

@@ -20,14 +20,22 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
   late int _selectedTab;
   bool _hasError = false;
 
+  Map<int, int> _reloadCounter = {};
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
   }
 
+  // void _onTabSelected(int index) {
+  //   setState(() => _selectedTab = index);
+  // }
+
   void _onTabSelected(int index) {
-    setState(() => _selectedTab = index);
+    setState(() {
+      _selectedTab = index;
+      _reloadCounter[index] = (_reloadCounter[index] ?? 0) + 1;
+    });
   }
 
   void _retry() {
@@ -36,15 +44,40 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
     });
   }
 
+  // Widget _buildTabContent() {
+  //   try {
+  //     switch (_selectedTab) {
+  //       case 0:
+  //         return const MyEvents();
+  //       case 1:
+  //         return const JoinedEvents();
+  //       case 2:
+  //         return const Calendar();
+  //       default:
+  //         return const SizedBox.shrink();
+  //     }
+  //   } catch (e, st) {
+  //     debugPrint("Error in MyEventsScreen tab: $e\n$st");
+  //     _hasError = true;
+  //     return AppErrorState(onRetry: _retry);
+  //   }
+  // }
+
   Widget _buildTabContent() {
     try {
       switch (_selectedTab) {
         case 0:
-          return const MyEvents();
+          return MyEvents(
+            key: ValueKey('my_events_${_reloadCounter[0] ?? 0}'),
+          );
         case 1:
-          return const JoinedEvents();
+          return JoinedEvents(
+            key: ValueKey('joined_events_${_reloadCounter[1] ?? 0}'),
+          );
         case 2:
-          return const Calendar();
+          return Calendar(
+            key: ValueKey('calendar_${_reloadCounter[2] ?? 0}'),
+          );
         default:
           return const SizedBox.shrink();
       }

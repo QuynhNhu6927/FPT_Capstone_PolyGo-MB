@@ -15,14 +15,18 @@ import 'create_post_dialog.dart';
 
 class PostContent extends StatefulWidget {
   final String searchQuery;
-  const PostContent({super.key, this.searchQuery = ''});
+  final ScrollController controller;
+  const PostContent({
+    super.key,
+    this.searchQuery = '',
+    required this.controller,
+  });
 
   @override
   State<PostContent> createState() => _PostContentState();
 }
 
 class _PostContentState extends State<PostContent> {
-  bool _showScrollButton = false;
   String? selectedImage;
   String? _userAvatar;
   bool _loading = true;
@@ -34,33 +38,17 @@ class _PostContentState extends State<PostContent> {
   bool _hasNextPage = true;
   bool _isLoadingMore = false;
 
-  final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
     _repo = PostRepository(PostService(ApiClient()));
     _loadUserAvatar();
     _loadPosts();
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200 &&
-          !_isLoadingMore &&
-          _hasNextPage) {
-        _loadMorePosts();
-      }
-
-      setState(() {
-        _showScrollButton = _scrollController.offset > 300;
-      });
-    });
-
+    widget.controller.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -148,6 +136,19 @@ class _PostContentState extends State<PostContent> {
     }
   }
 
+  void _handleScroll() {
+    if (!widget.controller.hasClients) return;
+
+    final maxScroll = widget.controller.position.maxScrollExtent;
+    final current = widget.controller.position.pixels;
+
+    if (maxScroll - current <= 200) {
+      if (!_isLoadingMore && _hasNextPage && !_loading) {
+        _loadMorePosts();
+      }
+    }
+  }
+
   Future<void> _loadMorePosts() async {
     if (!_hasNextPage) return;
 
@@ -223,11 +224,8 @@ class _PostContentState extends State<PostContent> {
       return '${(diff.inDays / 365).floor()} ${loc.translate("year_ago")}';
     }
 
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () => _loadPosts(reset: true),
-        child: ListView(
-          controller: _scrollController,
+    return ListView(
+      controller: widget.controller,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
           children: [
             _buildCreatePostBox(context),
@@ -255,25 +253,6 @@ class _PostContentState extends State<PostContent> {
                 child: Center(child: CircularProgressIndicator()),
               ),
           ],
-        ),
-      ),
-      floatingActionButton: _showScrollButton
-          ? FloatingActionButton.small(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        onPressed: () {
-          _scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        },
-        child: Icon(
-          Icons.arrow_upward,
-          color: Colors.white
-        ),
-      )
-          : null,
-
     );
 
   }

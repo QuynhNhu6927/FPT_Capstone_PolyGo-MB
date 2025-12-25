@@ -328,6 +328,135 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
     final durationFormatted =
         "${event!.expectedDurationInMinutes ~/ 60}h ${event!.expectedDurationInMinutes % 60}m";
 
+    Future<bool?> showPaidEventWarning() {
+      return showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final loc = AppLocalizations.of(context);
+
+          return StatefulBuilder(
+            builder: (context, setState) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? const LinearGradient(
+                    colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                      : const LinearGradient(
+                    colors: [Colors.white, Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---- TITLE ----
+                    Center(
+                      child: Text(
+                        loc.translate("paid_event_warning"),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ---- DIVIDER ----
+                    Divider(
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
+                      thickness: 1,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ---- DESCRIPTION ----
+                    Text(
+                      loc.translate("paid_event_confirmation"),
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[300] : Colors.grey[800],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // ---- AVAILABLE BALANCE ----
+                    Text(
+                      loc.translate("available_balance"),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // ---- SỐ DƯ (màu xám) ----
+                    Text(
+                      formatCurrency(_balance),
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ---- BUTTONS ----
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(loc.translate("cancel")),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(loc.translate("confirm")),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return Dialog(
       elevation: 12,
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
@@ -577,231 +706,431 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
                       variant: event!.isParticipant
                           ? ButtonVariant.outline
                           : ButtonVariant.primary,
-                      size: ButtonSize.md,
-                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      size: ButtonSize.sm,
+                      icon: const Icon(
+                        Icons.check_circle_outline,
+                        size: 18,
+                      ),
                       onPressed: isDisabled
                           ? null
                           : () async {
-                              if (event!.fee > 0) {
-                                final confirmPaid =
-                                    await _showPaidEventWarning();
-                                if (confirmPaid != true) return;
-                              }
+                        final prefs =
+                        await SharedPreferences.getInstance();
+                        final token = prefs.getString('token') ?? '';
+                        if (token.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                loc.translate("missing_token"),
+                              ),
+                            ),
+                          );
+                          return;
+                        }
 
-                              if (event!.isPublic) {
-                                await _registerEvent('');
-                                return;
-                              }
+                        Future<void> registerEvent(
+                            String password, {
+                              bool closeTwoDialogs = false,
+                            }) async {
+                          final repository = EventRepository(
+                            EventService(ApiClient()),
+                          );
+                          try {
+                            await repository.registerEvent(
+                              token: token,
+                              eventId: event!.id,
+                              password: password,
+                            );
 
-                              final controller = TextEditingController();
-                              await showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  String? errorText;
-                                  final isDark =
-                                      Theme.of(context).brightness ==
-                                      Brightness.dark;
-                                  final loc = AppLocalizations.of(context);
+                            //  Đóng dialog
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop(); // password dialog
+                              Navigator.pop(
+                                context,
+                              ); // event detail dialog
+                            } else {
+                              Navigator.pop(
+                                context,
+                              ); // chỉ event detail dialog
+                            }
 
-                                  return StatefulBuilder(
-                                    builder: (context, setState) {
-                                      return Dialog(
-                                        backgroundColor: Colors.transparent,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            gradient: isDark
-                                                ? const LinearGradient(
-                                                    colors: [
-                                                      Color(0xFF1E1E1E),
-                                                      Color(0xFF2C2C2C),
-                                                    ],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  )
-                                                : const LinearGradient(
-                                                    colors: [
-                                                      Colors.white,
-                                                      Colors.white,
-                                                    ],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  ),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate(
+                                    "event_register_success",
+                                  ),
+                                ),
+                              ),
+                            );
+                          } on InvalidEventPasswordException {
+                            throw loc.translate("wrong_password");
+                          } on KickedFromEventException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate(
+                                    "event_register_kicked",
+                                  ),
+                                ),
+                              ),
+                            );
+                          } on EventsOverlappingException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate("event_overlapping"),
+                                ),
+                              ),
+                            );
+                          } on EventRegistrationLimitExceeded {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate("event_limit_times"),
+                                ),
+                              ),
+                            );
+                          } on EventFull {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate("event_full_slot"),
+                                ),
+                              ),
+                            );
+                          } on InsufficientBalanceException {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate(
+                                    "insufficient_balance",
+                                  ),
+                                ),
+                              ),
+                            );
+                          } catch (_) {
+                            if (!mounted) return;
+                            if (closeTwoDialogs) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pop(context);
+                            }
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loc.translate(
+                                    "event_join_system_error",
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        }
+
+                        if (event!.fee > 0) {
+                          final confirmPaid =
+                          await showPaidEventWarning();
+                          if (confirmPaid != true) return;
+                        }
+
+                        if (event!.isPublic) {
+                          await registerEvent('');
+                          return;
+                        }
+
+                        final controller = TextEditingController();
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            String? errorText;
+                            final isDark =
+                                Theme.of(context).brightness ==
+                                    Brightness.dark;
+                            final loc = AppLocalizations.of(context);
+
+                            return StatefulBuilder(
+                              builder: (context, setState) {
+                                return Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      gradient: isDark
+                                          ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFF1E1E1E),
+                                          Color(0xFF2C2C2C),
+                                        ],
+                                        begin:
+                                        Alignment.topLeft,
+                                        end: Alignment
+                                            .bottomRight,
+                                      )
+                                          : const LinearGradient(
+                                        colors: [
+                                          Colors.white,
+                                          Colors.white,
+                                        ],
+                                        begin:
+                                        Alignment.topLeft,
+                                        end: Alignment
+                                            .bottomRight,
+                                      ),
+                                      borderRadius:
+                                      BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withOpacity(0.08),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        // ---- TITLE ----
+                                        Center(
+                                          child: Text(
+                                            loc.translate(
+                                              "enter_event_password",
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(
-                                                  0.08,
-                                                ),
-                                                blurRadius: 12,
-                                                offset: const Offset(0, 6),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              // ---- TITLE ----
-                                              Center(
-                                                child: Text(
-                                                  loc.translate(
-                                                    "enter_event_password",
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium
-                                                      ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 18,
-                                                        color: isDark
-                                                            ? Colors.white
-                                                            : Colors.black87,
-                                                      ),
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 10),
-
-                                              Divider(
-                                                color: isDark
-                                                    ? Colors.grey[700]
-                                                    : Colors.grey[300],
-                                                thickness: 1,
-                                              ),
-
-                                              const SizedBox(height: 12),
-
-                                              // ---- DESCRIPTION ----
-                                              Text(
-                                                loc.translate(
-                                                  "private_event_description",
-                                                ),
-                                                style: TextStyle(
-                                                  color: isDark
-                                                      ? Colors.grey[300]
-                                                      : Colors.grey[800],
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 12),
-
-                                              // ---- PASSWORD FIELD ----
-                                              TextField(
-                                                controller: controller,
-                                                obscureText: true,
-                                                decoration: InputDecoration(
-                                                  hintText: loc.translate(
-                                                    "password",
-                                                  ),
-                                                  hintStyle: TextStyle(
-                                                    color: isDark
-                                                        ? Colors.grey[500]
-                                                        : Colors.grey[400],
-                                                  ),
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                  errorText: errorText,
-                                                  contentPadding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 10,
-                                                      ),
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 16),
-
-                                              // ---- BUTTONS ----
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop(),
-                                                    child: Text(
-                                                      loc.translate("cancel"),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor:
-                                                          const Color(
-                                                            0xFF2563EB,
-                                                          ),
-                                                      foregroundColor:
-                                                          Colors.white,
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 16,
-                                                            vertical: 10,
-                                                          ),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    onPressed: () async {
-                                                      if (controller
-                                                          .text
-                                                          .isEmpty) {
-                                                        setState(() {
-                                                          errorText = loc.translate(
-                                                            "password_required",
-                                                          );
-                                                        });
-                                                        return;
-                                                      }
-
-                                                      try {
-                                                        await _registerEvent(
-                                                          controller.text,
-                                                          closeTwoDialogs: true,
-                                                        );
-                                                      } catch (e) {
-                                                        if (e ==
-                                                            "wrong_password") {
-                                                          setState(() {
-                                                            errorText = loc
-                                                                .translate(
-                                                                  "wrong_password",
-                                                                );
-                                                          });
-                                                        }
-                                                      }
-                                                    },
-                                                    child: Text(
-                                                      loc.translate("confirm"),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                            textAlign:
+                                            TextAlign.center,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                              fontWeight:
+                                              FontWeight.bold,
+                                              fontSize: 18,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : Colors
+                                                  .black87,
+                                            ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            },
+
+                                        const SizedBox(height: 10),
+
+                                        // ---- DIVIDER ----
+                                        Divider(
+                                          color: isDark
+                                              ? Colors.grey[700]
+                                              : Colors.grey[300],
+                                          thickness: 1,
+                                        ),
+
+                                        const SizedBox(height: 12),
+
+                                        // ---- DESCRIPTION ----
+                                        Text(
+                                          loc.translate(
+                                            "private_event_description",
+                                          ),
+                                          // hãy đặt key này trong localization
+                                          style: TextStyle(
+                                            color: isDark
+                                                ? Colors.grey[300]
+                                                : Colors.grey[800],
+                                            fontSize: 14,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 12),
+
+                                        // ---- PASSWORD FIELD ----
+                                        TextField(
+                                          controller: controller,
+                                          obscureText: true,
+                                          decoration: InputDecoration(
+                                            hintText: loc.translate(
+                                              "password",
+                                            ),
+                                            hintStyle: TextStyle(
+                                              color: isDark
+                                                  ? Colors.grey[500]
+                                                  : Colors.grey[400],
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                8,
+                                              ),
+                                            ),
+                                            errorText: errorText,
+                                            contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 10,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 16),
+
+                                        // ---- BUTTONS ----
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop(),
+                                              child: Text(
+                                                loc.translate(
+                                                  "cancel",
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                const Color(
+                                                  0xFF2563EB,
+                                                ),
+                                                foregroundColor:
+                                                Colors.white,
+                                                padding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 10,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                    12,
+                                                  ),
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                if (controller
+                                                    .text
+                                                    .isEmpty) {
+                                                  setState(() {
+                                                    errorText = loc
+                                                        .translate(
+                                                      "password_required",
+                                                    );
+                                                  });
+                                                  return;
+                                                }
+
+                                                try {
+                                                  await registerEvent(
+                                                    controller.text,
+                                                    closeTwoDialogs:
+                                                    true,
+                                                  );
+                                                } catch (e) {
+                                                  if (e ==
+                                                      "wrong_password") {
+                                                    setState(() {
+                                                      errorText = loc
+                                                          .translate(
+                                                        "wrong_password",
+                                                      );
+                                                    });
+                                                  }
+                                                }
+                                              },
+                                              child: Text(
+                                                loc.translate(
+                                                  "confirm",
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
                     ),
                   ],
                 ],

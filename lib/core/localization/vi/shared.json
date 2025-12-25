@@ -23,6 +23,12 @@
   "dark_mode": "Tối",
   "search_placeholder": "Tìm kiếm...",
   "about_plus": "Đăng ký ngay để nhận được nhiều quyền lợi không giới hạn",
-  "no_notifications": "Chưa có thông báo nào"
+  "no_notifications": "Chưa có thông báo nào",
+  "error_unavailable_content": "Nội dung này không còn khả dụng hoặc đã bị gỡ do vi phạm chính sách!",
+  "ur_account_banned": "Tài khoản của bạn đã bị khóa",
+  "banned_account_until": "Ngày mở khóa",
+  "account_banned_support": "Tài khoản của bạn bị khóa tạm thời do vi phạm chính sách nền tảng. Nếu đây là nhầm lẫn, vui lòng gửi yêu cầu hỗ trợ!",
+  "account_banned_support_understand": "Đã hiểu",
+  "account_banned_support_button": "Trợ giúp"
 
 }

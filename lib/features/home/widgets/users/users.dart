@@ -66,28 +66,6 @@ class _UsersState extends State<Users> {
     _repository = UserRepository(UserService(ApiClient()));
     widget.controller.addListener(_handleScroll);
 
-    // _scrollController.addListener(() {
-    //   final offset = _scrollController.offset;
-    //
-    //   if (offset > _lastOffset && offset - _lastOffset > 10) {
-    //     if (_showFilterBar) {
-    //       setState(() => _showFilterBar = false);
-    //     }
-    //   } else if (offset < _lastOffset && _lastOffset - offset > 10) {
-    //     if (!_showFilterBar) {
-    //       setState(() => _showFilterBar = true);
-    //     }
-    //   }
-    //
-    //   _lastOffset = offset;
-    //
-    //   if (_scrollController.position.pixels >=
-    //       _scrollController.position.maxScrollExtent - 200) {
-    //     if (_isShowingMatching && !_hasActiveFilter) {
-    //       _loadMoreMatchingUsers();
-    //     }
-    //   }
-    // });
   }
 
   void _handleScroll() {

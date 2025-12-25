@@ -143,5 +143,15 @@
 
   "confirm_subscription": "サブスクリプションを確認",
   "available_balance": "利用可能残高",
-  "plan_price": "プラン価格"
+  "plan_price": "プラン価格",
+  "withdrawalrevert": "元に戻す",
+
+  "usage_overview": "使用状況",
+  "no_usage_data": "使用データがありません",
+  "unlimited": "無制限",
+  "no_limit": "",
+  "limit_daily": "毎日",
+  "limit_weekly": "毎週",
+  "limit_monthly": "毎月",
+  "features_usages": "機能"
 }

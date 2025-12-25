@@ -33,7 +33,7 @@ class PostFooter extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.thumb_up_alt_outlined, size: 20),
+              Icon(Icons.tag_faces_outlined, size: 20),
               const SizedBox(width: 4),
               Text("$reactCount"),
             ],

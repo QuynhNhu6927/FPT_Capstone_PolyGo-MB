@@ -9,6 +9,7 @@ import '../../../data/repositories/wordset_repository.dart';
 import '../../../data/services/apis/wordset_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../../routes/app_routes.dart';
+import 'game_warning.dart';
 
 class WordSetDetails extends StatefulWidget {
   final String wordSetId;
@@ -171,6 +172,20 @@ class _WordSetDetailsState extends State<WordSetDetails> {
                 Text(
                   DateFormat('dd MMM yyyy').format(_wordSet!.createdAt),
                   style: TextStyle(color: secondaryText, fontSize: 12),
+                ),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => const GameWarningDialog(),
+                    );
+                  },
+                  child: Icon(
+                    Icons.report_gmailerrorred,
+                    size: 20,
+                    color: Colors.orange,
+                  ),
                 ),
               ],
             ),

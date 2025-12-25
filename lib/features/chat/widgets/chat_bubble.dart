@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +19,7 @@ class ChatBubble extends StatefulWidget {
   final Color colorPrimary;
   final String? activeMessageId;
   final VoidCallback onTap;
-  final Future<void> Function()? onTranslate;
+  final Future<bool> Function()? onTranslate;
 
   const ChatBubble({
     super.key,
@@ -40,7 +42,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
-  // 🔹 Translate UI states
+  // Translate UI states
   bool _showTranslated = false;
 
   @override
@@ -130,7 +132,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               child: _buildContent(context),
             ),
 
-            // 🔹 Hiển thị phần dịch ở dưới
+            // Hiển thị phần dịch ở dưới
             if (_showTranslated && widget.message.translatedContent != null)
               Container(
                 margin: const EdgeInsets.only(top: 4),
@@ -188,16 +190,16 @@ class _ChatBubbleState extends State<ChatBubble> {
         children: [
           bubble,
 
-          // 🔹 icon dịch ở bên phải bubble – chỉ hiện với tin nhắn đối phương
+          // icon dịch ở bên phải bubble – chỉ hiện với tin nhắn đối phương
           if (!widget.isMine)
             Padding(
               padding: const EdgeInsets.only(left: 6),
               child: GestureDetector(
                 onTap: () async {
                   if (!_showTranslated) {
-                    // gọi API translate
                     if (widget.onTranslate != null) {
-                      await widget.onTranslate!();
+                      final success = await widget.onTranslate!();
+                      if (!success) return;
                     }
                   }
                   setState(() => _showTranslated = !_showTranslated);
@@ -283,6 +285,61 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
             ],
           ),
+        ),
+      );
+    }
+
+    if (widget.message.type == "VoiceCall" ||
+        widget.message.type == "VideoCall") {
+      final isVideo = widget.message.type == "VideoCall";
+      final data = _parseCallContent(widget.message.content);
+
+      final status = data?['status'] ?? 'Failed';
+      final durationSeconds = data?['durationSeconds'] ?? 0;
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.isMine
+              ? widget.colorPrimary.withOpacity(0.85)
+              : (widget.isDark
+              ? const Color(0xFF2C2C2C)
+              : const Color(0xFFDFDFDF)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isVideo ? Icons.videocam : Icons.call,
+              color: _callIconColor(status),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _callText(status, isVideo),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: widget.isMine ? Colors.white : Colors.white,
+                  ),
+                ),
+                if (status == "Completed")
+                  Text(
+                    _formatCallDuration(durationSeconds),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: widget.isMine
+                          ? Colors.white70
+                          : Colors.white60,
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       );
     }
@@ -409,4 +466,39 @@ class _ChatBubbleState extends State<ChatBubble> {
       ),
     );
   }
+
+  Map<String, dynamic>? _parseCallContent(String content) {
+    try {
+      return jsonDecode(content) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatCallDuration(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  Color _callIconColor(String status) {
+    return status == "Completed" ? Colors.green : Colors.red;
+  }
+
+  String _callText(String status, bool isVideo) {
+    switch (status) {
+      case "Completed":
+        return isVideo ? "Gọi video" : "Gọi thoại";
+      case "Missed":
+        return "Gọi nhỡ";
+      case "Declined":
+      case "Cancelled":
+        return "Từ chối";
+      default:
+        return "Cuộc gọi";
+    }
+  }
+
+
+
 }

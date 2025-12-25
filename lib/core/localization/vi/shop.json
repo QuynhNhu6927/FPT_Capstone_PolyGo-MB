@@ -123,14 +123,14 @@
   "method": "Phương thức",
   "inquiry": "Hỗ trợ",
 
-  "unlimited_features": "Tính năng không giới hạn",
+  "unlimited_features": "Tính năng",
   "premiumbadges": "Huy hiệu Plus",
-  "eventcreation": "Tạo sự kiện",
-  "voicecall": "Gọi thoại",
-  "videocall": "Gọi video",
-  "eventparticipation": "Tham gia sự kiện",
+  "eventcreation": "Tạo sự kiện 10 lần/tháng",
+  "voicecall": "Gọi thoại 20 lần/ngày",
+  "videocall": "Gọi video 20 lần/ngày",
+  "eventparticipation": "Không giới hạn tham gia sự kiện",
   "prioritysupport": "Ưu tiên hỗ trợ",
-  "translation": "Phiên dịch",
+  "translation": "Phiên dịch 20 lần/ngày",
   "advancedmatching": "",
   "analytics": "",
   "daily": "ngày",
@@ -145,6 +145,16 @@
   "available_balance": "Số dư khả dụng",
   "plan_price": "Giá gói",
   "no_transactions": "Chưa có thông tin",
-  "out_of_withdraw": "Bạn đã sử dụng hết số lần rút tiền tháng này!"
+  "out_of_withdraw": "Bạn đã sử dụng hết số lần rút tiền tháng này!",
+  "withdrawalrevert": "Hoàn tiền rút",
+
+  "usage_overview": "Lượt sử dụng",
+  "no_usage_data": "Không có dữ liệu",
+  "unlimited": "Không giới hạn",
+  "no_limit": "",
+  "limit_daily": "Mỗi ngày",
+  "limit_weekly": "Mỗi tuần",
+  "limit_monthly": "Mỗi tháng",
+  "features_usages": "Tiện ích"
 
 }

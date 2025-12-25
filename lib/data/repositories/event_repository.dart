@@ -23,6 +23,7 @@ import '../models/events/update_event_status_response.dart';
 import '../models/events/user_hosted_event_model.dart';
 import '../models/summary/event_summary_details.dart';
 import '../models/summary/gen_summary.dart';
+import '../models/summary/send_summary_mail_response.dart';
 import '../services/apis/event_service.dart';
 
 class EventRepository {
@@ -396,6 +397,20 @@ class EventRepository {
     }
 
     return res.data!;
+  }
+
+  Future<ApiResponse<SendSummaryMailResponse>> sendSummaryMail(
+      String token,
+      String eventId,
+      ) async {
+    try {
+      return await _service.sendSummaryMail(
+        token: token,
+        eventId: eventId,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
 }

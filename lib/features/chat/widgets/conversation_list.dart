@@ -407,6 +407,11 @@ String _getLastMessageText(LastMessage lastMessage, AppLocalizations loc) {
           ? '${loc.translate("you_sent")}: ${loc.translate("sent_audio")}'
           : loc.translate("sent_audio");
 
+    case 4: // call
+      return isMe
+          ? '${loc.translate("you_sent")}: ${loc.translate("last_outgoing_call")}'
+          : loc.translate("last_incoming_call");
+
     default:
       final content = lastMessage.content ?? '';
       return isMe

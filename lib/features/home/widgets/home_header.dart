@@ -256,7 +256,6 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                 const SizedBox(width: 8),
 
                 // Notification icon
-                // Notification icon
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   width: _isSearching ? 0 : 42, // width mặc định IconButton

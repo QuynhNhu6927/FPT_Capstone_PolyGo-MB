@@ -27,9 +27,18 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showHeader = true;
   double _lastOffset = 0;
 
+  Map<int, int> _reloadCounter = {};
+
   void _onMenuSelected(int index) {
-    setState(() => _menuIndex = index);
+    setState(() {
+      _menuIndex = index;
+      _reloadCounter[index] = (_reloadCounter[index] ?? 0) + 1;
+    });
   }
+
+  // void _onMenuSelected(int index) {
+  //   setState(() => _menuIndex = index);
+  // }
 
   void _onChildError() {
     if (!_hasError) {
@@ -81,12 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> pages = [
       EventsContent(
-        key: const ValueKey('events'),
+        key: ValueKey('events_${_reloadCounter[0] ?? 0}'),
         searchQuery: _searchQuery,
         controller: _scrollController,
       ),
       Users(
-        key: const ValueKey('users'),
+        key: ValueKey('users_${_reloadCounter[1] ?? 0}'),
         onLoaded: _onChildLoaded,
         onError: _onChildError,
         isRetrying: _isRetrying,
@@ -94,15 +103,16 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _scrollController,
       ),
       WordSetContent(
-        key: const ValueKey('games'),
+        key: ValueKey('games_${_reloadCounter[2] ?? 0}'),
         searchQuery: _searchQuery,
-        // controller: _scrollController,
+        controller: _scrollController,
 
       ),
       PostContent(
-        key: const ValueKey('social'),
+        // key: const ValueKey('social'),
+        key: ValueKey('social_${_reloadCounter[3] ?? 0}'),
         searchQuery: _searchQuery,
-        // controller: _scrollController,
+        controller: _scrollController,
       ),
     ];
 

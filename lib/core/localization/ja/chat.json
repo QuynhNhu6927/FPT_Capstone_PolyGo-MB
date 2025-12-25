@@ -24,5 +24,10 @@
   "conversation_settings": "会話設定",
   "choose_language_to_translate": "翻訳する言語を選択",
   "chat_images": "チャット画像",
-  "no_longer_friend": "このユーザーとはフレンドではありません"
+  "no_longer_friend": "このユーザーとはフレンドではありません",
+  "voice_call_limit_exceeded": "本日の音声通話の利用回数に達しました。",
+  "video_call_limit_exceeded": "本日のビデオ通話の利用回数に達しました。",
+  "last_incoming_call": "着信",
+  "last_outgoing_call": "発信"
+
 }

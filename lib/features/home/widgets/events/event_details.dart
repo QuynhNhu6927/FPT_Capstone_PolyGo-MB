@@ -617,6 +617,26 @@ class _EventDetailState extends State<EventDetail> {
                                           ),
                                         ),
                                       );
+                                    } on EventRegistrationLimitExceeded {
+                                      if (!mounted) return;
+                                      if (closeTwoDialogs) {
+                                        Navigator.of(
+                                          context,
+                                          rootNavigator: true,
+                                        ).pop();
+                                        Navigator.pop(context);
+                                      } else {
+                                        Navigator.pop(context);
+                                      }
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            loc.translate("event_limit_times"),
+                                          ),
+                                        ),
+                                      );
                                     } on EventFull {
                                       if (!mounted) return;
                                       if (closeTwoDialogs) {

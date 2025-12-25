@@ -30,12 +30,22 @@ class TransactionFilter extends StatelessWidget {
     'Purchase',
     'Refund',
     'Withdraw',
-    'Adjustment',
-    'AutoRenew',
+    'Withdrawalrevert'
   ];
 
-  static const List<String> _transactionMethods = ['System', 'Wallet', 'QRPayment'];
-  static const List<String> _transactionStatuses = ['Pending', 'Completed', 'Expired', 'Cancelled'];
+  static const List<String> _transactionMethods = [
+    'System',
+    'Wallet',
+    'QRPayment'
+  ];
+
+  static const List<String> _transactionStatuses = [
+    'Pending',
+    'Completed',
+    'Expired',
+    'Cancelled'
+  ];
+
   static const List<String> _inquiryOptions = ['Yes', 'No'];
 
   @override

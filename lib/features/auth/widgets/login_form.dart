@@ -43,6 +43,17 @@ class _LoginFormState extends State<LoginForm> {
     await Permission.camera.request();
   }
 
+  DateTime? parseNextUnbannedAt(dynamic value) {
+    if (value == null) return null;
+
+    if (value is String) {
+      final parsed = DateTime.parse(value);
+      return parsed.toLocal();
+    }
+
+    return null;
+  }
+
   Future<void> _onSubmit() async {
     setState(() {
       _emailError = null;
@@ -76,18 +87,21 @@ class _LoginFormState extends State<LoginForm> {
       await UserPresenceManager().init();
 
       final decoded = JwtDecoder.decode(token);
+      decoded.forEach((key, value) {
+        debugPrint('JWT CLAIM: $key = $value');
+      });
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
-      final nextUnbannedAt = decoded['NextUnbannedAt'];
-
+      final nextUnbannedAtRaw = decoded['NextUnbannedAt'];
+      final nextUnbannedAt = parseNextUnbannedAt(nextUnbannedAtRaw);
       if (!mounted) return;
-
       if (nextUnbannedAt != null) {
         // Token có NextUnbannedAt → user đang bị banned
-        // Vẫn giữ token, nhưng có thể hiển thị popup thông báo
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (_) => const BannedScreen(),
+          builder: (_) => BannedScreen(
+            nextUnbannedAt: nextUnbannedAt,
+          ),
         );
       } else {
         await _requestMicCamPermission();
@@ -133,16 +147,21 @@ class _LoginFormState extends State<LoginForm> {
       await UserPresenceManager().init();
 
       final decoded = JwtDecoder.decode(token);
+      decoded.forEach((key, value) {
+        debugPrint('JWT CLAIM: $key = $value');
+      });
       final isNew = decoded['IsNew']?.toString().toLowerCase() == 'true';
-      final nextUnbannedAt = decoded['NextUnbannedAt'];
-
+      final nextUnbannedAtRaw = decoded['NextUnbannedAt'];
+      final nextUnbannedAt = parseNextUnbannedAt(nextUnbannedAtRaw);
       if (!mounted) return;
 
       if (nextUnbannedAt != null) {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (_) => const BannedScreen(),
+          builder: (_) => BannedScreen(
+            nextUnbannedAt: nextUnbannedAt,
+          ),
         );
       } else {
         await _requestMicCamPermission();

@@ -100,5 +100,10 @@
   "toggle_transcript": "文字起こし",
   "setting_subtitle": "字幕設定",
   "you_have_been_kicked_from_room": "ルームから退出させられました！",
-  "chat_banned": "チャットが禁止されました！"
+  "chat_banned": "チャットが禁止されました！",
+
+  "generate_event_summary": "要約を生成",
+  "regenerate_summary": "再生成",
+  "set_as_public": "公開する",
+  "summary_sent_success": "要約は正常に公開され、参加者に送信されました！"
 }

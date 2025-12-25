@@ -101,6 +101,11 @@
   "toggle_transcript": "Transcription",
   "setting_subtitle": "Subtitle setting",
   "you_have_been_kicked_from_room": "You have been kicked!",
-  "chat_banned": "You have been banned!"
+  "chat_banned": "You have been banned!",
+
+  "generate_event_summary": "Generate summary",
+  "regenerate_summary": "Regenerate",
+  "set_as_public": "Publish",
+  "summary_sent_success": "The summary has been published and sent to participants successfully!"
 
 }
