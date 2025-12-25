@@ -59,6 +59,8 @@
   "scoring_1": "• Thứ hạng sẽ được dựa vào tổng điểm và thời gian hoàn thành",
   "scoring_2": "• Mỗi bộ câu hỏi có bảng xếp hạng riêng",
   "scoring_3": "• Bạn có thể chơi lại nhiều lần để cải thiện điểm số",
-  "scoring_4": "• Bạn sẽ được thêm điểm EXP sau mỗi lần chơi"
+  "scoring_4": "• Bạn sẽ được thêm điểm EXP sau mỗi lần chơi",
+  "game_warning_des": "Vui lòng cài đặt ngôn ngữ bàn phím theo ngôn ngữ của bộ câu hỏi này để tăng tính trải nghiệm khi chơi!",
+  "game_warning": "Lưu ý!"
 
 }

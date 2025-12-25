@@ -78,7 +78,6 @@ class _MyAppState extends State<MyApp> {
         _token = null;
       } else {
         try {
-          // tạo repo và gọi API me
           final repo = AuthRepository(AuthService(ApiClient()));
           final user = await repo.me(_token!);
           final nextUnbannedAt = user.nextUnbannedAt;
@@ -92,7 +91,6 @@ class _MyAppState extends State<MyApp> {
           }
         } catch (e) {
           print('Error fetching user info: $e');
-          // nếu lỗi API, có thể xóa token để yêu cầu login lại
           await forceLogout();
           return;
         }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/config/api_constants.dart';
@@ -22,6 +24,7 @@ import '../../models/events/update_event_status_response.dart';
 import '../../models/events/user_hosted_event_model.dart';
 import '../../models/summary/event_summary_details.dart';
 import '../../models/summary/gen_summary.dart';
+import '../../models/summary/send_summary_mail_response.dart';
 
 class EventService {
   final ApiClient apiClient;
@@ -92,7 +95,6 @@ class EventService {
     );
   }
 
-
   Future<EventRegisterResponse> registerEvent({
     required String token,
     required EventRegisterRequest request,
@@ -120,6 +122,8 @@ class EventService {
           throw KickedFromEventException();
         } else if (message == 'Error.InsufficientBalance') {
           throw InsufficientBalanceException();
+        } else if (message == 'Error.EventRegistrationLimitExceeded') {
+          throw EventRegistrationLimitExceeded();
         } else if (message == 'Error.EventNotOpenForRegistration') {
           throw EventNotOpenForRegistration();
         } else if (message == 'Error.EventFull') {
@@ -546,6 +550,38 @@ class EventService {
     );
   }
 
+  Future<ApiResponse<SendSummaryMailResponse>> sendSummaryMail({
+    required String token,
+    required String eventId,
+  }) async {
+    try {
+      final url = ApiConstants.publicSummary.replaceFirst(
+        '{eventId}',
+        eventId,
+      );
+
+      final response = await apiClient.post(
+        url,
+        data: {},
+        headers: {
+          ApiConstants.headerAuthorization: 'Bearer $token',
+        },
+      );
+
+      dynamic jsonData = response.data;
+      if (jsonData is String) {
+        jsonData = jsonDecode(jsonData);
+      }
+
+      return ApiResponse.fromJson(
+        jsonData,
+            (data) => SendSummaryMailResponse.fromJson(jsonData),
+      );
+    } on DioError {
+      rethrow;
+    }
+  }
+
 }
 
 class InvalidEventPasswordException implements Exception {}
@@ -554,3 +590,4 @@ class InsufficientBalanceException implements Exception {}
 class EventsOverlappingException implements Exception {}
 class EventNotOpenForRegistration implements Exception {}
 class EventFull implements Exception {}
+class EventRegistrationLimitExceeded implements Exception {}

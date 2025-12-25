@@ -127,7 +127,7 @@ class _WalletState extends State<Wallet> {
         _hasPreviousPage = response?.hasPreviousPage ?? false;
       });
     } catch (e) {
-      // error riêng cho transactions
+      //
     } finally {
       if (!mounted) return;
       setState(() {

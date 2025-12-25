@@ -219,11 +219,11 @@ class _CallingScreenState extends State<CallingScreen> {
                   : Container(color: Colors.black),
             ),
 
-          // Call info (Voice Call hoặc Video Call trước khi remote connect)
+          // Call info
           if (!widget.isVideoCall || _remoteRenderer.srcObject == null)
             _buildCallInfo(),
 
-          // Local preview nhỏ (chỉ video call khi đã có stream)
+          // Local preview nhỏ
           if (widget.isVideoCall && _localRenderer.srcObject != null)
             Positioned(
               top: 60,

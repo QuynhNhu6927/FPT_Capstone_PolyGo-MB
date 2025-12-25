@@ -122,7 +122,7 @@ class PostHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tên user + số ảnh nếu có
+              //
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [

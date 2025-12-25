@@ -22,5 +22,11 @@
   "dark_mode": "ダークモード",
   "search_placeholder": "検索中...",
   "about_plus": "今すぐ登録して、すべての機能を無制限で利用しましょう",
-  "no_notifications": "まだ通知はありません"
+  "no_notifications": "まだ通知はありません",
+  "error_unavailable_content": "このコンテンツは存在しないか、ポリシー違反のため削除されました。",
+  "ur_account_banned": "アカウントが停止されました",
+  "banned_account_until": "解除予定日",
+  "account_banned_support": "ポリシー違反により、アカウントは一時的に停止されています。誤りだと思われる場合は、サポートへお問い合わせください。",
+  "account_banned_support_understand": "理解しました",
+  "account_banned_support_button": "サポート"
 }

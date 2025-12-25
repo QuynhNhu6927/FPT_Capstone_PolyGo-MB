@@ -27,14 +27,59 @@ class EventSummary extends StatefulWidget {
 class _EventSummaryState extends State<EventSummary> {
   late final EventRepository repository;
   EventSummaryData? data;
+  late final summary = data!;
   bool isLoading = true;
   bool isGenerating = false;
-  bool hasUserTriggeredGenerate = false;
+  bool isPublishing = false;
+  // bool hasUserTriggeredGenerate = false;
   @override
   void initState() {
     super.initState();
     repository = EventRepository(EventService(ApiClient()));
     loadSummary();
+  }
+
+  Future<void> publishSummary() async {
+    if (isPublishing) return;
+
+    setState(() => isPublishing = true);
+
+    try {
+      final res = await repository.sendSummaryMail(
+        widget.token,
+        widget.eventId,
+      );
+
+      // Optimistic update: ẩn nút ngay
+      setState(() {
+        data = data?.copyWith(isPublic: true);
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            res.data?.message ??
+                AppLocalizations.of(context)
+                    .translate('summary_sent_success'),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint("❌ Send summary mail error: $e");
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Send summary failed'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isPublishing = false);
+      }
+    }
   }
 
   Future<void> loadSummary() async {
@@ -57,7 +102,7 @@ class _EventSummaryState extends State<EventSummary> {
 
     setState(() {
       isGenerating = true;
-      hasUserTriggeredGenerate = true;
+      // hasUserTriggeredGenerate = true;
     });
 
     // chạy ngầm không chờ kết quả
@@ -65,7 +110,7 @@ class _EventSummaryState extends State<EventSummary> {
       token: widget.token,
       eventId: widget.eventId,
     ).catchError((e) {
-      print("❌ Generate Summary Error: $e");
+      //
     });
   }
 
@@ -177,20 +222,60 @@ class _EventSummaryState extends State<EventSummary> {
     Color textColor,
     AppLocalizations loc,
   ) {
+
+    if (isGenerating) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            "Đang tạo báo cáo sự kiện, xin vui lòng quay lại sau vài phút",
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    // if (data == null || !data!.hasSummary) {
+    //   if (widget.isHost) {
+    //     if (isGenerating || hasUserTriggeredGenerate) {
+    //       return Center(
+    //         child: Padding(
+    //           padding: const EdgeInsets.symmetric(horizontal: 20),
+    //           child: Text(
+    //             "Đang tạo báo cáo sự kiện, xin vui lòng quay lại sau vài phút",
+    //             textAlign: TextAlign.center,
+    //           ),
+    //         ),
+    //       );
+    //     }
+    //
+    //     return Center(
+    //       child: Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 20),
+    //         child: AppButton(
+    //           size: ButtonSize.md,
+    //           variant: ButtonVariant.primary,
+    //           onPressed: generateSummary,
+    //           icon: const Icon(Icons.auto_awesome, size: 18),
+    //           text: loc.translate('generate_event_summary'),
+    //         ),
+    //       ),
+    //     );
+    //   } else {
+    //     return Center(
+    //       child: Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 20),
+    //         child: Text(
+    //           loc.translate('no_summary_available'),
+    //           textAlign: TextAlign.center,
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // }
+
     if (data == null || !data!.hasSummary) {
       if (widget.isHost) {
-        if (isGenerating || hasUserTriggeredGenerate) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                "Đang tạo báo cáo sự kiện, xin vui lòng quay lại sau vài phút",
-                textAlign: TextAlign.center,
-              ),
-            ),
-          );
-        }
-
         return Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -223,6 +308,61 @@ class _EventSummaryState extends State<EventSummary> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// ---------- HOST ACTION BUTTONS ----------
+          if (widget.isHost && summary.hasSummary && !summary.isPublic) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    size: ButtonSize.sm,
+                    variant: ButtonVariant.outline,
+                    icon: const Icon(Icons.refresh, size: 18),
+                    text: loc.translate('regenerate_summary'),
+                    onPressed: isGenerating
+                        ? null
+                        : () async {
+                      setState(() => isGenerating = true);
+                      try {
+                        await repository.generateSummary(
+                          token: widget.token,
+                          eventId: widget.eventId,
+                        );
+                      } catch (e) {
+                        debugPrint("❌ Regenerate error: $e");
+                      } finally {
+                        if (mounted) {
+                          setState(() => isGenerating = false);
+                          loadSummary(); // reload UI
+                        }
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(width: sw(context, 12)),
+                Expanded(
+                  child: AppButton(
+                    size: ButtonSize.sm,
+                    variant: ButtonVariant.primary,
+                    icon: isPublishing
+                        ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Icon(Icons.public, size: 18),
+                    text: loc.translate('set_as_public'),
+                    onPressed: isPublishing ? null : publishSummary,
+                  ),
+                ),
+
+              ],
+            ),
+            SizedBox(height: sh(context, 20)),
+          ],
+
           /// ---------- SUMMARY ----------
           Container(
             width: double.infinity,

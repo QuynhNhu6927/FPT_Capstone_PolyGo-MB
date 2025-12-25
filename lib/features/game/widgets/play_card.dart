@@ -112,77 +112,124 @@ class _PlayCardWidgetState extends State<PlayCardWidget> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text(
-                loc.translate("congratulations"),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    loc.translate("completed_word_set"),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, size: 20, color: Colors.amber),
-                      const SizedBox(width: 8),
-                      Text("${loc.translate("score")}: $score",
-                          style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.timer, size: 20, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Text(
-                          "${loc.translate("completion_time")}: $completionTime ${loc.translate("seconds_short")}",
-                          style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.lightbulb_outline, size: 20, color: Colors.green),
-                      const SizedBox(width: 8),
-                      Text("${loc.translate("hints_used")}: $hintsUsed",
-                          style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.close, size: 20, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Text("${loc.translate("mistakes")}: $mistakes",
-                          style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    _player.stop();
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => HomeScreen(initialIndex: 2),
-                      ),
-                          (route) => false,
-                    );
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.overview,
-                      arguments: {'id': widget.startData.wordSetId},
-                    );
-                  },
-                  child: Text(loc.translate("ok")),
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final textColor = isDark ? Colors.white : Colors.black;
+
+              final Gradient bg = isDark
+                  ? const LinearGradient(
+                colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+                  : const LinearGradient(
+                colors: [Colors.white, Colors.white],
+              );
+
+              return AlertDialog(
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                // titleTextStyle: TextStyle(
+                //   color: textColor,
+                //   fontWeight: FontWeight.bold,
+                //   fontSize: 20,
+                // ),
+                contentTextStyle: TextStyle(
+                  color: textColor,
+                  fontSize: 16,
                 ),
-              ],
-            ),
+                contentPadding: EdgeInsets.zero,
+                titlePadding: EdgeInsets.zero,
+                actionsPadding: EdgeInsets.zero,
+
+                content: Container(
+                  decoration: BoxDecoration(
+                    gradient: bg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Title
+                      Text(loc.translate("congratulations")),
+
+                      const SizedBox(height: 16),
+
+                      Text(loc.translate("completed_word_set")),
+
+                      const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          const Icon(Icons.star, size: 20, color: Colors.amber),
+                          const SizedBox(width: 8),
+                          Text("${loc.translate("score")}: $score"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          const Icon(Icons.timer, size: 20, color: Colors.blue),
+                          const SizedBox(width: 8),
+                          Text(
+                            "${loc.translate("completion_time")}: "
+                                "$completionTime ${loc.translate("seconds_short")}",
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          const Icon(Icons.lightbulb_outline,
+                              size: 20, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Text("${loc.translate("hints_used")}: $hintsUsed"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          const Icon(Icons.close, size: 20, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text("${loc.translate("mistakes")}: $mistakes"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// Actions
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            _player.stop();
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => HomeScreen(initialIndex: 2),
+                              ),
+                                  (route) => false,
+                            );
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.overview,
+                              arguments: {'id': widget.startData.wordSetId},
+                            );
+                          },
+                          child: Text(loc.translate("ok")),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         }
       } else {

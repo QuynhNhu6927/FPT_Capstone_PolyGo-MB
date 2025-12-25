@@ -99,7 +99,7 @@ class ReportDetailDialog extends StatelessWidget {
               Expanded(
                 child: Container(
                   constraints: BoxConstraints(
-                    maxHeight: 14 * 1.4 * 4 + 8, // khoảng 4 dòng
+                    maxHeight: 14 * 1.4 * 4 + 8,
                   ),
                   child: SingleChildScrollView(
                     child: RenderUtils.selectableMarkdownText(
@@ -189,7 +189,6 @@ class ReportDetailDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title row with close button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

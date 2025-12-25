@@ -172,7 +172,7 @@ class _EventDetailState extends State<EventDetail> {
 
                     const SizedBox(height: 4),
 
-                    // ---- SỐ DƯ (màu xám) ----
+                    // -
                     Text(
                       formatCurrency(_balance),
                       style: TextStyle(
@@ -614,6 +614,26 @@ class _EventDetailState extends State<EventDetail> {
                                         SnackBar(
                                           content: Text(
                                             loc.translate("event_overlapping"),
+                                          ),
+                                        ),
+                                      );
+                                    } on EventRegistrationLimitExceeded {
+                                      if (!mounted) return;
+                                      if (closeTwoDialogs) {
+                                        Navigator.of(
+                                          context,
+                                          rootNavigator: true,
+                                        ).pop();
+                                        Navigator.pop(context);
+                                      } else {
+                                        Navigator.pop(context);
+                                      }
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            loc.translate("event_limit_times"),
                                           ),
                                         ),
                                       );

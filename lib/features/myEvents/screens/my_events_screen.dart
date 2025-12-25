@@ -20,6 +20,7 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
   late int _selectedTab;
   bool _hasError = false;
 
+  Map<int, int> _reloadCounter = {};
   @override
   void initState() {
     super.initState();
@@ -27,7 +28,10 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
   }
 
   void _onTabSelected(int index) {
-    setState(() => _selectedTab = index);
+    setState(() {
+      _selectedTab = index;
+      _reloadCounter[index] = (_reloadCounter[index] ?? 0) + 1;
+    });
   }
 
   void _retry() {
@@ -40,11 +44,17 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
     try {
       switch (_selectedTab) {
         case 0:
-          return const MyEvents();
+          return MyEvents(
+            key: ValueKey('my_events_${_reloadCounter[0] ?? 0}'),
+          );
         case 1:
-          return const JoinedEvents();
+          return JoinedEvents(
+            key: ValueKey('joined_events_${_reloadCounter[1] ?? 0}'),
+          );
         case 2:
-          return const Calendar();
+          return Calendar(
+            key: ValueKey('calendar_${_reloadCounter[2] ?? 0}'),
+          );
         default:
           return const SizedBox.shrink();
       }

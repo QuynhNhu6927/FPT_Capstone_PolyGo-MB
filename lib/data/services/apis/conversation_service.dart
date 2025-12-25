@@ -161,6 +161,15 @@ class ConversationService {
             : throw Exception("No data in translateMessage response"),
       );
     } on DioError catch (e) {
+      if (e.response?.data != null &&
+          e.response!.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        final message = data['message'] ?? '';
+
+        if (message == 'Error.TranslationLimitExceeded') {
+          throw TranslationLimitExceededException();
+        }
+      }
       rethrow;
     }
   }
@@ -250,3 +259,5 @@ class ConversationService {
   }
 
 }
+
+class TranslationLimitExceededException implements Exception {}

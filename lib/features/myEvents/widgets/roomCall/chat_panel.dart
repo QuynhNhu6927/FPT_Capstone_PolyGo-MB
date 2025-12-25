@@ -123,7 +123,7 @@ class _ChatPanelState extends State<ChatPanel> {
                 itemBuilder: (context, index) {
                   final msg = widget.messages[index];
                   final isMe = msg.sender == widget.myName;
-
+                  final localTime = msg.timestamp.toLocal();
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Column(
@@ -168,7 +168,7 @@ class _ChatPanelState extends State<ChatPanel> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
-                            "${msg.timestamp.hour.toString().padLeft(2, '0')}:${msg.timestamp.minute.toString().padLeft(2, '0')}",
+                            "${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}",
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
                               color: secondaryTextColor,

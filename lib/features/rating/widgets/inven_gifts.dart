@@ -87,7 +87,7 @@ class _InvenGiftsState extends State<InvenGifts> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with close (X)
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -254,7 +254,6 @@ class _InvenGiftsState extends State<InvenGifts> {
                   ),
                 ),
 
-            // --- Quantity selector & Confirm button ---
             if (_selectedIndex != null) ...[
               const SizedBox(height: 12),
               Row(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:polygo_mobile/core/utils/string_extensions.dart';
 import 'package:polygo_mobile/features/home/widgets/social/postCard/post/post_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +8,7 @@ import '../../../../data/models/api_response.dart';
 import '../../../../data/models/post/post_model.dart';
 import '../../../../data/repositories/post_repository.dart';
 import '../../../../data/services/apis/post_service.dart';
-import '../../../shared/app_error_state.dart';
+import '../../../shared/unavailable_content.dart';
 
 class PostDetailsContent extends StatefulWidget {
   final String postId;
@@ -102,9 +101,7 @@ class _PostDetailsContentState extends State<PostDetailsContent> {
             : _error != null
             ? Padding(
           padding: const EdgeInsets.symmetric(vertical: 32.0),
-          child: AppErrorState(
-            onRetry: _loadPost,
-          ),
+          child: UnavailableContentState(),
         )
             : _post == null
             ? Center(

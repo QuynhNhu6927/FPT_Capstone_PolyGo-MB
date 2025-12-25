@@ -78,7 +78,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
         numberOfUnreadMessages = user.numberOfUnreadMessages ?? 0;
       });
     } catch (e) {
-      // có thể log lỗi hoặc ignore
+      //
     }
   }
 
@@ -256,10 +256,9 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                 const SizedBox(width: 8),
 
                 // Notification icon
-                // Notification icon
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
-                  width: _isSearching ? 0 : 42, // width mặc định IconButton
+                  width: _isSearching ? 0 : 42,
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 250),
                     opacity: _isSearching ? 0.0 : 1.0,

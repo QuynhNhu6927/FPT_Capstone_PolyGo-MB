@@ -253,15 +253,6 @@ class _UserInfoState extends State<UserInfo> {
     );
   }
 
-  // Future<void> _logout(BuildContext context) async {
-  //   await UserPresenceManager().stop();
-  //   debugPrint("Hub state after stop: ${UserPresenceManager().service.connection?.state}");
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove('token');
-  //   if (!mounted) return;
-  //   Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (r) => false);
-  // }
-
   Future<void> _logout(BuildContext context) async {
     await UserPresenceManager().stop();
     await AuthService(ApiClient()).googleSignOut();
@@ -277,19 +268,6 @@ class _UserInfoState extends State<UserInfo> {
           (r) => false,
     );
   }
-
-  // Future<void> _logout(BuildContext context) async {
-  //   await UserPresenceManager().stop();
-  //   await AuthService(ApiClient()).googleSignOut();
-  //
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove('token');
-  //   await prefs.remove('userId');
-  //   await prefs.remove('isNew');
-  //
-  //   if (!mounted) return;
-  //   Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
-  // }
 
   Future<void> _updateAvatar() async {
     final loc = AppLocalizations.of(context);
@@ -431,7 +409,7 @@ class _UserInfoState extends State<UserInfo> {
       alignment: Alignment.topCenter,
       child: Column(
         children: [
-          // ----------------- Container 1: Header -----------------
+
           Container(
             width: containerWidth,
             padding: EdgeInsets.all(sw(context, 24)),
@@ -463,7 +441,6 @@ class _UserInfoState extends State<UserInfo> {
 
           SizedBox(height: sh(context, 12)),
 
-          // ----------------- Container 2: Info details -----------------
           Container(
             width: containerWidth,
             padding: EdgeInsets.all(sw(context, 24)),
@@ -487,7 +464,6 @@ class _UserInfoState extends State<UserInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Languages + Interests
                 if (hasNoData)
                   GestureDetector(
                     onTap: () {

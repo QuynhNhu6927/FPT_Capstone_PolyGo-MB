@@ -18,7 +18,7 @@ class MessageItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool showDateSeparator;
   final Function(String messageId)? onDelete;
-  final Future<void> Function()? onTranslate;
+  final Future<bool> Function()? onTranslate;
 
   const MessageItem({
     super.key,

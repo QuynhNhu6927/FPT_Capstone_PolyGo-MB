@@ -1,4 +1,3 @@
-// deposit_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:polygo_mobile/features/shop/widgets/deposit/payment_web_view.dart';

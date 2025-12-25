@@ -65,7 +65,7 @@ class FriendButton extends StatelessWidget {
       case "Friends":
         return ElevatedButton.icon(
           onPressed: () => _showUnfriendDialog(context),
-          icon: const Icon(Icons.people_alt, color: Colors.white, size: 22),
+          icon: const Icon(Icons.how_to_reg, color: Colors.white, size: 22),
           label: const SizedBox.shrink(),
           style: ElevatedButton.styleFrom(
             backgroundColor: blue,
@@ -86,7 +86,7 @@ class FriendButton extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: Text(loc.translate("Friend Request")),
-        content: Text(loc.translate("Do you want to accept this friend request?")),
+         content: Text(loc.translate("Do you want to accept this friend request?")),
         actions: [
           TextButton(
             onPressed: () {

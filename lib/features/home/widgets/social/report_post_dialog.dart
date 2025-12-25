@@ -196,7 +196,7 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
 
                 const SizedBox(height: 12),
 
-                /// Description (dùng chung cho tất cả lý do)
+                /// Description
                 TextField(
                   controller: _descriptionController,
                   maxLines: 2,

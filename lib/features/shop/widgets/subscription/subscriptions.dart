@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:polygo_mobile/features/shop/widgets/subscription/plan_card.dart';
 import 'package:polygo_mobile/features/shop/widgets/subscription/subscription_actions.dart';
+import 'package:polygo_mobile/features/shop/widgets/subscription/user_usages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/utils/responsive.dart';
 import '../../../../core/api/api_client.dart';
@@ -174,7 +175,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Hiển thị số dư khả dụng
                   Text(
                     '${loc.translate("available_balance")}: ${formatMoney(balance)}',
                     style: TextStyle(
@@ -183,7 +183,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Giá gói
                   Text(
                     '${loc.translate("plan_price")}: ${formatMoney(plan.price)}',
                     style: TextStyle(
@@ -441,35 +440,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                 SizedBox(height: sh(context, 16)),
                 Row(
                   children: [
-                    // Expanded(
-                    //   flex: 2,
-                    //   child: ElevatedButton(
-                    //     onPressed: () {
-                    //       _actions.showCancelDialog(
-                    //         context: context,
-                    //         currentSubscription: _currentSubscription,
-                    //         onSuccess: () async {
-                    //           await _loadCurrentSubscription();
-                    //           await _fetchPlans(
-                    //               lang: _currentLocale?.languageCode);
-                    //         },
-                    //       );
-                    //     },
-                    //     style: ElevatedButton.styleFrom(
-                    //       padding: EdgeInsets.symmetric(
-                    //         vertical: sh(context, 8),
-                    //         horizontal: sw(context, 12),
-                    //       ),
-                    //       backgroundColor: Colors.white,
-                    //       foregroundColor: colorPrimary,
-                    //       shape: RoundedRectangleBorder(
-                    //         borderRadius: BorderRadius.circular(sw(context, 8)),
-                    //       ),
-                    //     ),
-                    //     child: Text(loc.translate("cancel")),
-                    //   ),
-                    // ),
-                    // SizedBox(width: sw(context, 12)),
                     Expanded(
                       flex: 3,
                       child: ElevatedButton(
@@ -496,6 +466,33 @@ class _SubscriptionsState extends State<Subscriptions> {
                         child: Text(loc.translate("auto_renew")),
                       ),
                     ),
+
+                    SizedBox(width: sw(context, 8)),
+
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => const UsageOverviewDialog(),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: sh(context, 8),
+                            horizontal: sw(context, 12),
+                          ),
+                          backgroundColor: Colors.white,
+                          foregroundColor: colorPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(sw(context, 8)),
+                          ),
+                        ),
+                        child: Text(loc.translate("features_usages")),
+                      ),
+                    ),
+
                   ],
                 ),
               ],
@@ -543,7 +540,6 @@ class _SubscriptionsState extends State<Subscriptions> {
     final currentSection = _buildCurrentSubscriptionSection();
 
     if (isWideScreen && currentSection != null) {
-      // Tablet: show side by side
       return Padding(
         padding: EdgeInsets.symmetric(
           horizontal: sw(context, 16),
@@ -557,7 +553,6 @@ class _SubscriptionsState extends State<Subscriptions> {
               child: currentSection,
             ),
             SizedBox(width: sw(context, 16)),
-            // Plans list (hẹp hơn)
             Expanded(
               flex: 3,
               child: ListView.separated(
@@ -578,7 +573,6 @@ class _SubscriptionsState extends State<Subscriptions> {
         ),
       );
     } else {
-      // Mobile: show vertically
       return RefreshIndicator(
         onRefresh: () async {
           await Future.wait([

@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/render_utils.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../../../data/models/events/event_model.dart';
 import '../../../../data/repositories/event_repository.dart';
 import '../../../../data/services/apis/event_service.dart';
@@ -52,7 +54,12 @@ class _EventRoomIntroState extends State<EventRoomIntro> {
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final double fontSize = st(context, 14);
+    final double lineHeight = 1.4;
+    final int maxLines = 9;
+    final double maxHeight =
+        fontSize * lineHeight * maxLines + 8;
     return Dialog(
       elevation: 12,
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : theme.cardColor,
@@ -107,11 +114,21 @@ class _EventRoomIntroState extends State<EventRoomIntro> {
               const SizedBox(height: 16),
 
               /// Description
-              Text(
-                _event!.description.isNotEmpty
-                    ? _event!.description
-                    : loc.translate('no_description'),
-                style: theme.textTheme.bodyMedium,
+              Container(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: SingleChildScrollView(
+                  child: RenderUtils.selectableMarkdownText(
+                    context,
+                    _event!.description.isNotEmpty
+                        ? _event!.description
+                        : loc.translate('no_description'),
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      height: lineHeight,
+                      color: textColor,
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 20),

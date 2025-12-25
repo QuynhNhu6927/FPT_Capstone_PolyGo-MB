@@ -191,7 +191,7 @@ class WebRTCController extends ChangeNotifier {
 
     try {
       await videoTrack.switchCamera();
-      print("🎥 Switched camera");
+      print("Switched camera");
     } catch (e) {
       print("Error switching camera: $e");
     }
@@ -272,29 +272,29 @@ class WebRTCController extends ChangeNotifier {
         .build();
 
     _hub!.onclose((error) {
-      print("🔴 [SignalR] Connection closed. Error: $error");
-      print("🔴 [SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
+      print("[SignalR] Connection closed. Error: $error");
+      print("[SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
     });
 
     _hub!.onreconnecting((error) {
-      print("🟡 [SignalR] Reconnecting... Error: $error");
-      print("🟡 [SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
+      print("[SignalR] Reconnecting... Error: $error");
+      print("[SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
 
       // Nếu đang transcribe, cần disable trước khi reconnect
       if (isTranscriptionEnabled) {
         print(
-          "🟡 [SignalR] Was transcribing, will need to re-enable after reconnect",
+          "[SignalR] Was transcribing, will need to re-enable after reconnect",
         );
       }
     });
 
     _hub!.onreconnected((connectionId) async {
-      print("🟢 [SignalR] Reconnected! New ConnectionId: $connectionId");
-      print("🟢 [SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
+      print("[SignalR] Reconnected! New ConnectionId: $connectionId");
+      print("[SignalR] isTranscriptionEnabled=$isTranscriptionEnabled");
 
       // Nếu đang transcribe, cần re-enable với connection mới
       if (isTranscriptionEnabled) {
-        print("🟢 [SignalR] Re-enabling transcription after reconnect...");
+        print("[SignalR] Re-enabling transcription after reconnect...");
         // Reset flag trước
         isTranscriptionEnabled = false;
         // Gọi lại enable
@@ -409,7 +409,7 @@ class WebRTCController extends ChangeNotifier {
 
     _hub!.on('ReceiveChatMessage', (args) {
       if (args == null || args.length < 4) {
-        debugPrint("⚠️ [CHAT] Invalid args: $args");
+        debugPrint("[CHAT] Invalid args: $args");
         return;
       }
 
@@ -425,7 +425,7 @@ class WebRTCController extends ChangeNotifier {
       //
       final exists = chatMessages.any((m) => m.id == id);
       if (exists) {
-        debugPrint("🔁 [CHAT] Duplicate ignored: $id");
+        debugPrint("[CHAT] Duplicate ignored: $id");
         return;
       }
 
@@ -437,7 +437,7 @@ class WebRTCController extends ChangeNotifier {
       );
 
       debugPrint(
-        "📥 [CHAT] Receive | id=$id | sender=$senderName | message=$message",
+        "[CHAT] Receive | id=$id | sender=$senderName | message=$message",
       );
 
       chatMessages.add(chatMessage);
@@ -446,7 +446,7 @@ class WebRTCController extends ChangeNotifier {
 
     _hub!.on("ToggleMicCommand", (args) {
       final enabled = args?[0] ?? true;
-      print("🎤 Received ToggleMicCommand: $enabled");
+      print("Received ToggleMicCommand: $enabled");
 
       localStream?.getAudioTracks().forEach((t) => t.enabled = enabled);
       localAudioEnabled = enabled;
@@ -455,7 +455,7 @@ class WebRTCController extends ChangeNotifier {
 
     _hub!.on("ToggleCamCommand", (args) {
       final enabled = args?[0] ?? true;
-      print("🎥 Received ToggleCamCommand: $enabled");
+      print("Received ToggleCamCommand: $enabled");
 
       localStream?.getVideoTracks().forEach((t) => t.enabled = enabled);
       localVideoEnabled = enabled;
@@ -464,7 +464,7 @@ class WebRTCController extends ChangeNotifier {
 
     _hub!.on("ToggleChatCommand", (args) {
       final enabled = args?[0] ?? true;
-      print("💬 Received ToggleChatCommand: $enabled");
+      print("Received ToggleChatCommand: $enabled");
 
       isChatEnabled = enabled;
       notifyListeners();
@@ -474,7 +474,7 @@ class WebRTCController extends ChangeNotifier {
       final targetId = args?[0];
       final enabled = args?[1] ?? true;
 
-      print("📢 ChatStateChanged: $targetId -> $enabled");
+      print("ChatStateChanged: $targetId -> $enabled");
 
       if (participants.containsKey(targetId)) {
         participants[targetId]!.isChatEnabled = enabled;
@@ -532,7 +532,7 @@ class WebRTCController extends ChangeNotifier {
 
       if (connId != null && participants.containsKey(connId)) {
         participants[connId]!.isHandRaised = true;
-        print("🙋 $name ($connId) waved");
+        print("$name ($connId) waved");
         notifyListeners();
       }
     });
@@ -543,7 +543,7 @@ class WebRTCController extends ChangeNotifier {
 
       if (connId != null && participants.containsKey(connId)) {
         participants[connId]!.isHandRaised = false;
-        print("✋ User $connId unwaved");
+        print("User $connId unwaved");
         notifyListeners();
       }
     });
@@ -553,7 +553,7 @@ class WebRTCController extends ChangeNotifier {
       final roomName = args?[0];
       final message = args?[1] ?? "You were removed from the event.";
 
-      print("❌ Kicked from room: $message");
+      print("Kicked from room: $message");
 
       // Gửi message lên UI
       if (onKicked != null) {
@@ -565,7 +565,7 @@ class WebRTCController extends ChangeNotifier {
     });
 
     _hub!.on("ReceiveTranscription", (args) async {
-      print("🟢 Received transcription from hub: $args");
+      print("Received transcription from hub: $args");
 
       final transcriptionId = args?[0];
       final speakerId = args?[1];
@@ -580,15 +580,15 @@ class WebRTCController extends ChangeNotifier {
       if (targetLanguage != sourceLanguage) {
         try {
           print(
-            "🌐 Requesting translation for $transcriptionId to $targetLanguage...",
+            "Requesting translation for $transcriptionId to $targetLanguage...",
           );
           translatedText = await _hub!.invoke(
             "RequestTranslation",
             args: [transcriptionId, targetLanguage],
           );
-          print("🌐 Translation received: $translatedText");
+          print("Translation received: $translatedText");
         } catch (e) {
-          print("❌ Translation failed: $e");
+          print("Translation failed: $e");
         }
       }
 
@@ -606,7 +606,7 @@ class WebRTCController extends ChangeNotifier {
 
       notifyListeners();
       print(
-        "🟢 Transcription list updated. Total items: ${transcriptions.length}",
+        "Transcription list updated. Total items: ${transcriptions.length}",
       );
     });
 
@@ -647,7 +647,7 @@ class WebRTCController extends ChangeNotifier {
     _isTranscriptionToggling = true;
 
     try {
-      print("📞 [FLUTTER] Enabling transcription with $newSourceLanguage");
+      print("[FLUTTER] Enabling transcription with $newSourceLanguage");
 
       // luôn update trong controller
       sourceLanguage = newSourceLanguage;
@@ -663,7 +663,7 @@ class WebRTCController extends ChangeNotifier {
 
       await startSendingAudio();
     } catch (e) {
-      print("❌ Failed to enable transcription: $e");
+      print("Failed to enable transcription: $e");
     } finally {
       _isTranscriptionToggling = false;
     }
@@ -673,52 +673,52 @@ class WebRTCController extends ChangeNotifier {
     // Prevent double toggle
     if (_isTranscriptionToggling) {
       print(
-        "⚠️ [FLUTTER] disableMobileTranscription BLOCKED - already toggling!",
+        "[FLUTTER] disableMobileTranscription BLOCKED - already toggling!",
       );
       return;
     }
     if (!isTranscriptionEnabled) {
       print(
-        "⚠️ [FLUTTER] disableMobileTranscription BLOCKED - already disabled!",
+        "[FLUTTER] disableMobileTranscription BLOCKED - already disabled!",
       );
       return;
     }
 
     _isTranscriptionToggling = true;
     try {
-      print("📞 [FLUTTER] disableMobileTranscription called");
+      print("[FLUTTER] disableMobileTranscription called");
       print(
-        "📞 [FLUTTER] Current state: isTranscriptionEnabled=$isTranscriptionEnabled",
+        "[FLUTTER] Current state: isTranscriptionEnabled=$isTranscriptionEnabled",
       );
-      print("📞 [FLUTTER] Stack trace: ${StackTrace.current}");
+      print("[FLUTTER] Stack trace: ${StackTrace.current}");
 
       // Dừng gửi audio trước
       await stopSendingAudio();
 
       // Tắt transcription trên server
       await _hub?.invoke("DisableMobileTranscription", args: []);
-      print("📞 [FLUTTER] DisableMobileTranscription invoke completed");
+      print("[FLUTTER] DisableMobileTranscription invoke completed");
 
       // Cập nhật trạng thái local
       isTranscriptionEnabled = false;
       isTranscriptionEnabledRef.value = false;
       notifyListeners();
-      print("📞 [FLUTTER] disableMobileTranscription completed");
+      print("[FLUTTER] disableMobileTranscription completed");
     } catch (e) {
-      print("❌ [FLUTTER] Failed to disable mobile transcription: $e");
+      print("[FLUTTER] Failed to disable mobile transcription: $e");
     } finally {
       _isTranscriptionToggling = false;
     }
   }
 
   Future<void> startSendingAudio() async {
-    print("🎙️ startSendingAudio called");
+    print("startSendingAudio called");
 
     if (_recorder == null) {
-      print("🎙️ Initializing recorder...");
+      print("Initializing recorder...");
       _recorder = FlutterSoundRecorder();
       await _recorder!.openRecorder();
-      print("🎙️ Recorder opened");
+      print("Recorder opened");
     }
 
     _audioStreamController = StreamController<Uint8List>();
@@ -726,7 +726,7 @@ class WebRTCController extends ChangeNotifier {
     // Listen dữ liệu và gửi lên hub
     _audioStreamController!.stream.listen(
           (chunk) async {
-        print("🎧 Audio chunk received: ${chunk.lengthInBytes} bytes");
+        print("Audio chunk received: ${chunk.lengthInBytes} bytes");
 
         // Debug: Calculate audio amplitude to verify real speech
         if (chunk.length >= 20) {
@@ -741,18 +741,18 @@ class WebRTCController extends ChangeNotifier {
           final maxAmp = samples.reduce((a, b) => a > b ? a : b);
           final avgAmp = samples.reduce((a, b) => a + b) ~/ samples.length;
           print(
-            "🔊 Audio amplitude - Max: $maxAmp, Avg: $avgAmp (silence < 100, speech > 1000)",
+            "Audio amplitude - Max: $maxAmp, Avg: $avgAmp (silence < 100, speech > 1000)",
           );
         }
 
         await sendAudioChunk(chunk);
       },
-      onDone: () => print("🎧 Audio stream closed"),
-      onError: (e) => print("❌ Audio stream error: $e"),
+      onDone: () => print("Audio stream closed"),
+      onError: (e) => print("Audio stream error: $e"),
     );
 
     // Bắt đầu ghi âm PCM 16-bit, dùng StreamSink
-    print("🎙️ Starting recorder...");
+    print("Starting recorder...");
     await _recorder!.startRecorder(
       toStream: _audioStreamController!.sink,
       codec: Codec.pcm16,
@@ -761,45 +761,45 @@ class WebRTCController extends ChangeNotifier {
     );
 
     _isRecording = true;
-    print("🎙️ Recorder started");
+    print("Recorder started");
   }
 
   Future<void> stopSendingAudio() async {
     if (!_isRecording) return;
 
-    print("🎙️ Stopping recorder...");
+    print("Stopping recorder...");
     await _recorder?.stopRecorder();
     await _audioStreamController?.close();
     _isRecording = false;
-    print("🎙️ Recorder stopped and stream closed");
+    print("Recorder stopped and stream closed");
   }
 
   Future<void> sendAudioChunk(Uint8List chunk) async {
     if (_hub == null || !isConnected) {
-      print("⚠️ Hub not connected, skipping audio chunk");
+      print("Hub not connected, skipping audio chunk");
       return;
     }
 
-    print("📤 Sending audio chunk: ${chunk.lengthInBytes} bytes");
+    print("Sending audio chunk: ${chunk.lengthInBytes} bytes");
     try {
       // BE chỉ cần audioData, không cần eventId vì đã có trong Context.ConnectionId
       await _hub!.invoke("SendAudioChunk", args: [chunk.toList()]);
-      print("✅ Audio chunk sent successfully");
+      print("Audio chunk sent successfully");
     } catch (e) {
-      print("❌ Error sending audio chunk: $e");
+      print("Error sending audio chunk: $e");
       // Có thể dừng recording nếu lỗi liên tục
       // await stopSendingAudio();
     }
   }
 
   void enableCaptions() {
-    print("🟢 Enabling captions...");
+    print("Enabling captions...");
     isCaptionsEnabled = true;
     notifyListeners();
   }
 
   void disableCaptions() {
-    print("🔴 Disabling captions...");
+    print("Disabling captions...");
     isCaptionsEnabled = false;
     notifyListeners();
   }
@@ -918,7 +918,7 @@ class WebRTCController extends ChangeNotifier {
 
     try {
       await _hub!.invoke("SendWave", args: [eventId]);
-      print("🙋 Sent Wave");
+      print("Sent Wave");
     } catch (e) {
       print("Error sending wave: $e");
     }
@@ -929,7 +929,7 @@ class WebRTCController extends ChangeNotifier {
 
     try {
       await _hub!.invoke("Unwave", args: [eventId]);
-      print("✋ Sent Unwave");
+      print("Sent Unwave");
     } catch (e) {
       print("Error sending unwave: $e");
     }
@@ -937,7 +937,7 @@ class WebRTCController extends ChangeNotifier {
 
   Future<void> kickUser(String targetConnId, {String reason = ""}) async {
     if (!isHost) {
-      print("❌ Only host can kick user");
+      print("Only host can kick user");
       return;
     }
 
@@ -945,7 +945,7 @@ class WebRTCController extends ChangeNotifier {
 
     try {
       await _hub!.invoke("KickUser", args: [eventId, targetConnId, reason]);
-      print("🚫 Host kicked: $targetConnId with reason: $reason");
+      print("Host kicked: $targetConnId with reason: $reason");
     } catch (e) {
       print("Error kicking user: $e");
     }
@@ -1023,7 +1023,7 @@ class WebRTCController extends ChangeNotifier {
         onParticipantMuted?.call(participantId);
       }
 
-      print("🎤 Sent ToggleMic to $participantId = $enabled");
+      print("Sent ToggleMic to $participantId = $enabled");
     } catch (e) {
       print("Error toggling mic for $participantId: $e");
     }
@@ -1046,7 +1046,7 @@ class WebRTCController extends ChangeNotifier {
         onParticipantCameraOff?.call(participantId);
       }
 
-      print("🎥 Sent ToggleCam to $participantId = $enabled");
+      print("Sent ToggleCam to $participantId = $enabled");
     } catch (e) {
       print("Error toggling camera for $participantId: $e");
     }
@@ -1067,7 +1067,7 @@ class WebRTCController extends ChangeNotifier {
         args: [eventId, participantId, enabled],
       );
 
-      print("💬 Sent ToggleChat to $participantId = $enabled");
+      print("Sent ToggleChat to $participantId = $enabled");
     } catch (e) {
       print("Error toggling chat for $participantId: $e");
     }
@@ -1093,13 +1093,13 @@ class WebRTCController extends ChangeNotifier {
 
   Future<void> sendChatMessage(String message) async {
     if (!isChatEnabled) {
-      debugPrint("⛔ [CHAT] Disabled — cannot send message");
+      debugPrint("[CHAT] Disabled — cannot send message");
       return;
     }
 
     if (_hub == null || !isConnected || eventId.isEmpty) {
       debugPrint(
-        "⛔ [CHAT] Invalid state | hub: $_hub | connected: $isConnected | eventId: $eventId",
+        "[CHAT] Invalid state | hub: $_hub | connected: $isConnected | eventId: $eventId",
       );
       return;
     }
@@ -1108,7 +1108,7 @@ class WebRTCController extends ChangeNotifier {
     if (content.isEmpty) return;
 
     debugPrint(
-      "📤 [CHAT] Sending | user=$userName | eventId=$eventId | content=$content",
+      "[CHAT] Sending | user=$userName | eventId=$eventId | content=$content",
     );
 
     try {
@@ -1117,9 +1117,9 @@ class WebRTCController extends ChangeNotifier {
         args: [eventId, userName, content],
       );
 
-      debugPrint("✅ [CHAT] Invoke SendChatMessage success");
+      debugPrint("[CHAT] Invoke SendChatMessage success");
     } catch (e, stack) {
-      debugPrint("❌ [CHAT] Invoke SendChatMessage failed: $e");
+      debugPrint("[CHAT] Invoke SendChatMessage failed: $e");
       debugPrint(stack.toString());
     }
   }
@@ -1181,11 +1181,11 @@ class WebRTCController extends ChangeNotifier {
 
   Future<void> loadChatHistory() async {
     if (_hub == null || !isConnected || eventId.isEmpty) {
-      debugPrint("⛔ [CHAT] Cannot load history – invalid state");
+      debugPrint("[CHAT] Cannot load history – invalid state");
       return;
     }
 
-    debugPrint("📜 [CHAT] Loading chat history for eventId=$eventId");
+    debugPrint("[CHAT] Loading chat history for eventId=$eventId");
 
     try {
       final result = await _hub!.invoke(
@@ -1194,7 +1194,7 @@ class WebRTCController extends ChangeNotifier {
       );
 
       if (result is! List) {
-        debugPrint("⚠️ [CHAT] History result is not a list");
+        debugPrint("[CHAT] History result is not a list");
         return;
       }
 
@@ -1231,10 +1231,10 @@ class WebRTCController extends ChangeNotifier {
         ..clear()
         ..addAll(history);
 
-      debugPrint("✅ [CHAT] Loaded ${history.length} messages");
+      debugPrint("[CHAT] Loaded ${history.length} messages");
       notifyListeners();
     } catch (e, stack) {
-      debugPrint("❌ [CHAT] Load history failed: $e");
+      debugPrint("[CHAT] Load history failed: $e");
       debugPrint(stack.toString());
     }
   }

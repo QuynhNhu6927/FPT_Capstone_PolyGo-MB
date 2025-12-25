@@ -40,7 +40,6 @@ class _LimitedMarkdownState extends State<LimitedMarkdown> {
     final decoded = RenderUtils.decodeHtml(widget.data);
     final style = DefaultTextStyle.of(context).style;
 
-    // Tự động đổi màu theo dark/light mode
     final textColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white60
         : Colors.black87;

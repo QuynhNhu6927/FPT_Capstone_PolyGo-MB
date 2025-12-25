@@ -38,5 +38,6 @@
   "format": "形式",
   "apply_filters": "フィルターを適用",
   "not_open_registration": "このイベントはキャンセルされたか、現在利用できません",
-  "event_full_slot": "参加枠が満員です！"
+  "event_full_slot": "参加枠が満員です",
+  "event_limit_times": "今月のイベント参加回数の上限に達しました"
 }

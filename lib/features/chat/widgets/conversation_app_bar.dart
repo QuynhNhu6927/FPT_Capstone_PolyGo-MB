@@ -2,9 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/api/api_client.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/audioplayers.dart';
+import '../../../data/models/subscription/usage_item.dart';
+import '../../../data/repositories/subscription_repository.dart';
+import '../../../data/services/apis/subscription_service.dart';
 import '../../../data/services/signalr/user_presence.dart';
 import '../screens/calling_screen.dart';
 import 'conversation_setting.dart';
@@ -35,6 +40,53 @@ class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ConversationAppBarState extends State<ConversationAppBar> {
+
+  UsageItem? _voiceCallUsage;
+  UsageItem? _videoCallUsage;
+  bool _isCheckingUsage = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsage();
+  }
+
+  Future<void> _loadUsage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null || token.isEmpty) return;
+
+      final repo = SubscriptionRepository(
+        SubscriptionService(ApiClient()),
+      );
+
+      final res = await repo.getUsage(token: token);
+
+      if (res.data != null) {
+        for (final item in res.data!.items) {
+          if (item.featureType == "VoiceCall") {
+            _voiceCallUsage = item;
+          } else if (item.featureType == "VideoCall") {
+            _videoCallUsage = item;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error loading usage: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isCheckingUsage = false);
+      }
+    }
+  }
+
+  bool _isUsageExceeded(UsageItem? usage) {
+    if (usage == null) return false;
+    if (usage.isUnlimited) return false;
+    return usage.usageCount >= usage.limitValue;
+  }
+
   String _formatLastActive(String? date) {
     if (date == null || date.isEmpty) return '';
     try {
@@ -70,8 +122,65 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
     return true;
   }
 
+  // Future<void> _handleCall() async {
+  //   final loc = AppLocalizations.of(context);
+  //   try {
+  //     final granted = await _requestCallPermissions(false);
+  //     if (!granted) {
+  //       CallSoundManager().stopRingTone();
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(loc.translate('permission_denied'))),
+  //       );
+  //       return;
+  //     }
+  //
+  //     final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+  //     final isReceiverOnline = statusMap[widget.receiverId] ?? false;
+  //
+  //     if (!isReceiverOnline) {
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(loc.translate('user_offline'))),
+  //       );
+  //       return;
+  //     }
+  //
+  //     if (!mounted) return;
+  //     CallSoundManager().playRingTone();
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) => CallingScreen(
+  //           receiverId: widget.receiverId,
+  //           receiverName: widget.userName,
+  //           receiverAvatar: widget.avatarHeader,
+  //         ),
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(loc.translate('cannot_check_status'))),
+  //     );
+  //   }
+  // }
+
   Future<void> _handleCall() async {
     final loc = AppLocalizations.of(context);
+
+    if (_isCheckingUsage) return;
+
+    if (_isUsageExceeded(_voiceCallUsage)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.translate("voice_call_limit_exceeded")),
+        ),
+      );
+      return;
+    }
+
+    // ---- logic cũ giữ nguyên ----
     try {
       final granted = await _requestCallPermissions(false);
       if (!granted) {
@@ -83,7 +192,8 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
         return;
       }
 
-      final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+      final statusMap =
+      await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
       if (!isReceiverOnline) {
@@ -106,7 +216,7 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
           ),
         ),
       );
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.translate('cannot_check_status'))),
@@ -115,8 +225,65 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
   }
 
   // Trong _ConversationAppBarState
+  // Future<void> _handleVideoCall() async {
+  //   final loc = AppLocalizations.of(context);
+  //   try {
+  //     final granted = await _requestCallPermissions(true);
+  //     if (!granted) {
+  //       CallSoundManager().stopRingTone();
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(loc.translate('permission_denied'))),
+  //       );
+  //       return;
+  //     }
+  //
+  //     final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+  //     final isReceiverOnline = statusMap[widget.receiverId] ?? false;
+  //
+  //     if (!isReceiverOnline) {
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(loc.translate('user_offline'))),
+  //       );
+  //       return;
+  //     }
+  //
+  //     if (!mounted) return;
+  //     CallSoundManager().playRingTone();
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) => CallingScreen(
+  //           receiverId: widget.receiverId,
+  //           receiverName: widget.userName,
+  //           receiverAvatar: widget.avatarHeader,
+  //           isVideoCall: true, // bật video call
+  //         ),
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(loc.translate('cannot_check_status'))),
+  //     );
+  //   }
+  // }
+
   Future<void> _handleVideoCall() async {
     final loc = AppLocalizations.of(context);
+
+    if (_isCheckingUsage) return;
+
+    if (_isUsageExceeded(_videoCallUsage)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.translate("video_call_limit_exceeded")),
+        ),
+      );
+      return;
+    }
+
     try {
       final granted = await _requestCallPermissions(true);
       if (!granted) {
@@ -128,7 +295,8 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
         return;
       }
 
-      final statusMap = await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
+      final statusMap =
+      await UserPresenceManager().service.getOnlineStatus([widget.receiverId]);
       final isReceiverOnline = statusMap[widget.receiverId] ?? false;
 
       if (!isReceiverOnline) {
@@ -148,18 +316,17 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
             receiverId: widget.receiverId,
             receiverName: widget.userName,
             receiverAvatar: widget.avatarHeader,
-            isVideoCall: true, // bật video call
+            isVideoCall: true,
           ),
         ),
       );
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.translate('cannot_check_status'))),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

@@ -111,7 +111,6 @@ class AddBankDialog {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Gradient cho background dialog
     final Gradient cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -124,11 +123,11 @@ class AddBankDialog {
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          backgroundColor: Colors.transparent, // để hiện gradient
+          backgroundColor: Colors.transparent,
           contentPadding: EdgeInsets.zero,
           content: Container(
             decoration: BoxDecoration(
-              gradient: cardBackground, // gradient cho toàn bộ dialog
+              gradient: cardBackground,
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(16),
@@ -195,7 +194,7 @@ class AddBankDialog {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded( // thêm Expanded để Text ellipsis hoạt động
+                          Expanded(
                             child: Text(
                               selectedBankName ?? loc.translate("select_bank"),
                               maxLines: 1,

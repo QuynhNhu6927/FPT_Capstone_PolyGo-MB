@@ -144,7 +144,7 @@ class _ParticipantListState extends State<ParticipantList> {
                         final p = participants[index];
                         return ListTile(
                           leading: CircleAvatar(
-                            radius: 20, // bạn có thể điều chỉnh kích thước
+                            radius: 20,
                             backgroundColor: theme.dividerColor,
                             backgroundImage: p.avatarUrl != null ? NetworkImage(p.avatarUrl!) : null,
                             child: p.avatarUrl == null
@@ -227,7 +227,7 @@ class _ParticipantListState extends State<ParticipantList> {
                                     });
                                   },
                                   child: Icon(
-                                    p.isChatEnabled ? Icons.chat : Icons.chat,
+                                    p.isChatEnabled ? Icons.chat : Icons.comments_disabled,
                                     color: p.isChatEnabled ? Colors.green : Colors.red,
                                     size: 22,
                                   ),

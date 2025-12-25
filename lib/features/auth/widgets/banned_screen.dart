@@ -1,14 +1,22 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/size_config.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/responsive.dart';
 import '../../shared/system_report_dialog.dart';
 
 class BannedScreen extends StatelessWidget {
-  const BannedScreen({super.key});
+  final DateTime? nextUnbannedAt;
+
+  const BannedScreen({
+    super.key,
+    this.nextUnbannedAt,
+  });
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BannedScreen - nextUnbannedAt: $nextUnbannedAt');
     final theme = Theme.of(context);
     final t = theme.textTheme;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -21,7 +29,7 @@ class BannedScreen extends StatelessWidget {
       end: Alignment.bottomRight,
     )
         : const LinearGradient(colors: [Colors.white, Colors.white]);
-
+    final loc = AppLocalizations.of(context);
     final containerWidth = screenWidth < 500
         ? screenWidth * 0.9
         : screenWidth < 800
@@ -57,7 +65,7 @@ class BannedScreen extends StatelessWidget {
             ),
             SizedBox(height: sh(context, 20)),
             Text(
-              "Tài khoản của bạn đã bị khóa",
+              loc.translate("ur_account_banned"),
               textAlign: TextAlign.center,
               style: t.titleMedium?.copyWith(
                 fontSize: st(context, 20),
@@ -65,9 +73,24 @@ class BannedScreen extends StatelessWidget {
                 color: Colors.red,
               ),
             ),
+            if (nextUnbannedAt != null) ...[
+              SizedBox(height: sh(context, 8)),
+              Text(
+                "${loc.translate("banned_account_until")}: ${DateFormat('dd/MM/yyyy HH:mm').format(nextUnbannedAt!)}",
+                textAlign: TextAlign.center,
+                style: t.bodyMedium?.copyWith(
+                  fontSize: st(context, 14),
+                  fontWeight: FontWeight.w500,
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.orangeAccent
+                      : Colors.orange,
+                ),
+              ),
+            ],
+
             SizedBox(height: sh(context, 10)),
             Text(
-              "Vui lòng liên hệ hỗ trợ nếu bạn cho rằng đây là nhầm lẫn.",
+              loc.translate("account_banned_support"),
               textAlign: TextAlign.center,
               style: t.bodyMedium?.copyWith(
                 fontSize: st(context, 16),
@@ -79,7 +102,7 @@ class BannedScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppButton(
-                  text: "Support",
+                  text: loc.translate("account_banned_support_button"),
                   onPressed: () {
                     Navigator.of(context).pop();
                     showDialog(
@@ -92,7 +115,7 @@ class BannedScreen extends StatelessWidget {
                 ),
                 SizedBox(width: sw(context, 16)),
                 AppButton(
-                  text: "Understand",
+                  text: loc.translate("account_banned_support_understand"),
                   onPressed: () => Navigator.of(context).pop(),
                   size: ButtonSize.sm,
                   variant: ButtonVariant.primary,

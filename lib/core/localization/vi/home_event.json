@@ -39,5 +39,6 @@
   "format": "Thể loại",
   "apply_filters": "Áp dụng lọc",
   "not_open_registration": "Sự kiện này đã bị hủy hoặc không còn khả dụng nữa",
-  "event_full_slot": "Sự kiện đã hết chỗ trống!"
+  "event_full_slot": "Sự kiện đã hết chỗ trống!",
+  "event_limit_times": "Đã hết lượt tham gia sự kiện tháng này!"
 }

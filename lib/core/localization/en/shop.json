@@ -123,14 +123,14 @@
   "method": "Method",
   "inquiry": "Inquiry",
 
-  "unlimited_features": "Unlimited Features",
-  "premiumbadges": "Premium badge",
-  "eventcreation": "Event creation",
-  "voicecall": "Voice call",
-  "videocall": "Video call",
-  "eventparticipation": "Event participation",
+  "unlimited_features": "Unlimited features",
+  "premiumbadges": "Plus badges",
+  "eventcreation": "Create up to 10 events per month",
+  "voicecall": "Up to 20 voice calls per day",
+  "videocall": "Up to 20 video calls per day",
+  "eventparticipation": "Unlimited event participation",
   "prioritysupport": "Priority support",
-  "translation": "Translation",
+  "translation": "Up to 20 translations per day",
   "analytics": "",
   "advancedmatching": "",
   "daily": "daily",
@@ -145,6 +145,16 @@
   "available_balance": "Available balance",
   "plan_price": "Plan price",
   "no_transactions": "No datas yet",
-  "out_of_withdraw": "You have already create a withdraw request this month, please try for the reset!"
+  "out_of_withdraw": "You have already create a withdraw request this month, please try for the reset!",
+  "withdrawalrevert": "Revert",
+
+  "usage_overview": "Usage Overview",
+  "no_usage_data": "No usage data",
+  "unlimited": "Unlimited",
+  "no_limit": "",
+  "limit_daily": "Daily",
+  "limit_weekly": "Weekly",
+  "limit_monthly": "Monthly",
+  "features_usages": "Features"
 
 }

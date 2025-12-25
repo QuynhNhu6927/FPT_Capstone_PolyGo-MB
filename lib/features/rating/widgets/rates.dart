@@ -121,7 +121,7 @@ class _RatesState extends State<Rates> {
         );
       }
 
-      // Reload lại dữ liệu
+      // Reload
       await _loadMyRating();
       await _loadOtherRatings();
     } catch (e) {
@@ -235,7 +235,6 @@ class _RatesState extends State<Rates> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- Event title ---
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: sh(context, 16)),
                   child: Text(
@@ -283,7 +282,6 @@ class _RatesState extends State<Rates> {
 
                 SizedBox(height: sh(context, 25)),
 
-                // --- My rating  ---
                 if (_myRating != null && _myRating!.hasRating) ...[
                   Text(
                     loc.translate("your_event_rating"),
@@ -376,7 +374,6 @@ class _RatesState extends State<Rates> {
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   children: [
-                                                    // --- Stars picker ---
                                                     Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -406,7 +403,6 @@ class _RatesState extends State<Rates> {
                                                       }),
                                                     ),
                                                     const SizedBox(height: 12),
-                                                    // --- Comment field ---
                                                     TextField(
                                                       controller:
                                                           ratingController,
@@ -495,7 +491,6 @@ class _RatesState extends State<Rates> {
                   SizedBox(height: sh(context, 20)),
                 ],
 
-                // --- Other ratings ---
                 Text(
                   loc.translate("others_rating"),
                   style: theme.textTheme.titleMedium?.copyWith(

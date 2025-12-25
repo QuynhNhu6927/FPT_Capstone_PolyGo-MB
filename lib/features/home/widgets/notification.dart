@@ -159,7 +159,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   vertical: 12,
                 ),
                 itemCount: notifications.length + (hasNextPage ? 1 : 0),
-                // +1 để show loading indicator cuối
+
                 itemBuilder: (context, index) {
                   if (index >= notifications.length) {
                     return const Padding(
@@ -191,7 +191,7 @@ class _NotificationPageState extends State<NotificationPage> {
                             });
                           }
                         } catch (e) {
-                          // handle error nếu cần
+                          //
                         }
                       }
 

@@ -25,6 +25,10 @@
   "conversation_settings": "Cài đặt hội thoại",
   "choose_language_to_translate": "Chọn 1 ngôn ngữ bạn muốn dịch sang",
   "chat_images": "Hình ảnh",
-  "no_longer_friend": "Bạn và người dùng này không còn là bạn bè"
+  "no_longer_friend": "Bạn và người dùng này không còn là bạn bè",
+  "voice_call_limit_exceeded": "Đã dùng hết lượt gọi thoại trong ngày",
+  "video_call_limit_exceeded": "Đã dùng hết lượt gọi video trong ngày",
+  "last_incoming_call": "Cuộc gọi đến",
+  "last_outgoing_call": "Đã gọi đi"
 
 }

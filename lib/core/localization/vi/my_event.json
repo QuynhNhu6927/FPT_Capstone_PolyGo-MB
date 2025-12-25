@@ -101,6 +101,11 @@
   "toggle_transcript": "Thu âm thanh",
   "setting_subtitle": "Cài đặt phụ đề",
   "you_have_been_kicked_from_room": "Bạn đã bị mời ra khỏi phòng!",
-  "chat_banned": "Bạn đã bị cấm chat!"
+  "chat_banned": "Bạn đã bị cấm chat!",
+
+  "generate_event_summary": "Tạo bản tóm tắt",
+  "regenerate_summary": "Tạo lại",
+  "set_as_public": "Công khai",
+  "summary_sent_success": "Đã công khai bản tóm tắt đến những người tham dự thành công!"
 
 }

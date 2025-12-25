@@ -109,6 +109,7 @@ class ApiConstants {
   static const String getSummary = "/api/events/{eventId}/summary";
   static const String genSummary = "/api/events/{eventId}/summary/generate";
   static const String userEvent = "/api/events/hostedby/{hostId}";
+  static const String publicSummary = "/api/events/{eventId}/summary/send-mail";
 
   // Friend endpoints
   static const String requestFriend = "/api/friends/request";

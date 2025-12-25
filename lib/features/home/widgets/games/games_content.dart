@@ -14,7 +14,12 @@ import 'games_filter.dart';
 
 class WordSetContent extends StatefulWidget {
   final String searchQuery;
-  const WordSetContent({super.key, this.searchQuery = ''});
+  final ScrollController controller;
+  const WordSetContent({
+    super.key,
+    this.searchQuery = '',
+    required this.controller,
+  });
 
   @override
   State<WordSetContent> createState() => _WordSetContentState();
@@ -40,10 +45,6 @@ class _WordSetContentState extends State<WordSetContent> {
   bool _initialized = false;
   bool _isInitializing = false;
 
-  final ScrollController _scrollController = ScrollController();
-  bool _showFilterBar = true;
-  double _lastOffset = 0;
-
   List<String> get _selectedFilters => [
     ..._filterLanguages.map((e) => e['name'] ?? ''),
     if (_filterDifficulty != null) _filterDifficulty!,
@@ -59,21 +60,10 @@ class _WordSetContentState extends State<WordSetContent> {
   void initState() {
     super.initState();
     _repository = WordSetRepository(WordSetService(ApiClient()));
-
-    _scrollController.addListener(() {
-      final offset = _scrollController.offset;
-      if (offset > _lastOffset && offset - _lastOffset > 10) {
-        if (_showFilterBar) setState(() => _showFilterBar = false);
-      } else if (offset < _lastOffset && _lastOffset - offset > 10) {
-        if (!_showFilterBar) setState(() => _showFilterBar = true);
-      }
-      _lastOffset = offset;
-    });
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -180,18 +170,7 @@ class _WordSetContentState extends State<WordSetContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// Filter bar (ẩn/hiện animation)
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) => SizeTransition(
-              sizeFactor: animation,
-              axisAlignment: -1,
-              child: FadeTransition(opacity: animation, child: child),
-            ),
-            child: _showFilterBar
-                ? Container(
-              key: const ValueKey('filterBar'),
-              margin: const EdgeInsets.only(bottom: 2),
-              child: WordSetFilterBar(
+          WordSetFilterBar(
                 selectedFilters: _selectedFilters,
                 onOpenFilter: () async {
                   final result = await Navigator.push(
@@ -218,12 +197,9 @@ class _WordSetContentState extends State<WordSetContent> {
                   });
                   _loadWordSets(reset: true);
                 },
-              ),
-            )
-                : const SizedBox.shrink(),
           ),
 
-          if (_showFilterBar && _selectedFilters.isEmpty) ...[
+          if (_selectedFilters.isEmpty) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -356,7 +332,7 @@ class _WordSetContentState extends State<WordSetContent> {
               child: wordSetsToShow.isEmpty
                   ? Center(child: Text(loc.translate("no_wordsets_found")))
                   : SingleChildScrollView(
-                controller: _scrollController,
+                controller: widget.controller,
                 child: Column(
                   children: [
                   MasonryGridView.count(

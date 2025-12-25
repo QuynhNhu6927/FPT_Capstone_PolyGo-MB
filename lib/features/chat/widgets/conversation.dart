@@ -406,11 +406,13 @@ class _ConversationState extends State<Conversation> {
     }
   }
 
-  Future<void> _translateMessage(ConversationMessage message) async {
+  Future<bool> _translateMessage(ConversationMessage message) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    if (token == null) return;
+    if (token == null) return false;
+
     final repo = ConversationRepository(ConversationService(ApiClient()));
+
     try {
       final translated = await repo.translateMessage(
         token: token,
@@ -427,10 +429,27 @@ class _ConversationState extends State<Conversation> {
             _messages[index].isTranslated = translated.isAutoTranslated;
           }
         });
+        return true; // ✅ thành công
       }
+    } on TranslationLimitExceededException {
+      if (!mounted) return false;
+
+      final loc = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            loc.translate("translation_limit_exceeded")
+                ?? "You have reached the translation limit",
+          ),
+        ),
+      );
+      return false; // ❌ thất bại
     } catch (e) {
       debugPrint('Translate error: $e');
+      return false;
     }
+
+    return false;
   }
 
   @override

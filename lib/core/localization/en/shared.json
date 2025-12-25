@@ -23,6 +23,12 @@
   "dark_mode": "Dark mode",
   "search_placeholder": "Searching...",
   "about_plus": "Register now to receive unlimited features",
-  "no_notifications": "No notifications yet"
+  "no_notifications": "No notifications yet",
+  "error_unavailable_content": "This content is no longer available or has been removed due to policy violations.",
+  "ur_account_banned": "Your account has been suspended",
+  "banned_account_until": "Unban date",
+  "account_banned_support": "Your account has been temporarily suspended due to a violation of our platform policies. If you believe this is a mistake, please submit a support request.",
+  "account_banned_support_understand": "I understand",
+  "account_banned_support_button": "Support"
 
 }

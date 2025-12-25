@@ -242,7 +242,7 @@ class _HubManagerState extends State<HubManager> with WidgetsBindingObserver {
         String? callerName,
         String? callerAvatar,
       }) {
-        debugPrint('📞 Incoming call from $callerName ($callerId)');
+        debugPrint('Incoming call from $callerName ($callerId)');
 
         scheduleMicrotask(() {
           if (!mounted) return;
@@ -324,7 +324,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("StartCall", args: [receiverId, isVideoCall]);
     } catch (e) {
-      debugPrint("❌ Error starting call: $e");
+      debugPrint("Error starting call: $e");
     }
   }
 
@@ -333,7 +333,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("RespondCall", args: [callerId, accepted]);
     } catch (e) {
-      debugPrint("❌ Error responding call: $e");
+      debugPrint("Error responding call: $e");
     }
   }
 
@@ -342,7 +342,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("ToggleMedia", args: [micOn, camOn]);
     } catch (e) {
-      debugPrint("❌ Error toggling media: $e");
+      debugPrint("Error toggling media: $e");
     }
   }
 
@@ -351,7 +351,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("EndCall");
     } catch (e) {
-      debugPrint("❌ Error ending call: $e");
+      debugPrint("Error ending call: $e");
     }
   }
 
@@ -360,7 +360,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("SendOffer", args: [receiverId, sdp]);
     } catch (e) {
-      debugPrint("❌ Error sending offer: $e");
+      debugPrint("Error sending offer: $e");
     }
   }
 
@@ -369,7 +369,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("SendAnswer", args: [receiverId, sdp]);
     } catch (e) {
-      debugPrint("❌ Error sending answer: $e");
+      debugPrint("Error sending answer: $e");
     }
   }
 
@@ -378,7 +378,7 @@ extension UserPresenceCallExtension on UserPresenceService {
     try {
       await connection!.invoke("SendIceCandidate", args: [receiverId, candidate]);
     } catch (e) {
-      debugPrint("❌ Error sending ICE candidate: $e");
+      debugPrint("Error sending ICE candidate: $e");
     }
   }
 
@@ -393,19 +393,19 @@ extension UserPresenceCallExtension on UserPresenceService {
     OnReceiveIceCandidate? onReceiveIceCandidate,
   }) {
     if (connection == null) {
-      debugPrint("❌ registerCallHandlers: connection is null");
+      debugPrint("registerCallHandlers: connection is null");
       return;
     }
 
     // Incoming call
     connection!.on("IncomingCall", (args) {
-      debugPrint("📞 IncomingCall event received: $args");
+      debugPrint("IncomingCall event received: $args");
       if (args != null && args.length >= 4) {
         final callerId = args[0] as String;
         final isVideoCall = args[1] as bool;
         final callerName = args[2] as String?;
         final callerAvatar = args[3] as String?;
-        debugPrint("📞 CallerId: $callerId, isVideoCall: $isVideoCall, callerName: $callerName, callerAvatar: $callerAvatar");
+        debugPrint("CallerId: $callerId, isVideoCall: $isVideoCall, callerName: $callerName, callerAvatar: $callerAvatar");
         onIncomingCall?.call(
           callerId: callerId,
           isVideoCall: isVideoCall,
@@ -413,13 +413,13 @@ extension UserPresenceCallExtension on UserPresenceService {
           callerAvatar: callerAvatar,
         );
       } else {
-        debugPrint("⚠️ IncomingCall event has invalid args: $args");
+        debugPrint("IncomingCall event has invalid args: $args");
       }
     });
 
     // Call accepted
     connection!.on("CallAccepted", (args) {
-      debugPrint("✅ CallAccepted event: $args");
+      debugPrint("CallAccepted event: $args");
       if (args != null && args.isNotEmpty) {
         onCallAccepted?.call(args[0] as String);
       }
@@ -427,7 +427,7 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Call declined
     connection!.on("CallDeclined", (args) {
-      debugPrint("❌ CallDeclined event: $args");
+      debugPrint("CallDeclined event: $args");
       if (args != null && args.isNotEmpty) {
         onCallDeclined?.call(args[0] as String);
       }
@@ -435,13 +435,13 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Call ended
     connection!.on("CallEnded", (args) {
-      debugPrint("📴 CallEnded event: $args");
+      debugPrint("CallEnded event: $args");
       onCallEnded?.call();
     });
 
     // Update media state
     connection!.on("UpdateMediaState", (args) {
-      debugPrint("🎤 UpdateMediaState event: $args");
+      debugPrint("UpdateMediaState event: $args");
       if (args != null && args.length >= 3) {
         onUpdateMediaState?.call(args[0] as String, args[1] as bool, args[2] as bool);
       }
@@ -449,7 +449,7 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Receive SDP Offer
     connection!.on("ReceiveOffer", (args) {
-      debugPrint("📨 ReceiveOffer event: $args");
+      debugPrint("ReceiveOffer event: $args");
       if (args != null && args.isNotEmpty) {
         onReceiveOffer?.call(args[0] as String);
       }
@@ -457,7 +457,7 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Receive SDP Answer
     connection!.on("ReceiveAnswer", (args) {
-      debugPrint("📩 ReceiveAnswer event: $args");
+      debugPrint("ReceiveAnswer event: $args");
       if (args != null && args.isNotEmpty) {
         onReceiveAnswer?.call(args[0] as String);
       }
@@ -465,7 +465,7 @@ extension UserPresenceCallExtension on UserPresenceService {
 
     // Receive ICE Candidate
     connection!.on("ReceiveIceCandidate", (args) {
-      debugPrint("🧊 ReceiveIceCandidate event: $args");
+      debugPrint("ReceiveIceCandidate event: $args");
       if (args != null && args.isNotEmpty) {
         onReceiveIceCandidate?.call(args[0] as String);
       }

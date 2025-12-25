@@ -35,8 +35,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     _friendStatus = widget.user.friendStatus ?? "None";
   }
 
-  // ------------------- Friend handlers giữ nguyên -------------------
-
   Future<void> _handleSendFriendRequest() async {
     final loc = AppLocalizations.of(context);
     setState(() => _isLoading = true);
@@ -153,8 +151,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
     }
   }
 
-  // ------------------- Build UI -------------------
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -189,7 +185,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- Avatar + Name ----------------
           Row(
             children: [
               Stack(
@@ -241,7 +236,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                     ),
                   ),
 
-                  // ===== LV badge =====
                   if (experiencePoints != null)
                     Positioned(
                       bottom: -4,
@@ -319,7 +313,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
 
           SizedBox(height: sh(context, 6)),
 
-          // ---------------- Introduction ----------------
           if (introduction != null && introduction.isNotEmpty) ...[
             SizedBox(height: sh(context, 8)),
             RichText(
@@ -345,11 +338,8 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
             ),
           ],
 
-
-          // ---------- Tags Row ----------
           if ((widget.user != null && experiencePoints != null) ||
               (widget.user.planType == 'Plus')
-          // (widget.user.streakDays != null && widget.user.streakDays! > 0)
           ) ...[
             SizedBox(height: sh(context, 12)),
             SingleChildScrollView(
@@ -408,20 +398,17 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                         gradient: merit >= 70
                             ? const LinearGradient(
                                 colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
-                                // xanh lá đậm -> xanh lá nhạt
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
                             : merit >= 50
                             ? const LinearGradient(
                                 colors: [Color(0xFFFFC107), Color(0xFFFFEB3B)],
-                                // vàng đậm -> vàng nhạt
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
                             : const LinearGradient(
                                 colors: [Color(0xFFF44336), Color(0xFFE57373)],
-                                // đỏ đậm -> đỏ nhạt
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -451,7 +438,6 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
             ),
           ],
           const SizedBox(height: 20),
-          // ---------------- Buttons ----------------
           Row(
             children: [
               Expanded(
@@ -525,6 +511,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                               'lastActiveAt':
                                   conversation.user.lastActiveAt ?? '',
                               'isOnline': conversation.user.isOnline,
+                              'isFriend': conversation.isFriend,
                             },
                           );
                         } else {

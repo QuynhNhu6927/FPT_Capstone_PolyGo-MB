@@ -93,7 +93,6 @@ class SubscriptionService {
       );
 
       final json = response.data as Map<String, dynamic>;
-      // Lấy thẳng CurrentSubscription từ json['data']
       return ApiResponse.fromJson(
         json,
             (data) => CurrentSubscription.fromJson(data),

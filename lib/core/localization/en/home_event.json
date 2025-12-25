@@ -39,5 +39,6 @@
   "format": "Type",
   "apply_filters": "Apply filters",
   "not_open_registration": "This event has been cancelled or not available anymore",
-  "event_full_slot": "Event full of slot!"
+  "event_full_slot": "Event full of slot!",
+  "event_limit_times": "You have reached your event participation limit for this month!"
 }

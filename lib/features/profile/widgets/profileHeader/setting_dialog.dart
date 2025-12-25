@@ -44,7 +44,6 @@ class SettingsFullScreenDialog extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [
-              // ===== Top items =====
               Column(
                 children: [
                   ListTile(
@@ -132,7 +131,6 @@ class SettingsFullScreenDialog extends StatelessWidget {
 
               const Spacer(),
 
-              // ===== Bottom items =====
               Column(
                 children: [
                   ListTile(
