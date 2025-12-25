@@ -449,7 +449,7 @@ class _UsersState extends State<Users> {
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               padding: const EdgeInsets.only(bottom: 16),
-              itemCount: usersToShow.length + (_isLoadingMore ? 1 : 0), // thêm 1 item nếu đang load
+              itemCount: usersToShow.length + (_isLoadingMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index < usersToShow.length) {
                   final user = usersToShow[index];

@@ -149,17 +149,16 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       final loc = AppLocalizations.of(context);
       showDialog(
         context: context,
-        barrierDismissible: true,  // user có thể bấm back
+        barrierDismissible: true,
         builder: (_) => WillPopScope(
           onWillPop: () async {
-            // Khi user bấm Back → thoát khỏi call
-            Navigator.pop(context);  // đóng dialog
+            Navigator.pop(context);
             Navigator.pushNamedAndRemoveUntil(
               context,
               AppRoutes.myEvents,
                   (route) => false,
             );
-            return false; // ngăn dialog tự đóng mặc định
+            return false;
           },
           child: AlertDialog(
             title: Text(loc.translate('you_have_been_kicked_from_room')),
@@ -167,7 +166,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);  // đóng dialog
+                  Navigator.pop(context);
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.myEvents,
@@ -205,7 +204,7 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     _controller.setTargetLanguage(entry.key);
-                    setState(() {}); // Nếu cần cập nhật UI
+                    setState(() {});
                   },
                 );
               }).toList(),
@@ -215,7 +214,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       },
     );
 
-    // Luôn bật captions
     if (!_controller.isCaptionsEnabled) {
       _controller.enableCaptions();
     }
@@ -336,7 +334,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       isCameraOn = _controller.localVideoEnabled;
       _localRenderer.srcObject = _controller.localStream;
 
-      // ---- CHỈ LẤY USER MỘT LẦN ----
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
@@ -485,15 +482,6 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
         _showSnack(loc.translate('event_status_update_failed'));
       }
 
-      // () async {
-      //   try {
-      //     await eventRepository.generateSummary(
-      //       token: token,
-      //       eventId: widget.eventId,
-      //     );
-      //   } catch (_) {}
-      // }();
-
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.myEvents);
       }
@@ -528,10 +516,8 @@ class _MeetingRoomScreenState extends State<MeetingRoomScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Main layout: VideoGrid + Subtitle + Controls
             Column(
               children: [
-                // VideoGrid chiếm tất cả không gian còn lại
                 Expanded(
                   child: VideoGrid(
                     eventTitle: widget.eventTitle,

@@ -173,7 +173,6 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
                     final repo = TransactionRepository(TransactionService(ApiClient()));
 
-                    // Lấy chi tiết giao dịch
                     final detail = await repo.getTransactionDetail(
                       token: token,
                       transactionId: tx.id,

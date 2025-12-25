@@ -84,7 +84,7 @@ class _SystemReportDialogState extends State<SystemReportDialog> {
       final token = prefs.getString("token");
       if (token == null) throw Exception("Token missing");
 
-      // Upload ảnh nếu có
+      // Upload
       List<String> uploadedUrls = [];
       if (_imageUrls.isNotEmpty) {
         final mediaRepo = MediaRepository(MediaService(ApiClient()));

@@ -72,10 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final currentOffset = _scrollController.offset;
 
       if (currentOffset > _lastOffset && _showHeader) {
-        // scroll xuống
         setState(() => _showHeader = false);
       } else if (currentOffset < _lastOffset && !_showHeader) {
-        // scroll lên
         setState(() => _showHeader = true);
       }
 

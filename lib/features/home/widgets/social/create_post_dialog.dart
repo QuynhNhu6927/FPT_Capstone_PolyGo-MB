@@ -138,7 +138,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 constraints: const BoxConstraints(
-                  maxHeight: 10 * 24.0, // max 10 dòng
+                  maxHeight: 10 * 24.0,
                 ),
                 child: Scrollbar(
                   child: SingleChildScrollView(

@@ -20,7 +20,6 @@ class AboutMeritDialog extends StatelessWidget {
         ? 450.0
         : 500.0;
 
-    // Xác định màu, nhãn mức trust và chú thích theo mốc
     LinearGradient bgGradient;
     Color iconColor;
     String trustLabel;
@@ -80,7 +79,6 @@ class AboutMeritDialog extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon vuông bo góc
                     Container(
                       width: sw(context, 60),
                       height: sw(context, 60),
@@ -123,7 +121,7 @@ class AboutMeritDialog extends StatelessWidget {
 
                 SizedBox(height: sh(context, 20)),
 
-                // Điểm hiện tại / 100, căn trái
+                // Điểm hiện tại / 100
                 RichText(
                   text: TextSpan(
                     children: [

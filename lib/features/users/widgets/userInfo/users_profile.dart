@@ -115,7 +115,6 @@ class _UserProfileState extends State<UserProfile> {
       );
     }
 
-    // ---------------- Data Processing ----------------
     final nativeLangs = (user!.speakingLanguages ?? [])
         .map(
           (e) => e is Map<String, dynamic>
@@ -176,7 +175,6 @@ class _UserProfileState extends State<UserProfile> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ---------------- Header + Info ----------------
             isWide
                 ? IntrinsicHeight(
                     child: Row(
@@ -224,7 +222,6 @@ class _UserProfileState extends State<UserProfile> {
 
             const SizedBox(height: 16),
 
-            // ---------------- Badges + Gifts ----------------
             isWide
                 ? IntrinsicHeight(
                     child: Row(

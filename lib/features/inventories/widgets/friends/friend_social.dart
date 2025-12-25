@@ -23,7 +23,6 @@ class FriendSocialSection extends StatelessWidget {
         ? screenWidth * 0.7
         : 900.0;
 
-    // Dynamic icon & font size
     final iconSize = screenWidth < 500
         ? 40.0
         : screenWidth < 900

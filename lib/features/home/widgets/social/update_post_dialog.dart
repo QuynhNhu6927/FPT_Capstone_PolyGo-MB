@@ -120,7 +120,6 @@ class _UpdatePostDialogState extends State<UpdatePostDialog> {
 
       final finalImageUrls = [..._existingImages, ...uploadedUrls];
 
-      // Gọi API update (void)
       final updateRequest = UpdatePostRequest(
         content: _controller.text.trim(),
         imageUrls: finalImageUrls,

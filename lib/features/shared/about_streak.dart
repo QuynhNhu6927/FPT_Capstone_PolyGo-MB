@@ -26,7 +26,6 @@ class AboutStreakDialog extends StatelessWidget {
         ? 450.0
         : 500.0;
 
-    // Gradient + label
     LinearGradient bgGradient;
     String streakLabel;
     String noteLabel;
@@ -81,7 +80,6 @@ class AboutStreakDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ==== ROW ICON + TITLE ====
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -100,7 +98,6 @@ class AboutStreakDialog extends StatelessWidget {
                     ),
                     SizedBox(width: sw(context, 16)),
 
-                    // ==== STREAK TITLE (THÊM SỐ) ====
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -127,7 +124,6 @@ class AboutStreakDialog extends StatelessWidget {
 
                 SizedBox(height: sh(context, 20)),
 
-                // ==== LONGEST STREAK TEXT ====
                 Text(
                   "${loc.translate("longest_streak")} $longestStreak",
                   style: t.headlineSmall?.copyWith(
@@ -139,7 +135,6 @@ class AboutStreakDialog extends StatelessWidget {
 
                 SizedBox(height: sh(context, 16)),
 
-                // ==== DESCRIPTION ====
                 Text(
                   noteLabel,
                   textAlign: TextAlign.left,

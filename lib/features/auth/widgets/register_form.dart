@@ -101,7 +101,7 @@ class _RegisterFormState extends State<RegisterForm> {
         _otpMessage =
             AppLocalizations.of(context).translate("otp_sent_success");
         _otpSuccess = true;
-        _emailError = null; // reset lỗi
+        _emailError = null;
       });
       _startOtpCountdown();
     } catch (e) {

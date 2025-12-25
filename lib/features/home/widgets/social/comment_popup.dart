@@ -128,7 +128,7 @@ class _CommentPopupState extends State<CommentPopup> {
     }
   }
 
-  /// ⬇️ Lấy detail post từ API
+  /// Lấy detail post từ API
   Future<void> _fetchPostDetail() async {
     setState(() => _isLoading = true);
     try {
@@ -357,7 +357,6 @@ class _CommentPopupState extends State<CommentPopup> {
                                         ),
                                         const SizedBox(height: 4),
 
-                                        // Nếu đang chỉnh sửa -> show TextField
                                         isEditing
                                             ? Row(
                                                 children: [
@@ -402,7 +401,6 @@ class _CommentPopupState extends State<CommentPopup> {
                                                       ),
                                                     ),
                                                   ),
-                                                  // Nút Cancel luôn hiển thị
                                                   IconButton(
                                                     icon: const Icon(
                                                       Icons.cancel,
@@ -419,11 +417,11 @@ class _CommentPopupState extends State<CommentPopup> {
                                                         );
                                                         controller
                                                             .text = comment
-                                                            .content; // reset nội dung
+                                                            .content;
                                                       });
                                                     },
                                                   ),
-                                                  // Nút Send chỉ hiển thị khi có thay đổi
+
                                                   if (_hasTextChanged.contains(
                                                     comment.id,
                                                   ))

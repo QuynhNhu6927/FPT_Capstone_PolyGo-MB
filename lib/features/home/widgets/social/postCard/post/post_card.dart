@@ -147,7 +147,7 @@ class _PostCardState extends State<PostCard> {
               const SizedBox(height: 12),
 
               PostContent(contentText: widget.contentText),
-              /// Render shared content (post hoặc event)
+              /// Render shared content
               if (widget.post.isShare) ...[
                 const SizedBox(height: 8),
                 _buildSharedContent(),

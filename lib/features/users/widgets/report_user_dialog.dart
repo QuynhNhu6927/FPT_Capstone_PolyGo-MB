@@ -94,7 +94,7 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
       final token = prefs.getString("token");
       if (token == null) throw Exception("Token missing");
 
-      // Upload ảnh nếu có
+      // Upload
       List<String> uploadedUrls = [];
       if (_imageUrls.isNotEmpty) {
         final mediaRepo = MediaRepository(MediaService(ApiClient()));
@@ -182,7 +182,6 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
 
                 const SizedBox(height: 10),
 
-                // ---- DIVIDER ----
                 Divider(
                   color: isDark ? Colors.grey[700] : Colors.grey[300],
                   thickness: 1,

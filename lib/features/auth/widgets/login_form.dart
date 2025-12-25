@@ -172,9 +172,8 @@ class _LoginFormState extends State<LoginForm> {
         );
       }
     } catch (e, s) {
-      // 🔥 LOG ĐẦY ĐỦ
-      debugPrint('❌ Google login failed');
-      debugPrint('❌ Error: $e');
+      debugPrint('Google login failed');
+      debugPrint('Error: $e');
       debugPrintStack(stackTrace: s);
 
       if (!mounted) return;

@@ -104,7 +104,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- Event name ---
                     Text(
                       _eventDetail!.title,
                       style: t.titleLarge?.copyWith(
@@ -114,7 +113,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                     ),
                     SizedBox(height: sh(context, 8)),
 
-                    // --- Banner ---
                     if (_eventDetail!.bannerUrl.isNotEmpty)
                       AspectRatio(
                         aspectRatio: 16 / 9,
@@ -125,7 +123,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                       ),
                     SizedBox(height: sh(context, 16)),
 
-                    // --- Host info + Gift button + Rating/Comment ---
                     Container(
                       padding: EdgeInsets.all(sw(context, 16)),
                       decoration: BoxDecoration(
@@ -150,7 +147,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // --- Host info ---
                           Row(
                             children: [
                               CircleAvatar(
@@ -193,11 +189,9 @@ class _RatingWidgetState extends State<RatingWidget> {
 
                           SizedBox(height: sh(context, 16)),
 
-                          // --- Rating stars ---
                           _buildRatingStars(colorPrimary),
                           SizedBox(height: sh(context, 16)),
 
-                          // --- Comment input ---
                           Container(
                             decoration: BoxDecoration(
                               gradient: isDark

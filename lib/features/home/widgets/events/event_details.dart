@@ -172,7 +172,7 @@ class _EventDetailState extends State<EventDetail> {
 
                     const SizedBox(height: 4),
 
-                    // ---- SỐ DƯ (màu xám) ----
+                    // -
                     Text(
                       formatCurrency(_balance),
                       style: TextStyle(

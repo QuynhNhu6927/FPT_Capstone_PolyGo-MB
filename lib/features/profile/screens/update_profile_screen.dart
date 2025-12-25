@@ -93,7 +93,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      // show error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(loc.translate('update_profile_failed'))),

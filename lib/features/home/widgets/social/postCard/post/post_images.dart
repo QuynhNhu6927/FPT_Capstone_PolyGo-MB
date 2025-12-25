@@ -79,8 +79,8 @@ class PostImages extends StatelessWidget {
             double leftW = totalWidth * 0.6;
             double rightW = totalWidth * 0.4;
 
-            double rightH = rightW;              // ảnh 1:1
-            double leftH = rightH * 2 + spacing; // chiều cao khớp cột phải
+            double rightH = rightW;
+            double leftH = rightH * 2 + spacing;
 
             return Row(
               children: [

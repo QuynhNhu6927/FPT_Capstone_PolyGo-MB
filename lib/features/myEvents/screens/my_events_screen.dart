@@ -27,10 +27,6 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
     _selectedTab = widget.initialTab;
   }
 
-  // void _onTabSelected(int index) {
-  //   setState(() => _selectedTab = index);
-  // }
-
   void _onTabSelected(int index) {
     setState(() {
       _selectedTab = index;
@@ -43,25 +39,6 @@ class _MyEventsScreenState extends State<MyEventsScreen> {
       _hasError = false;
     });
   }
-
-  // Widget _buildTabContent() {
-  //   try {
-  //     switch (_selectedTab) {
-  //       case 0:
-  //         return const MyEvents();
-  //       case 1:
-  //         return const JoinedEvents();
-  //       case 2:
-  //         return const Calendar();
-  //       default:
-  //         return const SizedBox.shrink();
-  //     }
-  //   } catch (e, st) {
-  //     debugPrint("Error in MyEventsScreen tab: $e\n$st");
-  //     _hasError = true;
-  //     return AppErrorState(onRetry: _retry);
-  //   }
-  // }
 
   Widget _buildTabContent() {
     try {

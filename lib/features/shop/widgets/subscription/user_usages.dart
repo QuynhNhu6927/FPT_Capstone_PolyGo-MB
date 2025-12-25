@@ -160,7 +160,7 @@ class _UsageItemView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Feature name (lowercase key)
+          /// Feature name
           Text(
             loc.translate(item.featureType.toLowerCase()),
             style: const TextStyle(
@@ -171,7 +171,7 @@ class _UsageItemView extends StatelessWidget {
 
           const SizedBox(height: 6),
 
-          /// Progress bar (luôn hiển thị)
+          /// Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(

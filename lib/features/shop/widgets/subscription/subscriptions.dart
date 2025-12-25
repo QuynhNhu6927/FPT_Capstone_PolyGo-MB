@@ -175,7 +175,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Hiển thị số dư khả dụng
                   Text(
                     '${loc.translate("available_balance")}: ${formatMoney(balance)}',
                     style: TextStyle(
@@ -184,7 +183,6 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Giá gói
                   Text(
                     '${loc.translate("plan_price")}: ${formatMoney(plan.price)}',
                     style: TextStyle(
@@ -542,7 +540,6 @@ class _SubscriptionsState extends State<Subscriptions> {
     final currentSection = _buildCurrentSubscriptionSection();
 
     if (isWideScreen && currentSection != null) {
-      // Tablet: show side by side
       return Padding(
         padding: EdgeInsets.symmetric(
           horizontal: sw(context, 16),
@@ -556,7 +553,6 @@ class _SubscriptionsState extends State<Subscriptions> {
               child: currentSection,
             ),
             SizedBox(width: sw(context, 16)),
-            // Plans list (hẹp hơn)
             Expanded(
               flex: 3,
               child: ListView.separated(
@@ -577,7 +573,6 @@ class _SubscriptionsState extends State<Subscriptions> {
         ),
       );
     } else {
-      // Mobile: show vertically
       return RefreshIndicator(
         onRefresh: () async {
           await Future.wait([

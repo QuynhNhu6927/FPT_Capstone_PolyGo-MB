@@ -80,7 +80,7 @@ class _MyWalletState extends State<MyWallet> {
               ),
               SizedBox(height: sh(context, 16)),
 
-              // 🔵 Balance Panel
+              // Balance Panel
               Container(
                 padding: EdgeInsets.all(sw(context, 16)),
                 decoration: BoxDecoration(
@@ -211,7 +211,7 @@ class _MyWalletState extends State<MyWallet> {
 
         SizedBox(height: sh(context, 16)),
 
-        // 🟩 WALLET + STATISTICS TOGETHER
+        // WALLET + STATISTICS TOGETHER
         Container(
           padding: EdgeInsets.all(sw(context, 16)),
           decoration: BoxDecoration(
@@ -231,7 +231,7 @@ class _MyWalletState extends State<MyWallet> {
           ),
           child: Column(
             children: [
-              // 🔽 BUTTON TOGGLE INSIDE CONTAINER
+              // BUTTON TOGGLE INSIDE CONTAINER
               InkWell(
                 onTap: () => setState(() => _showStats = !_showStats),
                 child: Row(
@@ -258,7 +258,7 @@ class _MyWalletState extends State<MyWallet> {
 
               SizedBox(height: sh(context, 12)),
 
-              // 🟩 Animated statistics (inside same container)
+              // Animated statistics
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
                 transitionBuilder: (child, animation) => FadeTransition(
@@ -340,7 +340,6 @@ String formatCurrency(double number) {
   }
 }
 
-// === Statistic Box ===
 Widget _buildStatBox(
   BuildContext context, {
   required String title,

@@ -123,15 +123,15 @@ class AuthService {
   /// Login bằng Google (idToken)
   Future<ApiResponse<String>> loginWithGoogle(String idToken) async {
     try {
-      debugPrint('🟡 Sending Google idToken to backend');
+      debugPrint('Sending Google idToken to backend');
 
       final response = await apiClient.post(
         ApiConstants.googleLogin,
         data: {'idToken': idToken},
       );
 
-      debugPrint('🟢 API status: ${response.statusCode}');
-      debugPrint('🟢 API data: ${response.data}');
+      debugPrint('API status: ${response.statusCode}');
+      debugPrint('API data: ${response.data}');
 
       final json = response.data as Map<String, dynamic>;
 
@@ -140,9 +140,9 @@ class AuthService {
             (data) => data.toString(),
       );
     } on DioException catch (e, s) {
-      debugPrint('❌ API Google login error');
-      debugPrint('❌ Dio error: ${e.message}');
-      debugPrint('❌ Response: ${e.response?.data}');
+      debugPrint('API Google login error');
+      debugPrint('Dio error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
       debugPrintStack(stackTrace: s);
 
       if (e.response?.data is Map<String, dynamic>) {
@@ -167,7 +167,7 @@ class AuthService {
 
   Future<String?> getGoogleIdToken() async {
     try {
-      debugPrint('🟡 Google signIn start');
+      debugPrint('Google signIn start');
 
       await _googleSignIn.signOut();
 
@@ -190,7 +190,7 @@ class AuthService {
   Future<void> googleSignOut() async {
     try {
       await _googleSignIn.signOut();
-      debugPrint('🟢 Google signOut success');
+      debugPrint('Google signOut success');
     } catch (e) {
       //
     }

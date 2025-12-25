@@ -112,12 +112,9 @@ class _PlayInfoRowWidgetState extends State<PlayInfoRowWidget> {
         constraints: const BoxConstraints(maxWidth: 700),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isSmall = constraints.maxWidth < 600; // threshold
+            final isSmall = constraints.maxWidth < 600;
 
             if (!isSmall) {
-              // -------------------------
-              // 4 ô trên cùng 1 hàng
-              // -------------------------
               return Row(
                 children: [
                   _infoCard(context, loc.translate("time"), _formatTime(elapsedSeconds), Icons.timer),
@@ -143,9 +140,6 @@ class _PlayInfoRowWidgetState extends State<PlayInfoRowWidget> {
               );
             }
 
-            // -----------------------------------------
-            // Màn nhỏ → chia 2 hàng, mỗi hàng 2 ô
-            // -----------------------------------------
             return Column(
               children: [
                 Row(

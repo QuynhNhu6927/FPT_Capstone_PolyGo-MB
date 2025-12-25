@@ -131,7 +131,7 @@ class _PlayScreenState extends State<PlayScreen> {
 
                       const SizedBox(height: 24),
 
-                      /// Buttons (giữ nguyên TextButton)
+                      /// Buttons
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [

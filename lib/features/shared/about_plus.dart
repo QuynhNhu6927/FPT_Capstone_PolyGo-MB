@@ -21,7 +21,6 @@ class AboutPlusDialog extends StatelessWidget {
         ? 450.0
         : 500.0;
 
-    // Gradient vàng
     final LinearGradient bgGradient = const LinearGradient(
       colors: [Color(0xFFFFC107), Color(0xFFFFE082)],
       begin: Alignment.topLeft,
@@ -59,7 +58,6 @@ class AboutPlusDialog extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon vuông bo góc, màu trắng
                     Container(
                       width: sw(context, 60),
                       height: sw(context, 60),
@@ -70,7 +68,7 @@ class AboutPlusDialog extends StatelessWidget {
                       child: Icon(
                         Icons.star_rounded,
                         size: sw(context, 36),
-                        color: Colors.white, // đổi màu icon
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(width: sw(context, 16)),
@@ -107,7 +105,6 @@ class AboutPlusDialog extends StatelessWidget {
 
                 SizedBox(height: sh(context, 20)),
 
-                // ==== LONGEST STREAK TEXT ====
                 Text(
                   loc.translate("about_plus"),
                   style: t.headlineSmall?.copyWith(
@@ -121,21 +118,21 @@ class AboutPlusDialog extends StatelessWidget {
 
                 // BUTTON custom
                 Align(
-                  alignment: Alignment.centerLeft, // căn trái
+                  alignment: Alignment.centerLeft,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, AppRoutes.shop);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFB8C00), // màu nền cam đậm
-                      foregroundColor: Colors.white, // màu chữ
+                      backgroundColor: const Color(0xFFFB8C00),
+                      foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                         vertical: sh(context, 14),
-                        horizontal: sw(context, 24), // thêm padding ngang cho nút
+                        horizontal: sw(context, 24),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(sw(context, 12)), // bo góc
+                        borderRadius: BorderRadius.circular(sw(context, 12)),
                       ),
                       textStyle: TextStyle(
                         fontSize: st(context, 16),

@@ -16,7 +16,6 @@ class ChatSignalrService {
   bool _isConnected = false;
   Timer? _reconnectTimer;
 
-  // Stream để mọi widget listen
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
 

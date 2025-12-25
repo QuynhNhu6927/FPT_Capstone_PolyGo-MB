@@ -249,7 +249,7 @@ class _SharedEventDetailState extends State<SharedEventDetail> {
       );
 
       if (closeTwoDialogs)
-        Navigator.of(context, rootNavigator: true).pop(); // password dialog
+        Navigator.of(context, rootNavigator: true).pop();
       Navigator.pop(context); // main dialog
     } on InvalidEventPasswordException {
       throw "wrong_password";

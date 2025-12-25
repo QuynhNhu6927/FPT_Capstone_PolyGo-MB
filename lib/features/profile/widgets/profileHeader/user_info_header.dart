@@ -46,7 +46,6 @@ class UserInfoHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ---------- Header Row ----------
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -101,7 +100,6 @@ class UserInfoHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tên người dùng
                   if (name.isNotEmpty)
                     Text(
                       name,
@@ -110,7 +108,6 @@ class UserInfoHeader extends StatelessWidget {
                         fontSize: st(context, 20),
                       ),
                     ),
-                  // Giới tính - experiencePoints
                   if ((user.gender != null && user.gender!.isNotEmpty))
                     Wrap(
                       children: [
@@ -123,7 +120,6 @@ class UserInfoHeader extends StatelessWidget {
                 ],
               ),
             ),
-            // Thay PopupMenuButton bằng IconButton để mở dialog
             IconButton(
               icon: Icon(
                 Icons.settings,
@@ -148,7 +144,6 @@ class UserInfoHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: sh(context, 6)),
-        // ---------- Introduction Section ----------
         if (introduction != null && introduction.isNotEmpty) ...[
           SizedBox(height: sh(context, 8)),
           RichText(
@@ -193,11 +188,9 @@ class UserInfoHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Thanh EXP
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Nền
                       Container(
                         height: 14,
                         width: constraints.maxWidth,
@@ -207,7 +200,6 @@ class UserInfoHeader extends StatelessWidget {
                         ),
                       ),
 
-                      // Phần màu EXP hiện tại
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Container(
@@ -224,7 +216,6 @@ class UserInfoHeader extends StatelessWidget {
                         ),
                       ),
 
-                      // Text EXP
                       Text(
                         "$currentExp / $totalExp",
                         style: const TextStyle(
@@ -238,7 +229,6 @@ class UserInfoHeader extends StatelessWidget {
 
                   SizedBox(height: sh(context, 4)),
 
-                  // Level info bên dưới thanh
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -268,7 +258,6 @@ class UserInfoHeader extends StatelessWidget {
         ),
         SizedBox(height: sh(context, 6)),
 
-        // ---------- Tags Row ----------
         if ((merit != null && experiencePoints != null) ||
             (user.planType == 'Plus') ||
             (user.streakDays != null && user.streakDays! > 0)) ...[
@@ -277,7 +266,6 @@ class UserInfoHeader extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                // Merit tag (NEW UI)
                 if (merit != null)
                   GestureDetector(
                     onTap: () {
@@ -294,20 +282,17 @@ class UserInfoHeader extends StatelessWidget {
                       margin: EdgeInsets.only(right: sw(context, 8)),
                       decoration: BoxDecoration(
                         gradient: merit >= 70
-                            // GREEN 70–100
                             ? const LinearGradient(
                                 colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
                             : merit >= 51
-                            // YELLOW 51–69
                             ? const LinearGradient(
                                 colors: [Color(0xFFFFC107), Color(0xFFFFE082)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
-                            // RED 0–50
                             : const LinearGradient(
                                 colors: [Color(0xFFE53935), Color(0xFFEF9A9A)],
                                 begin: Alignment.topLeft,
@@ -340,7 +325,6 @@ class UserInfoHeader extends StatelessWidget {
                     ),
                   ),
 
-                // PlanType tag
                 if (user.planType == 'Plus')
                   GestureDetector(
                     onTap: () {
@@ -380,7 +364,6 @@ class UserInfoHeader extends StatelessWidget {
                     ),
                   ),
 
-                // StreakDays tag
                 if (user.streakDays != null && user.streakDays! > 0)
                   GestureDetector(
                     onTap: () {

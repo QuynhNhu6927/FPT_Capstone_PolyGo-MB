@@ -102,7 +102,6 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
 
     final account = widget.accounts[selectedAccountIndex!];
 
-    // Lấy balance từ API
     final walletInfo = await _transactionRepo.getWalletInfo(token: token);
     final availableBalance = walletInfo?.balance ?? 0;
 
@@ -120,7 +119,6 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
       accountName: account.accountName,
     );
 
-    // Hiển thị loading
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -132,7 +130,7 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
       request: request,
     );
 
-    Navigator.pop(context); // ẩn loading
+    Navigator.pop(context);
 
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -141,7 +139,6 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
       return;
     }
 
-    // Hiển thị dialog OTP
     _showOtpDialog(token);
   }
 
@@ -151,7 +148,6 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Gradient cho background dialog
     final Gradient cardBackground = isDark
         ? const LinearGradient(
       colors: [Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
@@ -165,7 +161,7 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          backgroundColor: Colors.transparent, // để hiển thị gradient
+          backgroundColor: Colors.transparent,
           contentPadding: EdgeInsets.zero,
           content: Container(
             decoration: BoxDecoration(

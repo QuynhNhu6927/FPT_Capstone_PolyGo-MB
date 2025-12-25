@@ -119,7 +119,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                       ),
                       SizedBox(width: sw(context, 8)),
 
-                      // ➜ Chỉ giữ featureName + translate
+                      // featureName + translate
                       Expanded(
                         child: Text(
                           loc.translate(f.featureName.toLowerCase()),

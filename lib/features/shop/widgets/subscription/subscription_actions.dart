@@ -32,7 +32,6 @@ class SubscriptionActions {
       "reason_other",
     ];
 
-
     // Track selected reasons
     final Map<String, bool> selected = {for (var r in reasons) r: false};
     final otherController = TextEditingController();

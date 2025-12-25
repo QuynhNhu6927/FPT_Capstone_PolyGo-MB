@@ -90,8 +90,6 @@ class AppRoutes {
       case allGifts:
         return MaterialPageRoute(builder: (_) => const AllGiftsScreen());
 
-      // case notifications:
-      //   return MaterialPageRoute(builder: (_) => const NotificationScreen());
       case play:
         final args = settings.arguments as Map<String, dynamic>?;
         final startData = args?['startData'] as WordSetData?;
